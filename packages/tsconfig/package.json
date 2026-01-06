@@ -12,5 +12,9 @@
         "./build.json",
         "./dom.json",
         "./svelte.json"
-    ]
+    ],
+    "scripts": {
+        "lint": "echo 'No linting for tsconfig'",
+        "typecheck": "echo 'No typecheck for tsconfig'"
+    }
 }
