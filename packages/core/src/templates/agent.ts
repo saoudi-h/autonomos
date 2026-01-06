@@ -3,7 +3,12 @@
  * @param projectName - Name of the project to personalize the template
  */
 export function generateAgentTemplate(projectName: string = 'Project'): string {
-    return `# AGENT CONTEXT: ${projectName}
+    return `---
+name: "${projectName}"
+type: "project"
+status: "active"
+---
+# AGENT CONTEXT: ${projectName}
 
 ## 🧠 Context & Objectives
 
@@ -12,7 +17,6 @@ export function generateAgentTemplate(projectName: string = 'Project'): string {
 ## ⚙️ Workflow & Preferences
 
 - **Commits:** Conventional Commits
-- **Package Manager:** *(npm / pnpm / yarn / bun)*
 - **Language:** English
 
 ## 🏗 Stack & Architecture

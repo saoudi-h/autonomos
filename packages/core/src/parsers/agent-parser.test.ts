@@ -33,6 +33,26 @@ Strict Linting
         expect(context.title).toBe('Simple Title')
     })
 
+    it('should parse YAML frontmatter correctly', () => {
+        const markdown = `---
+name: "Advanced Agent"
+stack: ["React", "Node"]
+status: "Active"
+---
+# AGENT CONTEXT: Should ignore H1 if name exists
+## Section 1
+Content`
+        const context = AgentParser.parse(markdown)
+        expect(context.title).toBe('Advanced Agent')
+        expect(context.metadata).toEqual({
+            name: 'Advanced Agent',
+            stack: ['React', 'Node'],
+            status: 'Active',
+        })
+        expect(context.sections).toHaveLength(1)
+        expect(context.sections[0].title).toBe('Section 1')
+    })
+
     it('should return default title if missing', () => {
         const markdown = '## No Title'
         const context = AgentParser.parse(markdown)

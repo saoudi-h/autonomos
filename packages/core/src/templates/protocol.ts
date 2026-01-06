@@ -8,6 +8,17 @@ export const PROTOCOL_TEMPLATE = `# AI AGENT PROTOCOL (v${PROTOCOL_VERSION})
 
 > **SYSTEM INTEGRITY WARNING:** This file is the IMMUTABLE KERNEL of the project's AI workflow. Do not modify this file. Your instructions are to execute tasks and manage the project state based strictly on the definitions below.
 
+## 0. ⚡ QUICK REFERENCE
+| Action | File / Command |
+|--------|----------------|
+| **Get Context** | Read \`AGENT.md\` (Root + Local) |
+| **Pick Task** | Check \`.autonomos/TASKS.md\` (Highest Priority) |
+| **Track Progress** | Update \`.autonomos/TASKS.md\` to \`[/]\` |
+| **Log Session** | Create \`.autonomos/worklogs/YYYY-MM-DD-[TASK_ID].md\` |
+| **Finalize Task** | Update \`.autonomos/TASKS.md\` to \`[x]\` + Link Worklog |
+
+---
+
 ## 1. BOOTSTRAPPING & INITIALIZATION
 **IF** this is your first time seeing this project, or if key system files are missing, you **MUST** initialize them immediately before doing any work.
 
@@ -31,7 +42,7 @@ You must adhere to these schemas. Do not invent new formats.
 * Tasks must follow the format: \`- [Status] **[ID]** Title of task \`Priority\` \`Complexity\`\`
 * Valid Priorities: \`🔴 Critical\`, \`🟠 High\`, \`🔵 Medium\`, \`⚪ Low\`
 * Valid Complexities: \`S\`, \`M\`, \`L\`, \`XL\`
-* Valid Statuses: \`[ ]\` (Todo), \`[/]\` (In Progress), \`[x]\` (Done), \`[!]\` (Blocked)
+* Valid Statuses: \` [ ] \` (Todo), \`[/]\` (In Progress), \` [x] \` (Done), \` [!] \` (Blocked)
 
 **TEMPLATE FOR NEW TASKS.md:**
 \`\`\`markdown
@@ -79,20 +90,29 @@ Clear instructions for the next agent picking this up.
 
 **TEMPLATE FOR AGENT.md:**
 \`\`\`markdown
+---
+name: "[Name of directory or project]"
+type: "[project / package / module / script]"
+status: "[active / maintenance / poc]"
+---
 # AGENT CONTEXT: [Directory Name or Root]
 
 ## 🧠 Context & Objectives
 What does this specific folder/module do?
 
 ## ⚙️ Workflow & Preferences
-*(Crucial: User defined rules override standard defaults)*
 - **Commits:** [e.g. Conventional Commits]
-- **Linting:** [e.g. Strict, Biome, Eslint]
-- **Specific Commands:** [e.g. "Use \`ssh deploy\` alias"]
+- **Language:** [English (default)]
 
 ## 🏗 Stack & Architecture
 - **Tech:** [Frameworks, Libs specific to this module]
 - **Patterns:** [Architecture patterns used]
+
+## 📁 Key Directories
+| Path | Description |
+|------|-------------|
+| \`src/\` | Source code |
+| \`scripts/\` | Build or utility scripts |
 \`\`\`
 
 ## 3. CORE WORKFLOW (The Loop)

@@ -34,6 +34,7 @@
         "@repo/prettier": "workspace:*",
         "@repo/tsdown": "workspace:*",
         "@repo/vitest": "workspace:*",
+        "@types/js-yaml": "4.0.9",
         "typescript": "^5.0.0"
     },
     "module": "./dist/index.mjs",
@@ -42,6 +43,7 @@
         "./package.json": "./package.json"
     },
     "dependencies": {
+        "js-yaml": "4.1.0",
         "zod": "3.24.1"
     }
 }

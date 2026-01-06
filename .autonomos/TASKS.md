@@ -23,9 +23,9 @@
 - [x] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
 
 ### Protocol Refinements
-- [/] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
-- [ ] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
-- [ ] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
+- [x] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
+- [x] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
+- [/] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
 
 ### Testing & Quality
 - [x] **[TEST-01]** Add unit tests for TaskParser `Priority: 🟠` `Complexity: M`
