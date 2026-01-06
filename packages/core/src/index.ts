@@ -11,4 +11,5 @@ export * from './templates/protocol'
 export * from './templates/tasks'
 
 // Parsers
+export * from './parsers/agent-parser'
 export * from './parsers/task-parser'

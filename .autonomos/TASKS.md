@@ -18,8 +18,8 @@
 - [x] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
 
 ### Core Enhancements
-- [/] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
-- [ ] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
+- [x] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
+- [/] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
 - [ ] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
 
 ### Protocol Refinements

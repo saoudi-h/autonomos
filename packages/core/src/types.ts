@@ -54,12 +54,22 @@ export interface Task {
  * Agent configuration parsed from AGENT.md
  */
 export interface AgentConfig {
-    projectRoot: string
-    workflow: {
-        commits: string
-        linting: string
-        specificCommands: Record<string, string>
-    }
+    name: string
+    description?: string
+    stack: string[]
+    preferences?: Record<string, any>
+}
+
+export interface AgentSection {
+    title: string
+    content: string
+}
+
+export interface AgentContext {
+    title: string
+    description?: string
+    sections: AgentSection[]
+    metadata?: Record<string, any>
 }
 
 export const PRIORITIES: Priority[] = ['🔴 Critical', '🟠 High', '🔵 Medium', '⚪ Low']
