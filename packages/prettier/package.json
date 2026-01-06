@@ -4,5 +4,9 @@
     "private": true,
     "main": "index.js",
     "license": "MIT",
-    "dependencies": {}
+    "dependencies": {},
+    "scripts": {
+        "lint": "echo 'No linting for prettier config'",
+        "typecheck": "echo 'No typecheck for prettier config'"
+    }
 }
