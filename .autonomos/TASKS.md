@@ -1,19 +1,46 @@
-# PROJECT TASKS & ROADMAP - AUTONOMOS
+# PROJECT TASKS & ROADMAP
 
 > **LEGEND**
 > **Priority:** [🔴 Critical] [🟠 High] [🔵 Medium] [⚪ Low]
 > **Complexity:** [S] Small (1h), [M] Medium (4h), [L] Large (1-2 days), [XL] Huge (Planning req.)
 > **Status:** [ ] Todo, [/] In Progress, [x] Done, [!] Blocked
 
-## 🚀 Active Sprint (Bootstrap)
-- [x] **[INIT-001]** Implement Autonomos Protocol (Root Config) `Priority: 🔴` `Complexity: S`
-- [/] **[CORE-001]** Implement `@autonomos/core` Package `Priority: 🔴` `Complexity: M`
-    - Create `packages/core` structure
-    - Implement Protocol types
-    - Implement Parsers
-- [ ] **[CLI-001]** Scaffold `@autonomos/cli` Package `Priority: 🟠` `Complexity: S`
-    - Depends on `@autonomos/core`
-- [ ] **[GIT-001]** Initialize Git & Commitlint `Priority: 🔵` `Complexity: S`
+## 🚀 Active Sprint
+
+### CLI Improvements
+- [x] **[CLI-01]** Add `--help` / `-h` flag with detailed usage info `Priority: 🔴` `Complexity: S`
+- [x] **[CLI-02]** Implement `autonomos agents` command (list AGENT.md files) `Priority: 🟠` `Complexity: M`
+  - Tree-like output showing AGENT.md hierarchy
+  - `--all` flag: list from project root
+  - `--local` flag (default): list from current directory
+- [ ] **[CLI-03]** Add `--dry-run` flag to `init` (preview without writing) `Priority: �` `Complexity: S`
+- [ ] **[CLI-04]** Implement `autonomos status` command (show protocol version, tasks summary) `Priority: �` `Complexity: M`
+- [ ] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
+
+### Core Enhancements
+- [ ] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
+- [ ] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
+- [ ] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
+
+### Protocol Refinements
+- [ ] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
+- [ ] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
+- [ ] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
+
+### Testing & Quality
+- [ ] **[TEST-01]** Add unit tests for TaskParser `Priority: 🟠` `Complexity: M`
+- [ ] **[TEST-02]** Add integration tests for CLI commands `Priority: 🔵` `Complexity: L`
+- [ ] **[TEST-03]** Add E2E test: init → update → status workflow `Priority: ⚪` `Complexity: L`
+
+### Documentation
+- [ ] **[DOC-01]** Create README.md for @autonomos/core `Priority: 🟠` `Complexity: S`
+- [ ] **[DOC-02]** Create README.md for @autonomos/cli `Priority: 🟠` `Complexity: S`
+- [ ] **[DOC-03]** Add CLI usage examples to root README.md `Priority: 🔵` `Complexity: S`
 
 ## 🔮 Backlog
-- [ ] **[MCP-001]** Create `@autonomos/mcp-server` `Priority: ⚪` `Complexity: L`
+
+### Future Ideas
+- [ ] **[FUTURE-01]** MCP Server package (@autonomos/mcp-server) `Priority: ⚪` `Complexity: XL`
+- [ ] **[FUTURE-02]** VSCode extension for AGENT.md navigation `Priority: ⚪` `Complexity: XL`
+- [ ] **[FUTURE-03]** Web dashboard for project task visualization `Priority: ⚪` `Complexity: XL`
+- [ ] **[FUTURE-04]** GitHub Action for protocol validation `Priority: ⚪` `Complexity: L`
