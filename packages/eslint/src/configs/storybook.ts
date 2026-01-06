@@ -7,5 +7,5 @@ export const storybook: Config[] = defineConfig([
     {
         ignores: ['!.storybook', 'storybook-static', '.turbo', 'node_modules', 'dist', '.vscode'],
     },
-    ...storybookPlugin.configs['flat/recommended'],
+    ...(storybookPlugin.configs['flat/recommended'] as unknown as Config[]),
 ])

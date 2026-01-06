@@ -4,6 +4,18 @@
         "target": "es5",
         "baseUrl": "."
     },
-    "include": ["./src/**/*.ts", "./*.ts"],
-    "exclude": ["dist", "build", "node_modules", ".vscode", ".next", ".turbo"]
+    "include": [
+        "./src/**/*.ts",
+        "*.ts",
+        "*.js",
+        "*.mjs"
+    ],
+    "exclude": [
+        "dist",
+        "build",
+        "node_modules",
+        ".vscode",
+        ".next",
+        ".turbo"
+    ]
 }
