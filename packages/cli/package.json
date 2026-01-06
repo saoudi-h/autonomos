@@ -1,0 +1,43 @@
+{
+    "name": "@autonomos/cli",
+    "version": "0.0.1",
+    "description": "CLI tool for the Autonomos Agent Protocol",
+    "type": "module",
+    "bin": {
+        "autonomos": "./dist/index.mjs"
+    },
+    "scripts": {
+        "start": "node dist/index.mjs",
+        "build": "tsdown",
+        "lint": "eslint . --max-warnings 0",
+        "lint:fix": "eslint . --max-warnings 0 --fix",
+        "format:check": "prettier \"**/*\" --ignore-unknown --list-different",
+        "format:fix": "prettier \"**/*\" --ignore-unknown --write",
+        "clean": "rimraf node_modules dist",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "prepublishOnly": "pnpm run build",
+        "pre-commit": "lint-staged"
+    },
+    "dependencies": {
+        "@autonomos/core": "workspace:*",
+        "commander": "^14.0.2"
+    },
+    "devDependencies": {
+        "@repo/eslint": "workspace:*",
+        "@repo/prettier": "workspace:*",
+        "@repo/tsdown": "workspace:*",
+        "@types/node": "^25.0.3",
+        "typescript": "^5.0.0"
+    },
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    }
+}
