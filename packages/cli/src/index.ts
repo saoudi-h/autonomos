@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
+import pc from 'picocolors'
 
 import { PROTOCOL_VERSION } from '@autonomos/core'
 import { agents } from './commands/agents'
@@ -14,16 +15,17 @@ const program = new Command()
 program
     .name('autonomos')
     .description(
-        `CLI for the Autonomos Agent Protocol
+        pc.cyan(`CLI for the Autonomos Agent Protocol
 
 The Agent Protocol is a specification for AI agents to interact with codebases
 in a structured, consistent way. It defines how agents should read context,
-execute tasks, and persist knowledge.
+execute tasks, and persist knowledge.`) +
+            `
 
-Documentation: https://github.com/saoudi-h/autonomos`
+Documentation: ${pc.underline('https://github.com/saoudi-h/autonomos')}`
     )
     .version(
-        `CLI: ${CLI_VERSION}\nProtocol: ${PROTOCOL_VERSION}`,
+        `${pc.bold('CLI:')} ${pc.green(CLI_VERSION)}\n${pc.bold('Protocol:')} ${pc.green(PROTOCOL_VERSION)}`,
         '-v, --version',
         'Show version information'
     )
@@ -31,14 +33,14 @@ Documentation: https://github.com/saoudi-h/autonomos`
     .addHelpText(
         'after',
         `
-Examples:
-  $ autonomos init          Initialize the Agent Protocol in current directory
-  $ autonomos update        Update Protocol to the latest version
-  $ autonomos status        Show project status and task summary
-  $ autonomos agents        List all AGENT.md files in the project
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos init')}          Initialize the Agent Protocol in current directory
+  $ ${pc.cyan('autonomos update')}        Update Protocol to the latest version
+  $ ${pc.cyan('autonomos status')}        Show project status and task summary
+  $ ${pc.cyan('autonomos agents')}        List all AGENT.md files in the project
 
-More info:
-  Run 'autonomos <command> --help' for detailed information about a command.
+${pc.bold('More info:')}
+  Run '${pc.cyan('autonomos <command> --help')}' for detailed information about a command.
 `
     )
 
@@ -49,16 +51,16 @@ program
         'after',
         `
 This command creates the following structure:
-  .autonomos/
-  ├── manifest.json    # Protocol metadata and version
-  ├── PROTOCOL.md      # Immutable protocol specification
-  ├── TASKS.md         # Task registry
-  └── worklogs/        # Session logs directory
-  AGENT.md             # Project context file (at root)
+  ${pc.blue('.autonomos/')}
+  ├── ${pc.white('manifest.json')}    # Protocol metadata and version
+  ├── ${pc.white('PROTOCOL.md')}      # Immutable protocol specification
+  ├── ${pc.white('TASKS.md')}         # Task registry
+  └── ${pc.blue('worklogs/')}        # Session logs directory
+  ${pc.white('AGENT.md')}             # Project context file (at root)
 
-Examples:
-  $ autonomos init
-  $ cd my-project && autonomos init
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos init')}
+  $ ${pc.cyan('cd my-project && autonomos init')}
 `
     )
     .option('-n, --dry-run', 'Preview what would be created without writing files')
@@ -66,24 +68,24 @@ Examples:
         const result = init({ dryRun: opts.dryRun })
 
         if (!result.success) {
-            console.error(`❌ ${result.message}`)
+            console.error(pc.red(`\n❌ ${result.message}`))
             process.exit(1)
         }
 
         if (result.dryRun) {
-            console.log(`🔍 ${result.message} (dry-run)`)
+            console.log(pc.cyan(`\n🔍 ${result.message} (dry-run)`))
         } else {
-            console.log(`✅ ${result.message}`)
+            console.log(pc.green(`\n✅ ${result.message}`))
         }
 
         if (result.created.length > 0) {
-            console.log(`\n${result.dryRun ? 'Would create:' : 'Created:'}`)
-            result.created.forEach(file => console.log(`  📄 ${file}`))
+            console.log(`\n${pc.bold(result.dryRun ? 'Would create:' : 'Created:')}`)
+            result.created.forEach(file => console.log(`  ${pc.blue('📄')} ${pc.white(file)}`))
         }
 
         if (result.warnings.length > 0) {
-            console.log('\nWarnings:')
-            result.warnings.forEach(warn => console.log(`  ⚠️  ${warn}`))
+            console.log(pc.yellow('\nWarnings:'))
+            result.warnings.forEach(warn => console.log(`  ${pc.yellow('⚠️')}  ${warn}`))
         }
     })
 
@@ -93,16 +95,16 @@ program
     .addHelpText(
         'after',
         `
-This command updates PROTOCOL.md to the latest version embedded in the CLI.
-Only PROTOCOL.md is modified; your TASKS.md and AGENT.md files are preserved.
+This command updates ${pc.white('PROTOCOL.md')} to the latest version embedded in the CLI.
+Only ${pc.white('PROTOCOL.md')} is modified; your ${pc.white('TASKS.md')} and ${pc.white('AGENT.md')} files are preserved.
 
-Version comparison:
+${pc.bold('Version comparison:')}
   - If your project has an older version: Updates to the new version
   - If your project has a newer version: Warns you to update the CLI
   - If versions match: No action needed
 
-Examples:
-  $ autonomos update
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos update')}
 `
     )
     .action(() => {
@@ -110,14 +112,14 @@ Examples:
 
         if (!result.success) {
             if (result.cliOutdated) {
-                console.error(`⚠️  ${result.message}`)
+                console.error(pc.yellow(`\n⚠️  ${result.message}`))
             } else {
-                console.error(`❌ ${result.message}`)
+                console.error(pc.red(`\n❌ ${result.message}`))
             }
             process.exit(1)
         }
 
-        console.log(`✅ ${result.message}`)
+        console.log(pc.green(`\n✅ ${result.message}`))
     })
 
 program
@@ -131,28 +133,30 @@ Displays information about the current project:
   - CLI version used for initialization
   - Task summary (todo, in-progress, done, blocked)
 
-Examples:
-  $ autonomos status
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos status')}
 `
     )
     .action(() => {
         const result = status()
 
         if (!result.success) {
-            console.error(`❌ ${result.message}`)
+            console.error(pc.red(`\n❌ ${result.message}`))
             process.exit(1)
         }
 
-        console.log(`📦 Protocol v${result.protocolVersion} (CLI v${result.cliVersion})`)
+        console.log(
+            `\n${pc.bold('📦 Protocol')} ${pc.green(`v${result.protocolVersion}`)} ${pc.dim(`(CLI v${result.cliVersion})`)}`
+        )
 
         if (result.taskSummary) {
             const s = result.taskSummary
-            console.log(`\n📋 Tasks: ${s.total} total`)
-            console.log(`   ⬜ Todo: ${s.todo}`)
-            console.log(`   🔄 In Progress: ${s.inProgress}`)
-            console.log(`   ✅ Done: ${s.done}`)
+            console.log(`\n${pc.bold('📋 Tasks:')} ${pc.cyan(s.total)} total`)
+            console.log(`   ${pc.white('⬜ Todo:')} ${pc.white(s.todo)}`)
+            console.log(`   ${pc.blue('🔄 In Progress:')} ${pc.blue(s.inProgress)}`)
+            console.log(`   ${pc.green('✅ Done:')} ${pc.green(s.done)}`)
             if (s.blocked > 0) {
-                console.log(`   🚫 Blocked: ${s.blocked}`)
+                console.log(`   ${pc.red('🚫 Blocked:')} ${pc.red(s.blocked)}`)
             }
         }
     })
@@ -164,36 +168,38 @@ program
     .addHelpText(
         'after',
         `
-This command discovers and displays all AGENT.md files in a tree structure.
-AGENT.md files provide context to AI agents about specific directories.
+This command discovers and displays all ${pc.white('AGENT.md')} files in a tree structure.
+${pc.white('AGENT.md')} files provide context to AI agents about specific directories.
 
-Modes:
+${pc.bold('Modes:')}
   (default)   Search from current directory downwards
   --all       Search from project root (finds .autonomos or .git)
 
-Examples:
-  $ autonomos agents           # List from current directory
-  $ autonomos agents --all     # List from project root
-  $ cd packages/core && autonomos agents  # List only in packages/core
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos agents')}           # List from current directory
+  $ ${pc.cyan('autonomos agents --all')}     # List from project root
+  $ ${pc.cyan('cd packages/core && autonomos agents')}  # List only in packages/core
 `
     )
     .action(opts => {
         const result = agents({ all: opts.all })
 
         if (!result.success) {
-            console.error(`❌ ${result.message}`)
+            console.error(pc.red(`\n❌ ${result.message}`))
             process.exit(1)
         }
 
-        console.log(result.tree ?? result.message)
-        console.log(`\n${result.message}`)
+        console.log('\n' + (result.tree ?? result.message))
+        console.log(pc.dim(`\n${result.message}`))
     })
 
 program
     .command('version')
     .description('Show the current Protocol version')
     .action(() => {
-        console.log(`Agent Protocol v${PROTOCOL_VERSION} (CLI v${CLI_VERSION})`)
+        console.log(
+            `${pc.bold('Agent Protocol')} ${pc.green(`v${PROTOCOL_VERSION}`)} ${pc.dim(`(CLI v${CLI_VERSION})`)}`
+        )
     })
 
 program.parse()

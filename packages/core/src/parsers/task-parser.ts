@@ -3,7 +3,7 @@ import type { Complexity, Priority, Task, TaskStatus } from '../types'
 export class TaskParser {
     static parse(markdown: string): Task[] {
         const tasks: Task[] = []
-        const lines = markdown.split('\\n')
+        const lines = markdown.split(/\r?\n/)
         const taskRegex = /- \[([ x/!])\] \*\*\[(.+)\]\*\* (.+) `Priority: (.+)` `Complexity: (.+)`/
 
         for (const line of lines) {

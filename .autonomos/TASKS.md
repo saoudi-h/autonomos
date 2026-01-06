@@ -15,10 +15,10 @@
   - `--local` flag (default): list from current directory
 - [x] **[CLI-03]** Add `--dry-run` flag to `init` (preview without writing) `Priority: 🔵` `Complexity: S`
 - [x] **[CLI-04]** Implement `autonomos status` command (show protocol version, tasks summary) `Priority: 🔵` `Complexity: M`
-- [ ] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
+- [x] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
 
 ### Core Enhancements
-- [ ] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
+- [/] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
 - [ ] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
 - [ ] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
 
@@ -28,13 +28,13 @@
 - [ ] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
 
 ### Testing & Quality
-- [ ] **[TEST-01]** Add unit tests for TaskParser `Priority: 🟠` `Complexity: M`
+- [x] **[TEST-01]** Add unit tests for TaskParser `Priority: 🟠` `Complexity: M`
 - [ ] **[TEST-02]** Add integration tests for CLI commands `Priority: 🔵` `Complexity: L`
 - [ ] **[TEST-03]** Add E2E test: init → update → status workflow `Priority: ⚪` `Complexity: L`
 
 ### Documentation
-- [ ] **[DOC-01]** Create README.md for @autonomos/core `Priority: 🟠` `Complexity: S`
-- [ ] **[DOC-02]** Create README.md for @autonomos/cli `Priority: 🟠` `Complexity: S`
+- [x] **[DOC-01]** Create README.md for @autonomos/core `Priority: 🟠` `Complexity: S`
+- [x] **[DOC-02]** Create README.md for @autonomos/cli `Priority: 🟠` `Complexity: S`
 - [ ] **[DOC-03]** Add CLI usage examples to root README.md `Priority: 🔵` `Complexity: S`
 
 ## 🔮 Backlog
