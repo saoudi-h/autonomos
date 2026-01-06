@@ -1,7 +1,46 @@
+/**
+ * Manifest schema for .autonomos/manifest.json
+ */
+export interface Manifest {
+    /**
+     * Version of the Agent Protocol specification (SemVer)
+     */
+    protocolVersion: string
+
+    /**
+     * Version of the CLI that last updated this project
+     */
+    cliVersion: string
+
+    /**
+     * ISO timestamp of when the project was initialized
+     */
+    initializedAt: string
+
+    /**
+     * ISO timestamp of when the protocol was last updated
+     */
+    lastUpdated: string
+}
+
+/**
+ * Priority levels for tasks
+ */
 export type Priority = '🔴 Critical' | '🟠 High' | '🔵 Medium' | '⚪ Low'
+
+/**
+ * Complexity estimates for tasks
+ */
 export type Complexity = 'S' | 'M' | 'L' | 'XL'
+
+/**
+ * Task status markers
+ */
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'BLOCKED'
 
+/**
+ * Task entity parsed from TASKS.md
+ */
 export interface Task {
     id: string
     title: string
@@ -11,6 +50,9 @@ export interface Task {
     worklogPath?: string
 }
 
+/**
+ * Agent configuration parsed from AGENT.md
+ */
 export interface AgentConfig {
     projectRoot: string
     workflow: {
