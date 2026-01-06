@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-import { PROTOCOL_TEMPLATE_V2026_1 } from '@autonomos/core'
 import { Command } from 'commander'
+
+import { PROTOCOL_VERSION } from '@autonomos/core'
+import { init } from './commands/init'
+import { update } from './commands/update'
 
 const program = new Command()
 
@@ -10,9 +13,49 @@ program
     .command('init')
     .description('Initialize the Agent Protocol in the current directory')
     .action(() => {
-        console.log('Initializing Autonomos Protocol...')
-        console.log('Would write PROTOCOL.md with length:', PROTOCOL_TEMPLATE_V2026_1.length)
-        // Logic to write files would go here (using Core templates)
+        const result = init()
+
+        if (!result.success) {
+            console.error(`❌ ${result.message}`)
+            process.exit(1)
+        }
+
+        console.log(`✅ ${result.message}`)
+
+        if (result.created.length > 0) {
+            console.log('\nCreated:')
+            result.created.forEach(file => console.log(`  📄 ${file}`))
+        }
+
+        if (result.warnings.length > 0) {
+            console.log('\nWarnings:')
+            result.warnings.forEach(warn => console.log(`  ⚠️  ${warn}`))
+        }
+    })
+
+program
+    .command('update')
+    .description('Update the Protocol to the latest version')
+    .action(() => {
+        const result = update()
+
+        if (!result.success) {
+            if (result.cliOutdated) {
+                console.error(`⚠️  ${result.message}`)
+            } else {
+                console.error(`❌ ${result.message}`)
+            }
+            process.exit(1)
+        }
+
+        console.log(`✅ ${result.message}`)
+    })
+
+program
+    .command('version')
+    .description('Show the current Protocol version')
+    .action(() => {
+        console.log(`Agent Protocol v${PROTOCOL_VERSION}`)
     })
 
 program.parse()
