@@ -30,9 +30,9 @@
     "author": "Autonomos",
     "license": "MIT",
     "devDependencies": {
-        "@repo/tsdown": "workspace:*",
-        "@repo/prettier": "workspace:*",
         "@repo/eslint": "workspace:*",
+        "@repo/prettier": "workspace:*",
+        "@repo/tsdown": "workspace:*",
         "@repo/vitest": "workspace:*",
         "typescript": "^5.0.0"
     },
@@ -40,5 +40,8 @@
     "exports": {
         ".": "./dist/index.mjs",
         "./package.json": "./package.json"
+    },
+    "dependencies": {
+        "zod": "3.24.1"
     }
 }

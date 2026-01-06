@@ -20,10 +20,10 @@
 ### Core Enhancements
 - [x] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
 - [x] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
-- [/] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
+- [x] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
 
 ### Protocol Refinements
-- [ ] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
+- [/] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
 - [ ] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
 - [ ] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
 

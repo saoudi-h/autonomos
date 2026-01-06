@@ -1,4 +1,5 @@
 import { PROTOCOL_VERSION } from '../constants'
+import { ManifestSchema } from '../schemas/manifest'
 import type { Manifest } from '../types'
 
 /**
@@ -22,8 +23,9 @@ export function generateManifestContent(manifest: Manifest): string {
 }
 
 /**
- * Parses manifest.json content into a Manifest object
+ * Parses manifest.json content into a Manifest object with validation
  */
 export function parseManifest(content: string): Manifest {
-    return JSON.parse(content) as Manifest
+    const data = JSON.parse(content)
+    return ManifestSchema.parse(data)
 }

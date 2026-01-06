@@ -1,5 +1,6 @@
 // Constants
 export * from './constants'
+export * from './schemas/manifest'
 
 // Types
 export * from './types'
