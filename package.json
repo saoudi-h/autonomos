@@ -1,0 +1,65 @@
+{
+    "name": "autonomos",
+    "private": true,
+    "description": "",
+    "type": "module",
+    "scripts": {
+        "build": "turbo build",
+        "dev": "turbo dev",
+        "lint": "turbo lint",
+        "format:check": "prettier \"**/*\" --ignore-unknown --list-different",
+        "format:fix": "prettier \"**/*\" --ignore-unknown --list-different --write",
+        "clean": "turbo clean && rimraf node_modules",
+        "version": "changeset version",
+        "release": "changeset publish",
+        "typecheck": "tsc --noEmit",
+        "prepare": "husky",
+        "pre-commit": "turbo pre-commit --concurrency=1"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^20.2.0",
+        "@commitlint/config-conventional": "^20.2.0",
+        "@commitlint/types": "^20.2.0",
+        "@repo/eslint": "workspace:*",
+        "@repo/prettier": "workspace:*",
+        "@repo/tsconfig": "workspace:*",
+        "@types/eslint": "^9.6.1",
+        "@types/node": "^25.0.3",
+        "eslint": "^9.39.2",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.2.7",
+        "prettier": "^3.7.4",
+        "prettier-plugin-organize-imports": "^4.3.0",
+        "publint": "^0.3.16",
+        "rimraf": "^6.1.2",
+        "tsdown": "0.19.0-beta.3",
+        "turbo": "^2.7.2",
+        "typescript": "^5.9.3",
+        "unplugin-unused": "^0.5.6",
+        "vite-tsconfig-paths": "^6.0.3"
+    },
+    "packageManager": "pnpm@10.27.0",
+    "engines": {
+        "node": ">=18"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/saoudi-h/autonomos.git"
+    },
+    "keywords": [
+        "Agents",
+        "AI",
+        "code",
+        "autonomos"
+    ],
+    "author": {
+        "name": "Saoudi Hakim",
+        "url": "https://hakimsaoudi.dev",
+        "email": "saoudihakim@gmail.com"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@changesets/changelog-github": "^0.5.0",
+        "@changesets/cli": "^2.27.10"
+    }
+}

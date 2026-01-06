@@ -1,0 +1,12 @@
+{
+  "extends": ["@repo/tsconfig/base.json"],
+  "include": ["tsconfig.json"],
+  "exclude": [
+    "apps",
+    "packages",
+    "node_modules",
+    ".turbo",
+    ".vscode",
+    "solar.code-workspace.json"
+  ]
+}

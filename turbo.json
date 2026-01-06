@@ -1,0 +1,33 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalEnv": ["FIGMA_FILE_ID", "FIGMA_API_TOKEN", "GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY", "VERCEL_URL"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [
+        ".next/**", 
+        "!.next/cache/**",
+        "dist/**"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+  },
+  "clean": {
+      "outputs": [],
+      "cache": false
+  },
+  "format": {
+      "dependsOn": ["^format"]
+    },
+    "format:fix": {
+      "dependsOn": ["^format:fix"]
+    },
+    "pre-commit": {
+      "dependsOn": ["^pre-commit"]
+    }
+  }
+}

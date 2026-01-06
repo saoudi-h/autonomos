@@ -1,0 +1,9 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "display": "Vue",
+    "extends": "./dom.json",
+    "compilerOptions": {
+        "jsx": "preserve",
+        "jsxImportSource": "vue"
+    }
+}
