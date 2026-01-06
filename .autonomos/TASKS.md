@@ -25,7 +25,7 @@
 ### Protocol Refinements
 - [x] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
 - [x] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
-- [/] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
+- [x] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
 
 ### Testing & Quality
 - [x] **[TEST-01]** Add unit tests for TaskParser `Priority: 🟠` `Complexity: M`
@@ -35,7 +35,7 @@
 ### Documentation
 - [x] **[DOC-01]** Create README.md for @autonomos/core `Priority: 🟠` `Complexity: S`
 - [x] **[DOC-02]** Create README.md for @autonomos/cli `Priority: 🟠` `Complexity: S`
-- [ ] **[DOC-03]** Add CLI usage examples to root README.md `Priority: 🔵` `Complexity: S`
+- [x] **[DOC-03]** Add CLI usage examples to root README.md `Priority: 🔵` `Complexity: S`
 
 ## 🔮 Backlog
 
