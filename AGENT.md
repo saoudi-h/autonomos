@@ -1,19 +1,38 @@
-# AGENT CONTEXT: ROOT (Autonomos)
+---
+name: "Autonomos"
+type: "project"
+status: "active"
+stack: ["Node.js", "TypeScript", "TurboRepo", "pnpm", "Commander.js", "Vitest", "tsdown"]
+---
+# AGENT CONTEXT: Autonomos
 
 ## 🧠 Context & Objectives
-**Autonomos** is a Monorepo serving as the reference implementation and framework for the "Agent Protocol".
-It houses the SDK (`@autonomos/core`), the CLI tool (`@autonomos/cli`), and potentially other tools like MCP servers.
 
-**Goal:** Provide a standardized way for AI Agents to onboard, execute, and persist knowledge in software projects.
+Autonomos is a project dedicated to defining and implementing a robust, structured protocol for AI Agents to interact with codebases. The goal is to maximize agent autonomy while maintaining system integrity and long-term project context.
 
 ## ⚙️ Workflow & Preferences
-- **Commits:** Conventional Commits REQUIRED (e.g., `feat(core): add parser`).
-- **Package Manager:** `pnpm` (via TurboRepo).
-- **Language:** English for documentation.
-- **Strict Mode:** Do not modify `PROTOCOL.md`. It is the kernel.
+
+- **Commits:** Conventional Commits (feat, fix, docs, refactor, chore, style, test, ci, build). Always specify package scope (e.g., \`feat(cli): ...\`).
+- **Linting:** Strict linting and type-checking must pass before every commit.
+- **Language:** English (US) for all documentation and code.
 
 ## 🏗 Stack & Architecture
-- **Repo:** Turborepo + PNPM Workspaces.
-- **Packages:**
-    - `packages/core`: (**The Brain**) Shared definition of the protocol, types, templates, and parsers.
-    - `packages/cli`: (**The Hands**) Public CLI tool.
+
+- **Manager:** pnpm (Workspace)
+- **Repo:** TurboRepo
+- **Build:** [tsdown](file:///home/hakim/projects/autonomos/packages/tsdown)
+- **CLI:** Commander.js
+- **Test:** Vitest
+
+## 📁 Key Directories
+
+| Path | Description |
+|------|-------------|
+| \`packages/core\` | Core SDK and Protocol definitions |
+| \`packages/cli\` | CLI tool implementation |
+| \`.autonomos/\` | Protocol configuration and task registry |
+
+## ⚠️ Known Constraints
+
+- Project is in early alpha stage (v0.1.0-alpha).
+- CLI commands require the protocol structure to be initialized via \`autonomos init\`.
