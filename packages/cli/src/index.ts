@@ -4,6 +4,7 @@ import { Command } from 'commander'
 import { PROTOCOL_VERSION } from '@autonomos/core'
 import { agents } from './commands/agents'
 import { init } from './commands/init'
+import { status } from './commands/status'
 import { update } from './commands/update'
 
 const CLI_VERSION = '0.0.1'
@@ -60,18 +61,23 @@ Examples:
   $ cd my-project && autonomos init
 `
     )
-    .action(() => {
-        const result = init()
+    .option('-n, --dry-run', 'Preview what would be created without writing files')
+    .action(opts => {
+        const result = init({ dryRun: opts.dryRun })
 
         if (!result.success) {
             console.error(`❌ ${result.message}`)
             process.exit(1)
         }
 
-        console.log(`✅ ${result.message}`)
+        if (result.dryRun) {
+            console.log(`🔍 ${result.message} (dry-run)`)
+        } else {
+            console.log(`✅ ${result.message}`)
+        }
 
         if (result.created.length > 0) {
-            console.log('\nCreated:')
+            console.log(`\n${result.dryRun ? 'Would create:' : 'Created:'}`)
             result.created.forEach(file => console.log(`  📄 ${file}`))
         }
 
@@ -112,6 +118,43 @@ Examples:
         }
 
         console.log(`✅ ${result.message}`)
+    })
+
+program
+    .command('status')
+    .description('Show project status and task summary')
+    .addHelpText(
+        'after',
+        `
+Displays information about the current project:
+  - Protocol version
+  - CLI version used for initialization
+  - Task summary (todo, in-progress, done, blocked)
+
+Examples:
+  $ autonomos status
+`
+    )
+    .action(() => {
+        const result = status()
+
+        if (!result.success) {
+            console.error(`❌ ${result.message}`)
+            process.exit(1)
+        }
+
+        console.log(`📦 Protocol v${result.protocolVersion} (CLI v${result.cliVersion})`)
+
+        if (result.taskSummary) {
+            const s = result.taskSummary
+            console.log(`\n📋 Tasks: ${s.total} total`)
+            console.log(`   ⬜ Todo: ${s.todo}`)
+            console.log(`   🔄 In Progress: ${s.inProgress}`)
+            console.log(`   ✅ Done: ${s.done}`)
+            if (s.blocked > 0) {
+                console.log(`   🚫 Blocked: ${s.blocked}`)
+            }
+        }
     })
 
 program

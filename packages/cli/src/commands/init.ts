@@ -21,6 +21,7 @@ const CLI_VERSION = '0.0.1' // TODO: Import from package.json
 
 interface InitOptions {
     cwd?: string
+    dryRun?: boolean
 }
 
 interface InitResult {
@@ -28,6 +29,7 @@ interface InitResult {
     message: string
     created: string[]
     warnings: string[]
+    dryRun?: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ interface InitResult {
  */
 export function init(options: InitOptions = {}): InitResult {
     const cwd = options.cwd ?? process.cwd()
+    const dryRun = options.dryRun ?? false
     const created: string[] = []
     const warnings: string[] = []
 
@@ -52,6 +55,31 @@ export function init(options: InitOptions = {}): InitResult {
             message: `Project already initialized with Protocol v${PROTOCOL_VERSION}. Use \`autonomos update\` to update.`,
             created: [],
             warnings: [],
+            dryRun,
+        }
+    }
+
+    // In dry-run mode, just collect what would be created
+    if (dryRun) {
+        created.push(AUTONOMOS_DIR)
+        created.push(`${AUTONOMOS_DIR}/${WORKLOGS_DIR}`)
+        created.push(`${AUTONOMOS_DIR}/${MANIFEST_FILE}`)
+        created.push(`${AUTONOMOS_DIR}/${PROTOCOL_FILE}`)
+        created.push(`${AUTONOMOS_DIR}/${TASKS_FILE}`)
+
+        const agentPath = join(cwd, AGENT_FILE)
+        if (!existsSync(agentPath)) {
+            created.push(AGENT_FILE)
+        } else {
+            warnings.push(`${AGENT_FILE} already exists, would skip.`)
+        }
+
+        return {
+            success: true,
+            message: `Would initialize project with Agent Protocol v${PROTOCOL_VERSION}`,
+            created,
+            warnings,
+            dryRun: true,
         }
     }
 
@@ -95,5 +123,6 @@ export function init(options: InitOptions = {}): InitResult {
         message: `Project initialized with Agent Protocol v${PROTOCOL_VERSION}`,
         created,
         warnings,
+        dryRun: false,
     }
 }

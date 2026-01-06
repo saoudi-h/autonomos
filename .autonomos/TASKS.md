@@ -13,8 +13,8 @@
   - Tree-like output showing AGENT.md hierarchy
   - `--all` flag: list from project root
   - `--local` flag (default): list from current directory
-- [ ] **[CLI-03]** Add `--dry-run` flag to `init` (preview without writing) `Priority: �` `Complexity: S`
-- [ ] **[CLI-04]** Implement `autonomos status` command (show protocol version, tasks summary) `Priority: �` `Complexity: M`
+- [x] **[CLI-03]** Add `--dry-run` flag to `init` (preview without writing) `Priority: 🔵` `Complexity: S`
+- [x] **[CLI-04]** Implement `autonomos status` command (show protocol version, tasks summary) `Priority: 🔵` `Complexity: M`
 - [ ] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
 
 ### Core Enhancements
