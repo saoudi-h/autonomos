@@ -15,6 +15,22 @@
         {
             "name": "prettier",
             "path": "packages/prettier",
+        },
+        {
+            "name": "tsdown",
+            "path": "packages/tsdown",
+        },
+        {
+            "name": "vitest",
+            "path": "packages/vitest",
+        },
+        {
+            "name": "core",
+            "path": "packages/core",
+        },
+        {
+            "name": "cli",
+            "path": "packages/cli",
         }
     ],
     "settings": {
@@ -64,6 +80,5 @@
             "usehooks",
             "vuejs",
         ],
-        "typescript.tsdk": "solar/node_modules/typescript/lib",
     },
 }
