@@ -1,0 +1,36 @@
+{
+    "extends": "@repo/tsconfig/base.json",
+    "compilerOptions": {
+        "target": "esnext",
+        "lib": ["es2022"],
+        "moduleDetection": "force",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "types": ["node", "vitest"],
+        "strict": true,
+        "noUnusedLocals": true,
+        "declaration": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
+        "baseUrl": ".",
+        "outDir": "./dist",
+        "rootDir": ".",
+        "paths": {
+            "@/*": ["src/*"],
+            "@tests/*": ["tests/*"]
+        }
+    },
+    "include": [
+        "./src/**/*",
+        "./src/**/*.json",
+        "tsdown.config.ts",
+        "vitest.config.ts",
+        "tests/**/*",
+        "lint-staged.config.mjs",
+        "prettier.config.mjs"
+    ],
+    "exclude": ["dist", "build", "node_modules", ".vscode", ".turbo", "coverage"]
+}

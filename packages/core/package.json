@@ -1,0 +1,44 @@
+{
+    "name": "@autonomos/core",
+    "version": "0.0.1",
+    "description": "SDK and core definitions for the Agent Protocol",
+    "type": "module",
+    "main": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "scripts": {
+        "dev": "tsdown --watch",
+        "build": "tsdown",
+        "lint": "eslint . --max-warnings 0",
+        "lint:fix": "eslint . --max-warnings 0 --fix",
+        "format:check": "prettier \"**/*\" --ignore-unknown --list-different",
+        "format:fix": "prettier \"**/*\" --ignore-unknown --write",
+        "clean": "rimraf node_modules dist",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "prepublishOnly": "pnpm run build",
+        "pre-commit": "lint-staged"
+    },
+    "keywords": [
+        "agent",
+        "protocol",
+        "ai",
+        "workflow"
+    ],
+    "author": "Autonomos",
+    "license": "MIT",
+    "devDependencies": {
+        "@repo/tsdown": "workspace:*",
+        "@repo/prettier": "workspace:*",
+        "@repo/eslint": "workspace:*",
+        "@repo/vitest": "workspace:*",
+        "typescript": "^5.0.0"
+    },
+    "module": "./dist/index.mjs",
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    }
+}
