@@ -113,6 +113,9 @@ What does this specific folder/module do?
 |------|-------------|
 | \`src/\` | Source code |
 | \`scripts/\` | Build or utility scripts |
+
+## ⚠️ Known Constraints
+*List any technical debts, missing features, or external limitations.*
 \`\`\`
 
 ## 3. CORE WORKFLOW (The Loop)

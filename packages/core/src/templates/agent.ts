@@ -30,6 +30,10 @@ status: "active"
 |------|-------------|
 | \`src/\` | Source code |
 | \`.autonomos/\` | Agent Protocol files |
+
+## ⚠️ Known Constraints
+
+*List any technical debts, missing features, or external limitations.*
 `
 }
 
