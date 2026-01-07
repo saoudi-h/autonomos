@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "config:recommended",
+    ":label(renovate)",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "automerge": true,
+  "automergeType": "pr",
+  "timezone": "Europe/Paris",
+  "schedule": [
+    "0 0 2 * * 3"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enable": false
+    }
+  ]
+}
