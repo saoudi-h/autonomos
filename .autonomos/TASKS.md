@@ -21,6 +21,7 @@
 - [x] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`
 - [x] **[CORE-02]** Create worklog template and generator function `Priority: 🔵` `Complexity: S`
 - [x] **[CORE-03]** Add JSON Schema validation for manifest.json `Priority: ⚪` `Complexity: S`
+- [x] **[META-01]** Improve NPM metadata and LICENSE inclusion `Priority: 🟠` `Complexity: S`
 
 ### Protocol Refinements
 - [x] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`

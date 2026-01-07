@@ -8,12 +8,12 @@
     },
     "scripts": {
         "start": "node dist/index.mjs",
-        "build": "tsdown",
+        "build": "tsdown && cp ../../LICENSE .",
         "lint": "eslint . --max-warnings 0",
         "lint:fix": "eslint . --max-warnings 0 --fix",
         "format:check": "prettier \"**/*\" --ignore-unknown --list-different",
         "format:fix": "prettier \"**/*\" --ignore-unknown --write",
-        "clean": "rimraf node_modules dist",
+        "clean": "rimraf node_modules dist LICENSE",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "test": "vitest",
         "test:ui": "vitest --ui",
@@ -22,6 +22,34 @@
         "prepublishOnly": "pnpm run build",
         "pre-commit": "lint-staged"
     },
+    "keywords": [
+        "cli",
+        "agent",
+        "protocol",
+        "ai",
+        "workflow",
+        "ai-agent",
+        "autonomos"
+    ],
+    "author": "Autonomos",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/saoudi-h/autonomos.git",
+        "directory": "packages/cli"
+    },
+    "bugs": {
+        "url": "https://github.com/saoudi-h/autonomos/issues"
+    },
+    "homepage": "https://github.com/saoudi-h/autonomos/tree/main/packages/cli#readme",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "dependencies": {
         "@autonomos/core": "workspace:*",
         "commander": "^14.0.2",

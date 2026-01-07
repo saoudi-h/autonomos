@@ -1,6 +1,6 @@
 /**
- * Protocol version using SemVer
- * Alpha phase - not yet published to npm
+ * Agent Protocol Specification Version (Independent of Package versions)
+ * This refers to the schema and behavioral contract version.
  */
 export const PROTOCOL_VERSION = '0.1.0-alpha'
 

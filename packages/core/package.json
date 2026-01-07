@@ -7,12 +7,12 @@
     "types": "./dist/index.d.mts",
     "scripts": {
         "dev": "tsdown --watch",
-        "build": "tsdown",
+        "build": "tsdown && cp ../../LICENSE .",
         "lint": "eslint . --max-warnings 0",
         "lint:fix": "eslint . --max-warnings 0 --fix",
         "format:check": "prettier \"**/*\" --ignore-unknown --list-different",
         "format:fix": "prettier \"**/*\" --ignore-unknown --write",
-        "clean": "rimraf node_modules dist",
+        "clean": "rimraf node_modules dist LICENSE",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "test": "vitest",
         "test:ui": "vitest --ui",
@@ -25,10 +25,30 @@
         "agent",
         "protocol",
         "ai",
-        "workflow"
+        "workflow",
+        "ai-agent",
+        "mcp",
+        "autonomy"
     ],
     "author": "Autonomos",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/saoudi-h/autonomos.git",
+        "directory": "packages/core"
+    },
+    "bugs": {
+        "url": "https://github.com/saoudi-h/autonomos/issues"
+    },
+    "homepage": "https://github.com/saoudi-h/autonomos/tree/main/packages/core#readme",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "devDependencies": {
         "@repo/eslint": "workspace:*",
         "@repo/prettier": "workspace:*",
