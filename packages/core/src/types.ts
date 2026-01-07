@@ -1,29 +1,4 @@
 /**
- * Manifest schema for .autonomos/manifest.json
- */
-export interface Manifest {
-    /**
-     * Version of the Agent Protocol specification (SemVer)
-     */
-    protocolVersion: string
-
-    /**
-     * Version of the CLI that last updated this project
-     */
-    cliVersion: string
-
-    /**
-     * ISO timestamp of when the project was initialized
-     */
-    initializedAt: string
-
-    /**
-     * ISO timestamp of when the protocol was last updated
-     */
-    lastUpdated: string
-}
-
-/**
  * Priority levels for tasks
  */
 export type Priority = '🔴 Critical' | '🟠 High' | '🔵 Medium' | '⚪ Low'

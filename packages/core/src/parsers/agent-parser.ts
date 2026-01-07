@@ -14,7 +14,7 @@ export class AgentParser {
         const match = markdown.match(frontmatterRegex)
         if (match) {
             try {
-                metadata = yaml.load(match[1]) as Record<string, any>
+                metadata = yaml.load(match[1] as string) as Record<string, any>
                 content = markdown.slice(match[0].length).trim()
             } catch (e) {
                 console.error('Failed to parse Agent frontmatter:', e)

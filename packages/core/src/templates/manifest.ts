@@ -1,6 +1,5 @@
 import { PROTOCOL_VERSION } from '../constants'
-import { ManifestSchema } from '../schemas/manifest'
-import type { Manifest } from '../types'
+import { ManifestSchema, type Manifest } from '../schemas/manifest'
 
 /**
  * Creates a new manifest object with current timestamps

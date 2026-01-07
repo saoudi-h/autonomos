@@ -7,8 +7,8 @@ describe('AgentParser', () => {
         const context = AgentParser.parse(markdown)
         expect(context.title).toBe('My Project')
         expect(context.sections).toHaveLength(1)
-        expect(context.sections[0].title).toBe('Section 1')
-        expect(context.sections[0].content).toBe('Hello')
+        expect(context.sections[0]!.title).toBe('Section 1')
+        expect(context.sections[0]!.content).toBe('Hello')
     })
 
     it('should parse multiple sections correctly', () => {
@@ -21,10 +21,10 @@ Strict Linting
         `
         const context = AgentParser.parse(markdown)
         expect(context.sections).toHaveLength(2)
-        expect(context.sections[0].title).toBe('Context & Objectives')
-        expect(context.sections[0].content).toBe('Objective 1')
-        expect(context.sections[1].title).toBe('Workflow & Preferences')
-        expect(context.sections[1].content).toBe('Strict Linting')
+        expect(context.sections[0]!.title).toBe('Context & Objectives')
+        expect(context.sections[0]!.content).toBe('Objective 1')
+        expect(context.sections[1]!.title).toBe('Workflow & Preferences')
+        expect(context.sections[1]!.content).toBe('Strict Linting')
     })
 
     it('should handle alternative title format', () => {
@@ -50,7 +50,7 @@ Content`
             status: 'Active',
         })
         expect(context.sections).toHaveLength(1)
-        expect(context.sections[0].title).toBe('Section 1')
+        expect(context.sections[0]!.title).toBe('Section 1')
     })
 
     it('should return default title if missing', () => {

@@ -19,21 +19,21 @@ describe('TaskParser', () => {
         const markdown = '- [/] **[CLI-01]** Coding `Priority: 🟠 High` `Complexity: M`'
         const tasks = TaskParser.parse(markdown)
         expect(tasks).toHaveLength(1)
-        expect(tasks[0].status).toBe('IN_PROGRESS')
+        expect(tasks[0]!.status).toBe('IN_PROGRESS')
     })
 
     it('should parse a DONE task correctly', () => {
         const markdown = '- [x] **[DOC-01]** Writing `Priority: 🔵 Medium` `Complexity: L`'
         const tasks = TaskParser.parse(markdown)
         expect(tasks).toHaveLength(1)
-        expect(tasks[0].status).toBe('DONE')
+        expect(tasks[0]!.status).toBe('DONE')
     })
 
     it('should parse a BLOCKED task correctly', () => {
         const markdown = '- [!] **[CORE-01]** Waiting `Priority: ⚪ Low` `Complexity: XL`'
         const tasks = TaskParser.parse(markdown)
         expect(tasks).toHaveLength(1)
-        expect(tasks[0].status).toBe('BLOCKED')
+        expect(tasks[0]!.status).toBe('BLOCKED')
     })
 
     it('should parse multiple tasks across lines', () => {
@@ -44,8 +44,8 @@ describe('TaskParser', () => {
         `
         const tasks = TaskParser.parse(markdown)
         expect(tasks).toHaveLength(2)
-        expect(tasks[0].id).toBe('T1')
-        expect(tasks[1].id).toBe('T2')
+        expect(tasks[0]!.id).toBe('T1')
+        expect(tasks[1]!.id).toBe('T2')
     })
 
     it('should ignore non-task lines', () => {
