@@ -76,29 +76,71 @@ function findAgentFiles(dir: string, baseDir: string, depth = 0): AgentEntry[] {
     return entries
 }
 
+interface TreeNode {
+    name: string
+    isAgent: boolean
+    children: Record<string, TreeNode>
+}
+
 /**
- * Format agent entries as a tree structure
+ * Format agent entries as a true tree structure
  */
 function formatAsTree(entries: AgentEntry[], baseDir: string): string {
     if (entries.length === 0) {
         return '  (no AGENT.md files found)'
     }
 
-    const lines: string[] = []
-    const baseName = basename(baseDir)
+    const rootName = basename(baseDir)
+    const tree: TreeNode = { name: rootName, isAgent: false, children: {} }
 
-    lines.push(`📁 ${baseName}/`)
+    // Build the tree
+    for (const entry of entries) {
+        const parts = entry.relativePath.split('/')
+        let current = tree
 
-    // Group entries by their parent directory
-    for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i]
-        const isLast = i === entries.length - 1
-        const prefix = isLast ? '└── ' : '├── '
-        const indent = '    '.repeat(entry.depth)
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i]
+            const isAgent = part === AGENT_FILE
 
-        lines.push(`${indent}${prefix}📄 ${entry.relativePath}`)
+            if (!current.children[part]) {
+                current.children[part] = {
+                    name: part,
+                    isAgent,
+                    children: {},
+                }
+            }
+            current = current.children[part]
+        }
     }
 
+    const lines: string[] = []
+    lines.push(`📁 ${rootName}/`)
+
+    function render(node: TreeNode, prefix = '', _isLast = true): void {
+        const children = Object.values(node.children)
+        children.sort((a, b) => {
+            // Folders first
+            if (!a.isAgent && b.isAgent) return -1
+            if (a.isAgent && !b.isAgent) return 1
+            return a.name.localeCompare(b.name)
+        })
+
+        children.forEach((child, index) => {
+            const childIsLast = index === children.length - 1
+            const branch = childIsLast ? '└── ' : '├── '
+            const icon = child.isAgent ? '📄' : '📁'
+            const name = child.isAgent ? child.name : `${child.name}/`
+
+            lines.push(`${prefix}${branch}${icon} ${name}`)
+
+            if (!child.isAgent) {
+                const nextPrefix = prefix + (childIsLast ? '    ' : '│   ')
+                render(child, nextPrefix, childIsLast)
+            }
+        })
+    }
+
+    render(tree)
     return lines.join('\n')
 }
 
