@@ -1,6 +1,6 @@
 {
     "name": "@autonomos/cli",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "CLI tool for the Autonomos Agent Protocol",
     "type": "module",
     "bin": {
