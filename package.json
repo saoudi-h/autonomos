@@ -26,6 +26,7 @@
         "@tala-tools/tsdown": "0.1.3",
         "@types/eslint": "^9.6.1",
         "@types/node": "^25.0.3",
+        "@typescript/native-preview": "7.0.0-dev.20260518.1",
         "eslint": "^10.4.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.7",

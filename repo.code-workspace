@@ -18,6 +18,7 @@
         },
     ],
     "settings": {
+        "typescript.native-preview.tsdk": "/home/hakim/projects/autonomos/node_modules/@typescript/native-preview",
         "biome.enabled": false,
         "workbench.colorCustomizations": {
             "activityBar.activeBackground": "#f2e6df",
