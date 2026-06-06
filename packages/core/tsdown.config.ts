@@ -1,10 +1,5 @@
-import { base } from '@repo/tsdown'
-import type { UserConfigFn } from 'tsdown/config'
-import { defineConfig } from 'tsdown/config'
+import { defineConfig } from '@tala-tools/tsdown'
 
-const configFn: UserConfigFn = defineConfig(async options => ({
-    ...(await base(options, { ci: true })),
+export default defineConfig({
     entry: ['./src/index.ts', './src/*/index.ts'],
-}))
-
-export default configFn
+})

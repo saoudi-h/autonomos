@@ -1,5 +1,5 @@
-import type { Config } from '@repo/eslint'
-import { base } from '@repo/eslint'
+import type { Config } from '@tala-tools/eslint'
+import { base } from '@tala-tools/eslint'
 import { defineConfig } from 'eslint/config'
 
 const config: Config[] = defineConfig([

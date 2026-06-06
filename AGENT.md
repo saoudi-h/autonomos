@@ -1,9 +1,10 @@
 ---
-name: "Autonomos"
-type: "project"
-status: "active"
-stack: ["Node.js", "TypeScript", "TurboRepo", "pnpm", "Commander.js", "Vitest", "tsdown"]
+name: 'Autonomos'
+type: 'project'
+status: 'active'
+stack: ['Node.js', 'TypeScript', 'TurboRepo', 'pnpm', 'Commander.js', 'Vitest', 'tsdown']
 ---
+
 # AGENT CONTEXT: Autonomos
 
 ## 🧠 Context & Objectives
@@ -20,17 +21,16 @@ Autonomos is a project dedicated to defining and implementing a robust, structur
 
 - **Manager:** pnpm (Workspace)
 - **Repo:** TurboRepo
-- **Build:** [tsdown](file:///home/hakim/projects/autonomos/packages/tsdown)
+- **Build:** [tsdown](https://github.com/saoudi-h/tala-tools/tree/main/packages/tsdown) (via [`@tala-tools`](https://github.com/saoudi-h/tala-tools))
 - **CLI:** Commander.js
-- **Test:** Vitest
 
 ## 📁 Key Directories
 
-| Path | Description |
-|------|-------------|
-| \`packages/core\` | Core SDK and Protocol definitions |
-| \`packages/cli\` | CLI tool implementation |
-| \`.autonomos/\` | Protocol configuration and task registry |
+| Path              | Description                              |
+| ----------------- | ---------------------------------------- |
+| \`packages/core\` | Core SDK and Protocol definitions        |
+| \`packages/cli\`  | CLI tool implementation                  |
+| \`.autonomos/\`   | Protocol configuration and task registry |
 
 ## ⚠️ Known Constraints
 

@@ -1,3 +1,3 @@
-import baseConfig from '@repo/prettier'
+import baseConfig from '@tala-tools/prettier'
 
 export default baseConfig

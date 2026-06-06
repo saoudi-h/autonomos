@@ -1,54 +1,35 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
-  "globalEnv": [],
-  "tasks": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**"
-      ]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "clean": {
-      "outputs": [],
-      "cache": false
-    },
-    "format": {
-      "dependsOn": [
-        "^format"
-      ]
-    },
-    "format:fix": {
-      "dependsOn": [
-        "^format:fix"
-      ]
-    },
-    "pre-commit": {
-      "dependsOn": [
-        "^pre-commit"
-      ]
-    },
-    "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
-    },
-    "typecheck": {
-      "dependsOn": [
-        "^typecheck"
-      ]
+    "$schema": "https://turbo.build/schema.json",
+    "ui": "tui",
+    "globalEnv": [],
+    "tasks": {
+        "build": {
+            "dependsOn": ["^build"],
+            "inputs": ["$TURBO_DEFAULT$", ".env*"],
+            "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        },
+        "clean": {
+            "outputs": [],
+            "cache": false
+        },
+        "format": {
+            "dependsOn": ["^format"]
+        },
+        "format:fix": {
+            "dependsOn": ["^format:fix"]
+        },
+        "pre-commit": {
+            "dependsOn": ["^pre-commit"]
+        },
+        "lint": {
+            "dependsOn": ["^lint"]
+        },
+        "typecheck": {
+            "dependsOn": ["^typecheck"]
+        }
     }
-  }
 }

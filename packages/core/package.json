@@ -3,7 +3,6 @@
     "version": "0.0.2",
     "description": "SDK and core definitions for the Agent Protocol",
     "type": "module",
-    "main": "./dist/index.mjs",
     "types": "./dist/index.d.mts",
     "scripts": {
         "dev": "tsdown --watch",
@@ -50,14 +49,14 @@
         "LICENSE"
     ],
     "devDependencies": {
-        "@repo/eslint": "workspace:*",
-        "@repo/prettier": "workspace:*",
-        "@repo/tsdown": "workspace:*",
         "@repo/vitest": "workspace:*",
+        "@tala-tools/eslint": "0.1.3",
+        "@tala-tools/prettier": "0.0.3",
+        "@tala-tools/tsconfig": "0.0.1",
+        "@tala-tools/tsdown": "0.1.3",
         "@types/js-yaml": "4.0.9",
         "typescript": "^5.0.0"
     },
-    "module": "./dist/index.mjs",
     "exports": {
         ".": "./dist/index.mjs",
         "./package.json": "./package.json"

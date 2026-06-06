@@ -98,18 +98,19 @@ function formatAsTree(entries: AgentEntry[], baseDir: string): string {
         const parts = entry.relativePath.split('/')
         let current = tree
 
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i]
+        for (const part of parts) {
             const isAgent = part === AGENT_FILE
 
-            if (!current.children[part]) {
-                current.children[part] = {
+            let child = current.children[part]
+            if (!child) {
+                child = {
                     name: part,
                     isAgent,
                     children: {},
                 }
+                current.children[part] = child
             }
-            current = current.children[part]
+            current = child
         }
     }
 

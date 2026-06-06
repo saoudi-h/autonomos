@@ -5,22 +5,6 @@
             "path": ".",
         },
         {
-            "name": "eslint",
-            "path": "packages/eslint",
-        },
-        {
-            "name": "tsconfig",
-            "path": "packages/tsconfig",
-        },
-        {
-            "name": "prettier",
-            "path": "packages/prettier",
-        },
-        {
-            "name": "tsdown",
-            "path": "packages/tsdown",
-        },
-        {
             "name": "vitest",
             "path": "packages/vitest",
         },
@@ -31,7 +15,7 @@
         {
             "name": "cli",
             "path": "packages/cli",
-        }
+        },
     ],
     "settings": {
         "biome.enabled": false,
@@ -52,7 +36,7 @@
             "titleBar.activeBackground": "#e4c8bb",
             "titleBar.activeForeground": "#15202b",
             "titleBar.inactiveBackground": "#e4c8bb99",
-            "titleBar.inactiveForeground": "#15202b99"
+            "titleBar.inactiveForeground": "#15202b99",
         },
         "peacock.color": "#e4c8bb",
         "cSpell.words": [
