@@ -11,6 +11,7 @@ const config: Config[] = defineConfig([
             'prettier.config.mjs',
             'lint-staged.config.mjs',
             'tsdown.config.ts',
+            'scripts/**',
         ],
     },
 ])

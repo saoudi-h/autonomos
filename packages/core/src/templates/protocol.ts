@@ -16,6 +16,7 @@ export const PROTOCOL_TEMPLATE = `# AI AGENT PROTOCOL (v${PROTOCOL_VERSION})
 | **Track Progress** | Update \`.autonomos/TASKS.md\` to \`[/]\` |
 | **Log Session** | Create \`.autonomos/worklogs/YYYY-MM-DD-[TASK_ID].md\` |
 | **Finalize Task** | Update \`.autonomos/TASKS.md\` to \`[x]\` + Link Worklog |
+| **Discover AGENT.md files** | Run \`autonomos agents\` |
 
 ---
 
@@ -87,6 +88,7 @@ Clear instructions for the next agent picking this up.
 ### C. The Context Anchor (\`AGENT.md\`)
 **Role:** Fractal knowledge base. Contains facts, stack details, and user preferences.
 **Location:** Root (\`/AGENT.md\`) and any subdirectory requiring specific context (e.g., \`/packages/core/AGENT.md\`).
+**MUST be kept alive:** you may freely add to, edit, or correct an \`AGENT.md\` at any time. No format is imposed: one line is enough if it is clear. What matters is that the next session can use it.
 
 **TEMPLATE FOR AGENT.md:**
 \`\`\`markdown
@@ -122,14 +124,16 @@ What does this specific folder/module do?
 
 ### Phase 1: Context Loading (Read-Only)
 1.  **Read Root AGENT.md:** Absorb global preferences (Commit style, package manager, strict rules).
-2.  **Read .autonomos/TASKS.md:** Identify the highest priority task (🔴 or 🟠) that is not [x] or [!].
-3.  **Read Target AGENT.md:** If the task is in a subdirectory, check for a local \`AGENT.md\`.
+2.  **Run \`autonomos agents\` to discover all other \`AGENT.md\` files in the project tree.** For each one relevant to the work ahead, read it too.
+3.  **Read .autonomos/TASKS.md:** Identify the highest priority task (🔴 or 🟠) that is not [x] or [!].
+4.  **Read Target AGENT.md:** If the task is in a subdirectory, check for a local \`AGENT.md\`.
     *   *Note:* If the local \`AGENT.md\` contradicts the root, the local one wins for that specific scope.
 
 ### Phase 2: Execution
 1.  **Mark the task as [/] (In Progress)** in \`.autonomos/TASKS.md\`.
 2.  **Perform the task.**
 3.  **Constraint Check:** Constantly refer to "Workflow & Preferences" in \`AGENT.md\`.
+4.  **In-the-moment crystallization:** Every time you learn something important (the user corrects you, you discover a convention, you make a non-trivial technical choice), write it to the relevant \`AGENT.md\` IMMEDIATELY. Do NOT defer this to end of session.
 
 ### Phase 3: Crystallization (Write-Only)
 Before ending the session, you **MUST**:
@@ -137,6 +141,7 @@ Before ending the session, you **MUST**:
 1.  **Update AGENT.md:**
     *   Did you learn a new command? Add it to ⚙️ Workflow.
     *   Did you create a new complex module (>5 files)? Create a new \`AGENT.md\` inside it using the template above.
+    *   Did anything you previously wrote turn out to be wrong? Append a correction note (do not erase).
 
 2.  **Create Worklog:**
     *   Write a file in \`.autonomos/worklogs/\` summarizing your work.
@@ -145,7 +150,19 @@ Before ending the session, you **MUST**:
     *   Mark task as [x] (Done) or [!] (Blocked).
     *   Add a link to your worklog: \`- [x] **[ID]** Title... *See: .autonomos/worklogs/...*\`
 
-## 4. METADATA RULES
+## 4. HARNESS WORKFLOWS
+
+The protocol is delivered to the agent through **workflow files** installed at the harness-specific target directory. The exact location depends on the harness (see \`autonomos init --help\`). Three workflows are available:
+
+* **\`/session\`** (\`protocol-session.md\`) — Mandatory bootstrap at the start of every session. Loads context, identifies the next task, marks it in progress.
+* **\`/task\`** (\`protocol-task.md\`) — Invoked at the start of a new task within an active session. Verifies local \`AGENT.md\`, declares a 3-5 step plan before touching code.
+* **\`/crystallize\`** (\`protocol-crystallize.md\`) — Mandatory close-out before saying "session done". Worklog + 3 crystallize questions + task status + final verification line.
+
+**You MUST invoke \`/session\` at the start of every session and \`/crystallize\` before ending it. These are not optional.** Skipping them breaks the protocol's memory loop.
+
+If the project does not yet contain these workflow files, run \`autonomos init\` (or \`autonomos init --harness <name>\` to target a specific harness).
+
+## 5. METADATA RULES
 *   **Language:** Documentation (\`AGENT.md\`, \`TASKS.md\`) must be written in **English** unless specified otherwise in User Preferences.
 *   **Tone:** Technical, concise, "Fact-based". No fluff.
 *   **Anonymity:** You are a continuous entity. Refer to previous work as "we" or "the project", not "the previous AI".

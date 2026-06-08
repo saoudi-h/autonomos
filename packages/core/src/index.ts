@@ -1,6 +1,7 @@
 // Constants
 export * from './constants'
 export * from './schemas/manifest'
+export * from './schemas/harness-codes'
 
 // Types
 export * from './types'
@@ -15,3 +16,6 @@ export * from './templates/worklog'
 // Parsers
 export * from './parsers/agent-parser'
 export * from './parsers/task-parser'
+
+// Harness codes
+export * from './harness-codes'
