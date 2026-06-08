@@ -1,6 +1,6 @@
 {
     "name": "@autonomos/cli",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "description": "CLI tool for the Autonomos Agent Protocol",
     "type": "module",
     "bin": {
@@ -53,7 +53,8 @@
     "dependencies": {
         "@autonomos/core": "workspace:*",
         "commander": "^14.0.2",
-        "picocolors": "1.1.1"
+        "picocolors": "1.1.1",
+        "@inquirer/prompts": "^7.0.0"
     },
     "devDependencies": {
         "@tala-tools/eslint": "0.1.3",

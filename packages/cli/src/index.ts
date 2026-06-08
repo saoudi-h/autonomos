@@ -8,7 +8,11 @@ import { init } from './commands/init'
 import { status } from './commands/status'
 import { update } from './commands/update'
 
-const CLI_VERSION = '0.0.1'
+// Synchronize with the package.json version at build time. The bundler
+// inlines this JSON, so the resolved value is always current.
+// eslint-disable-next-line import/no-unresolved
+import packageJson from '../package.json' with { type: 'json' }
+const CLI_VERSION: string = packageJson.version
 
 const program = new Command()
 
@@ -58,36 +62,84 @@ This command creates the following structure:
   └── ${pc.blue('worklogs/')}        # Session logs directory
   ${pc.white('AGENT.md')}             # Project context file (at root)
 
+Additionally, when one or more harnesses are selected, the protocol workflow
+files (session / task / crystallize) are installed at the harness-specific
+target directory, e.g. .clinerules/workflows/ for Cline, .claude/skills/ for
+Claude Code, .agents/skills/ for the cross-tool standard (Cursor, Codex, etc.).
+
+${pc.bold('Harness selection:')}
+  (default)     Interactive multi-select prompt at the start of init.
+  --harness     Skip the prompt and install only for the given harness id(s).
+                May be repeated, e.g. --harness cline --harness claude-code.
+  --all         Skip the prompt and install for all known harnesses.
+  --no-prompt   Same as not specifying a TTY; useful in CI/scripted contexts.
+
 ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos init')}
+  $ ${pc.cyan('autonomos init --harness cline')}
+  $ ${pc.cyan('autonomos init --harness cline --harness claude-code')}
+  $ ${pc.cyan('autonomos init --all')}
+  $ ${pc.cyan('autonomos init --dry-run')}
   $ ${pc.cyan('cd my-project && autonomos init')}
 `
     )
     .option('-n, --dry-run', 'Preview what would be created without writing files')
-    .action(opts => {
-        const result = init({ dryRun: opts.dryRun })
+    .option('--harness <name...>', 'Install workflows for the specified harness id(s); skip the prompt')
+    .option('--all', 'Install workflows for all known harnesses; skip the prompt')
+    .option('--no-prompt', 'Skip the interactive harness prompt (use with --harness or --all)')
+    .action(
+        async (opts: {
+            dryRun?: boolean
+            harness?: string[]
+            all?: boolean
+            prompt?: boolean
+        }) => {
+            try {
+                const result = await init({
+                    dryRun: opts.dryRun,
+                    harnesses: opts.harness,
+                    all: opts.all,
+                    noPrompt: opts.prompt === false,
+                })
 
-        if (!result.success) {
-            console.error(pc.red(`\n❌ ${result.message}`))
-            process.exit(1)
-        }
+                if (!result.success) {
+                    console.error(pc.red(`\n❌ ${result.message}`))
+                    process.exit(1)
+                }
 
-        if (result.dryRun) {
-            console.log(pc.cyan(`\n🔍 ${result.message} (dry-run)`))
-        } else {
-            console.log(pc.green(`\n✅ ${result.message}`))
-        }
+                if (result.dryRun) {
+                    console.log(pc.cyan(`\n🔍 ${result.message} (dry-run)`))
+                } else {
+                    console.log(pc.green(`\n✅ ${result.message}`))
+                }
 
-        if (result.created.length > 0) {
-            console.log(`\n${pc.bold(result.dryRun ? 'Would create:' : 'Created:')}`)
-            result.created.forEach(file => console.log(`  ${pc.blue('📄')} ${pc.white(file)}`))
-        }
+                if (result.created.length > 0) {
+                    console.log(`\n${pc.bold(result.dryRun ? 'Would create:' : 'Created:')}`)
+                    result.created.forEach(file =>
+                        console.log(`  ${pc.blue('📄')} ${pc.white(file)}`)
+                    )
+                }
 
-        if (result.warnings.length > 0) {
-            console.log(pc.yellow('\nWarnings:'))
-            result.warnings.forEach(warn => console.log(`  ${pc.yellow('⚠️')}  ${warn}`))
+                if (result.harnessFiles && result.harnessFiles.length > 0) {
+                    console.log(`\n${pc.bold('Harness workflow files:')}`)
+                    result.harnessFiles.forEach(file =>
+                        console.log(`  ${pc.cyan('⚙️ ')} ${pc.white(file)}`)
+                    )
+                }
+
+                if (result.warnings.length > 0) {
+                    console.log(pc.yellow('\nWarnings:'))
+                    result.warnings.forEach(warn =>
+                        console.log(`  ${pc.yellow('⚠️')}  ${warn}`)
+                    )
+                }
+            } catch (err) {
+                const message = err instanceof Error ? err.message : String(err)
+                console.error(pc.red(`\n❌ ${message}`))
+                process.exit(1)
+            }
         }
-    })
+    )
 
 program
     .command('update')
