@@ -1,0 +1,62 @@
+{
+    "$schema": "./harness-codes.schema.json",
+    "_comment": "Autonomos harness codes. Each entry tells `autonomos init` where to write the protocol workflow files. The shape is intentionally minimal: only what the installer needs. To add a new harness, add an entry here. To remove one, delete it. The schema is enforced at load time by Zod (see schemas/harness-codes.ts).",
+    "platforms": {
+        "cline": {
+            "name": "Cline",
+            "preferred": true,
+            "installer": {
+                "targetDir": ".clinerules/workflows",
+                "fileExtension": ".md",
+                "_note": "In Cline, a single .md file in .clinerules/workflows/ acts as both a workflow (auto-discovered via the frontmatter `description` field) and a slash command (invoked via /<name>)."
+            }
+        },
+        "claude-code": {
+            "name": "Claude Code",
+            "preferred": true,
+            "installer": {
+                "skillsDir": ".claude/skills",
+                "commandsDir": ".claude/commands",
+                "fileExtension": ".md"
+            }
+        },
+        "codex": {
+            "name": "Codex",
+            "preferred": true,
+            "installer": {
+                "skillsDir": ".agents/skills",
+                "fileExtension": ".md",
+                "globalTargetDir": "~/.codex/skills",
+                "_note": "OpenAI Codex. Uses the cross-tool .agents/skills/ standard."
+            }
+        },
+        "antigravity": {
+            "name": "Antigravity",
+            "preferred": true,
+            "installer": {
+                "skillsDir": ".agent/skills",
+                "fileExtension": ".md",
+                "globalTargetDir": "~/.gemini/antigravity/skills",
+                "_note": "Google Antigravity. Note the singular `.agent/` (NOT the cross-tool `.agents/` standard). Cannot be deduplicated with the others."
+            }
+        },
+        "opencode": {
+            "name": "OpenCode",
+            "preferred": true,
+            "installer": {
+                "skillsDir": ".agents/skills",
+                "commandsDir": ".opencode/commands",
+                "fileExtension": ".md"
+            }
+        },
+        "kilocode": {
+            "name": "KiloCode",
+            "preferred": true,
+            "installer": {
+                "skillsDir": ".agents/skills",
+                "fileExtension": ".md",
+                "globalTargetDir": "~/.kilocode/skills"
+            }
+        }
+    }
+}
