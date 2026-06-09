@@ -16,7 +16,8 @@ export const PROTOCOL_TEMPLATE = `# AI AGENT PROTOCOL (v${PROTOCOL_VERSION})
 | **Track Progress** | Update \`.autonomos/TASKS.md\` to \`[/]\` |
 | **Log Session** | Create \`.autonomos/worklogs/YYYY-MM-DD-[TASK_ID].md\` |
 | **Finalize Task** | Update \`.autonomos/TASKS.md\` to \`[x]\` + Link Worklog |
-| **Discover AGENT.md files** | Run \`autonomos agents\` |
+| **Discover all AGENT.md files** | Run \`autonomos agents\` |
+| **Discover AGENT.md ancestors for a path** | Run \`autonomos agents <path>\` |
 
 ---
 

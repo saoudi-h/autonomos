@@ -29,7 +29,7 @@ Mark the task `[/]` in TASKS.md, then execute your plan.
 ## DURING EXECUTION — three reminders
 
 - **REMINDER 1:** For every non-trivial decision, consult the relevant AGENT.md.
-- **REMINDER 2:** For every new learning, write it immediately to an AGENT.md. Never say "I will note it later".
+- **REMINDER 2:** For every new learning, append a new line to an AGENT.md. If the new learning contradicts an existing one, replace the old entry in place and log the change in the worklog. AGENT.md stays a sharp current-state document, not a log.
 - **REMINDER 3:** You may edit any AGENT.md at any time. No format is imposed. What matters is that the next session can use it.
 
 ## END OF TASK

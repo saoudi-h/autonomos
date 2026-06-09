@@ -29,7 +29,7 @@ Ask yourself these three questions. For each, you MUST answer honestly. Do NOT s
 
 If the answer is not `nothing`, write it to the relevant AGENT.md (root or subfolder). No format is imposed. One line is enough if it is clear.
 
-**Question 2:** `Is any AGENT.md now obsolete or misleading?` If yes, add an update note (do not rewrite). Append-only: you add, you do not erase.
+**Question 2:** `Has any AGENT.md entry been contradicted or superseded?` If yes, update the relevant AGENT.md entry **in place** — the file is a current-state document, not a changelog. Then record the change in the worklog of this session (e.g. `PREF-007: GSAP → Motion, superseded by PREF-009`). Do NOT append superseded entries to AGENT.md; do NOT keep both.
 
 **Question 3:** `Is there something in the worklog that should have been in an AGENT.md and is not yet?` If yes, lift it out of the worklog and put it in the AGENT.md.
 
