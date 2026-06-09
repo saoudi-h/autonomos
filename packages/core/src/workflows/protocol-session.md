@@ -17,7 +17,7 @@ DO NOT skip steps. DO NOT begin work before Step 3 is complete.
 ## STEP 1 — Load context (three mandatory reads)
 
 1. Read the root `AGENT.md`. This is your project identity.
-2. Run the command `autonomos agents` to discover all other `AGENT.md` files in the project tree. For each one relevant to the work ahead, read it too.
+2. Run `autonomos agents` (no argument) to get the **full tree of all AGENT.md files in the project**. Read each one. This is your full fractal context — it lets you discover shared packages, cross-cutting conventions, and traps before starting any work.
 3. Read the most recent file in `.autonomos/worklogs/`. This is the memory of the previous session — read it to avoid repeating the same mistakes.
 
 RESPOND to the user with a 5-line maximum summary of what you have retained. You are FORBIDDEN to continue without this response.

@@ -12,10 +12,11 @@ description: 'Mandatory procedure for starting a new task within an active sessi
 
 You are about to begin a new task. DO NOT touch code before the end of Step 2.
 
-## STEP 1 — Verify local context
+## STEP 1 — Build the precise fractal context for this task
 
-1. If the task targets a subdirectory, check for an `AGENT.md` in that subdirectory or its parents. If present, read it.
-2. If no local `AGENT.md` exists AND you have worked in that folder multiple times before, propose to the user: `This folder has no AGENT.md yet. Should we create one to crystallize the conventions we have established here?`
+1. Run `autonomos agents <path-to-target-file-or-folder>` to get the **ordered list of ancestor AGENT.md files** for the file or folder you'll be working in. The output is root-first; non-existent ancestors are silently skipped.
+2. Read each returned AGENT.md **in order** (root → target). This is your precise fractal context for this task.
+3. If no local `AGENT.md` exists at the target AND you have worked in that folder multiple times before, propose to the user: `This folder has no AGENT.md yet. Should we create one to crystallize the conventions we have established here?`
 
 ## STEP 2 — Declare the plan
 
