@@ -10,7 +10,7 @@ import { update } from './commands/update'
 
 // Synchronize with the package.json version at build time. The bundler
 // inlines this JSON, so the resolved value is always current.
-// eslint-disable-next-line import/no-unresolved
+// (package.json import — inlined by the bundler)
 import packageJson from '../package.json' with { type: 'json' }
 const CLI_VERSION: string = packageJson.version
 
@@ -84,16 +84,14 @@ ${pc.bold('Examples:')}
 `
     )
     .option('-n, --dry-run', 'Preview what would be created without writing files')
-    .option('--harness <name...>', 'Install workflows for the specified harness id(s); skip the prompt')
+    .option(
+        '--harness <name...>',
+        'Install workflows for the specified harness id(s); skip the prompt'
+    )
     .option('--all', 'Install workflows for all known harnesses; skip the prompt')
     .option('--no-prompt', 'Skip the interactive harness prompt (use with --harness or --all)')
     .action(
-        async (opts: {
-            dryRun?: boolean
-            harness?: string[]
-            all?: boolean
-            prompt?: boolean
-        }) => {
+        async (opts: { dryRun?: boolean; harness?: string[]; all?: boolean; prompt?: boolean }) => {
             try {
                 const result = await init({
                     dryRun: opts.dryRun,
@@ -129,9 +127,7 @@ ${pc.bold('Examples:')}
 
                 if (result.warnings.length > 0) {
                     console.log(pc.yellow('\nWarnings:'))
-                    result.warnings.forEach(warn =>
-                        console.log(`  ${pc.yellow('⚠️')}  ${warn}`)
-                    )
+                    result.warnings.forEach(warn => console.log(`  ${pc.yellow('⚠️')}  ${warn}`))
                 }
             } catch (err) {
                 const message = err instanceof Error ? err.message : String(err)
@@ -215,34 +211,57 @@ ${pc.bold('Examples:')}
 
 program
     .command('agents')
-    .description('List all AGENT.md files in the project')
-    .option('-a, --all', 'Search from project root instead of current directory')
+    .description('List all AGENT.md files in the project, or the ancestor chain for a path')
+    .argument(
+        '[path]',
+        'Optional file or folder. When provided, return the ordered list of ancestor AGENT.md files (root -> target) instead of the full tree.'
+    )
+    .option('-a, --all', 'In tree mode: search from project root instead of current directory')
     .addHelpText(
         'after',
         `
-This command discovers and displays all ${pc.white('AGENT.md')} files in a tree structure.
-${pc.white('AGENT.md')} files provide context to AI agents about specific directories.
+This command has two modes:
 
-${pc.bold('Modes:')}
-  (default)   Search from current directory downwards
-  --all       Search from project root (finds .autonomos or .git)
+${pc.bold('Tree mode')} (default, or with ${pc.cyan('--all')}):
+  Discover and display all ${pc.white('AGENT.md')} files in a tree structure.
+  Used at session start to get the broader fractal picture of the project.
+
+${pc.bold('Ancestors mode')} (with a positional ${pc.cyan('<path>')} argument):
+  Return the ordered list of ${pc.white('AGENT.md')} files on the path from the
+  target up to the project root. Root-first; non-existent ancestors are
+  silently skipped. Used at task start to get the precise fractal context
+  for the file or folder being worked on.
 
 ${pc.bold('Examples:')}
-  $ ${pc.cyan('autonomos agents')}           # List from current directory
-  $ ${pc.cyan('autonomos agents --all')}     # List from project root
-  $ ${pc.cyan('cd packages/core && autonomos agents')}  # List only in packages/core
+  $ ${pc.cyan('autonomos agents')}                                    # Tree, from current dir
+  $ ${pc.cyan('autonomos agents --all')}                              # Tree, from project root
+  $ ${pc.cyan('autonomos agents apps/web')}                           # Ancestors for apps/web
+  $ ${pc.cyan('autonomos agents apps/web/components/ui/button.tsx')}  # Ancestors for a file
 `
     )
-    .action(opts => {
-        const result = agents({ all: opts.all })
+    .action((path: string | undefined, opts: { all?: boolean }) => {
+        const result = agents({ all: opts.all, target: path })
 
         if (!result.success) {
-            console.error(pc.red(`\n❌ ${result.message}`))
+            console.error(
+                pc.red(`
+❌ ${result.message}`)
+            )
             process.exit(1)
         }
 
-        console.log('\n' + (result.tree ?? result.message))
-        console.log(pc.dim(`\n${result.message}`))
+        if (result.mode === 'ancestors') {
+            console.log(
+                pc.cyan(`
+🔍 ${result.message}`)
+            )
+        } else {
+            console.log('\n' + (result.tree ?? result.message))
+            console.log(
+                pc.dim(`
+${result.message}`)
+            )
+        }
     })
 
 program

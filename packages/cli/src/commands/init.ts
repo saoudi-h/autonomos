@@ -22,7 +22,7 @@ import {
 
 // Synchronize with the package.json version at build time. The bundler
 // inlines this JSON, so the resolved value is always current.
-// eslint-disable-next-line import/no-unresolved
+// (package.json import — inlined by the bundler)
 import packageJson from '../../package.json' with { type: 'json' }
 const CLI_VERSION: string = packageJson.version
 
@@ -83,7 +83,8 @@ function getWorkflowsDir(): string {
 async function promptForHarnesses(): Promise<string[]> {
     const harnesses = listHarnesses()
     return checkbox({
-        message: 'Which AI harnesses do you want to install the protocol for? (space to toggle, enter to confirm)',
+        message:
+            'Which AI harnesses do you want to install the protocol for? (space to toggle, enter to confirm)',
         choices: harnesses.map(({ id, harness }) => ({
             name: harness.name,
             value: id,
