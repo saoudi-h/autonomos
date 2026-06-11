@@ -35,6 +35,9 @@ interface InitOptions {
     all?: boolean
     /** Skip the interactive prompt even when no harnesses are specified. */
     noPrompt?: boolean
+    /** When true, skip installing @autonomos/cli devDependency.
+     *  The npm script will use npx instead. */
+    noInstall?: boolean
 }
 
 interface InitResult {
@@ -215,18 +218,32 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
             const hadScript = !!pkg.scripts?.['autonomos']
 
             if (!pkg.scripts) pkg.scripts = {}
-            pkg.scripts['autonomos'] = 'npx --yes @autonomos/cli'
 
-            if (!pkg.devDependencies) pkg.devDependencies = {}
-            pkg.devDependencies['@autonomos/cli'] = `^${CLI_VERSION}`
+            if (options.noInstall || options.dryRun) {
+                // Mode B: npx only, no devDependency
+                pkg.scripts['autonomos'] = 'npx --yes @autonomos/cli'
+                writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 4) + '\n')
+                created.push('package.json (scripts.autonomos via npx)')
+                if (!hadScript) {
+                    warnings.push(
+                        'Added "autonomos" npm script using npx (--no-install mode). Run `npm install` when ready.'
+                    )
+                }
+            } else {
+                // Mode A (default): install as devDependency
+                pkg.scripts['autonomos'] = 'autonomos'
 
-            writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 4) + '\n')
-            created.push('package.json (scripts.autonomos + devDependencies.@autonomos/cli)')
+                if (!pkg.devDependencies) pkg.devDependencies = {}
+                pkg.devDependencies['@autonomos/cli'] = `^${CLI_VERSION}`
 
-            if (!hadScript) {
-                warnings.push(
-                    'Added "autonomos" npm script and @autonomos/cli devDependency. Run `npm install` to install.'
-                )
+                writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 4) + '\n')
+                created.push('package.json (scripts.autonomos + devDependencies.@autonomos/cli)')
+
+                if (!hadScript) {
+                    warnings.push(
+                        'Added "autonomos" npm script and @autonomos/cli devDependency. Run `npm install` to install.'
+                    )
+                }
             }
         } catch {
             warnings.push('Could not update package.json (invalid JSON or read error).')

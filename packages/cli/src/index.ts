@@ -90,14 +90,22 @@ ${pc.bold('Examples:')}
     )
     .option('--all', 'Install workflows for all known harnesses; skip the prompt')
     .option('--no-prompt', 'Skip the interactive harness prompt (use with --harness or --all)')
+    .option('--no-install', 'Skip installing @autonomos/cli as devDependency; use npx instead')
     .action(
-        async (opts: { dryRun?: boolean; harness?: string[]; all?: boolean; prompt?: boolean }) => {
+        async (opts: {
+            dryRun?: boolean
+            harness?: string[]
+            all?: boolean
+            prompt?: boolean
+            install?: boolean
+        }) => {
             try {
                 const result = await init({
                     dryRun: opts.dryRun,
                     harnesses: opts.harness,
                     all: opts.all,
                     noPrompt: opts.prompt === false,
+                    noInstall: opts.install === false,
                 })
 
                 if (!result.success) {
