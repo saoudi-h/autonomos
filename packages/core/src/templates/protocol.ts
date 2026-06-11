@@ -89,7 +89,8 @@ Clear instructions for the next agent picking this up.
 ### C. The Context Anchor (\`AGENT.md\`)
 **Role:** Fractal knowledge base. Contains facts, stack details, and user preferences.
 **Location:** Root (\`/AGENT.md\`) and any subdirectory requiring specific context (e.g., \`/packages/core/AGENT.md\`).
-**MUST be kept alive:** you may freely add to, edit, or correct an \`AGENT.md\` at any time. No format is imposed: one line is enough if it is clear. What matters is that the next session can use it.
+**MUST be kept alive:** you may freely add to, edit, or correct an \`AGENT.md\` at any time.
+**Format rule:** The root \`AGENT.md\` MUST follow the template below. For local \`AGENT.md\` files (in subfolders) and for subsequent updates to an existing \`AGENT.md\` (adding a new line, correcting a note), free format is fine — one line is enough if it is clear. What matters is that the next session can use it.
 
 **TEMPLATE FOR AGENT.md:**
 \`\`\`markdown

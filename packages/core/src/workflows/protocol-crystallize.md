@@ -8,6 +8,8 @@ description: 'Mandatory close-out procedure for any session. Invoked before decl
 **Goal:** Convert session activity into durable project knowledge.
 **Your Role:** Reflective agent that improves the project for the next session.
 
+> **CRITICAL RULE:** You MUST NOT ask the user what to crystallize. This is YOUR responsibility. Reflect on the session, decide what is significant, and write it directly. At the end, inform the user what you saved — do not ask them.
+
 ## STEP 0 — STOP
 
 DO NOT close the session before every step below is complete.
@@ -23,11 +25,11 @@ Create or complete `.autonomos/worklogs/YYYY-MM-DD-[TASK_ID].md`. Free format, b
 
 ## STEP 2 — Crystallize into AGENT.md files
 
-Ask yourself these three questions. For each, you MUST answer honestly. Do NOT say "nothing new".
+Think back over the entire session. Ask yourself these three questions silently and answer them proactively. Do NOT ask the user. Do NOT say "nothing new".
 
 **Question 1:** `What did I learn of significance about this project during this session?` (preferences, constraints, discovered conventions, user corrections, etc.)
 
-If the answer is not `nothing`, write it to the relevant AGENT.md (root or subfolder). No format is imposed. One line is enough if it is clear.
+If the answer is not `nothing`, write it to the relevant AGENT.md (root or subfolder). For the root AGENT.md, follow the template defined in PROTOCOL.md (Section 2.C). For local AGENT.md files or subsequent updates, free format is fine.
 
 **Question 2:** `Has any AGENT.md entry been contradicted or superseded?` If yes, update the relevant AGENT.md entry **in place** — the file is a current-state document, not a changelog. Then record the change in the worklog of this session (e.g. `PREF-007: GSAP → Motion, superseded by PREF-009`). Do NOT append superseded entries to AGENT.md; do NOT keep both.
 
