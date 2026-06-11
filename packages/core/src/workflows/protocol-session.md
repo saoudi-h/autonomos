@@ -17,8 +17,13 @@ DO NOT skip steps. DO NOT begin work before Step 3 is complete.
 ## STEP 1 — Load context (three mandatory reads)
 
 1. Read the root `AGENT.md`. This is your project identity.
-2. Run `autonomos agents` (no argument) to get the **full tree of all AGENT.md files in the project**. Read each one. This is your full fractal context — it lets you discover shared packages, cross-cutting conventions, and traps before starting any work.
-    > **Fallback:** If `autonomos agents` is not available or fails, run `find . -name AGENT.md -not -path '*/node_modules/*' -not -path '*/.autonomos/*'` and read them root-first (root `AGENT.md` first, then deeper ones).
+2. Load the **full tree of all AGENT.md files in the project** using the project's registered `autonomos` command:
+    - **Method 1 (preferred):** If the project has an npm script `autonomos`, run `npm run autonomos -- agents`
+    - **Method 2 (fallback):** Otherwise run `npx --yes @autonomos/cli agents`
+    - **Method 3 (last resort):** If neither is available, run `find . -name AGENT.md -not -path '*/node_modules/*' -not -path '*/.autonomos/*'` and read them root-first
+
+    Read each AGENT.md you discover. This is your full fractal context — it lets you discover shared packages, cross-cutting conventions, and traps before starting any work.
+
 3. Read the most recent file in `.autonomos/worklogs/`. This is the memory of the previous session — read it to avoid repeating the same mistakes.
 
 RESPOND to the user with a 5-line maximum summary of what you have retained. You are FORBIDDEN to continue without this response.

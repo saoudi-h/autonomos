@@ -14,8 +14,10 @@ You are about to begin a new task. DO NOT touch code before the end of Step 2.
 
 ## STEP 1 — Build the precise fractal context for this task
 
-1. Run `autonomos agents <path-to-target-file-or-folder>` to get the **ordered list of ancestor AGENT.md files** for the file or folder you'll be working in. The output is root-first; non-existent ancestors are silently skipped.
-    > **Fallback:** If `autonomos agents` is not available or fails, manually walk from the target directory up to the project root and read each `AGENT.md` you find along the way (root → target).
+1. Get the **ordered list of ancestor AGENT.md files** for the file or folder you'll be working in. The output is root-first; non-existent ancestors are silently skipped:
+    - **Method 1 (preferred):** If the project has an npm script `autonomos`, run `npm run autonomos -- agents <path>`
+    - **Method 2 (fallback):** Otherwise run `npx --yes @autonomos/cli agents <path>`
+    - **Method 3 (last resort):** If neither is available, manually walk from the target directory up to the project root and read each `AGENT.md` you find (root → target).
 2. Read each returned AGENT.md **in order** (root → target). This is your precise fractal context for this task.
 3. If no local `AGENT.md` exists at the target AND you have worked in that folder multiple times before, propose to the user: `This folder has no AGENT.md yet. Should we create one to crystallize the conventions we have established here?`
 

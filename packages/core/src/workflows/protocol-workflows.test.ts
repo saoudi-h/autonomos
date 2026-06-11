@@ -71,16 +71,28 @@ describe('session.md — no duplicated close-out logic', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 4. CLI fallback in all workflow files
+// 4. CLI strategy in all workflow files (npm run → npx → find)
 // ---------------------------------------------------------------------------
-describe('CLI fallback — all workflow files', () => {
-    it('session.md has a fallback for `autonomos agents`', () => {
-        expect(session).toContain('Fallback')
-        expect(session).toContain('find')
+describe('CLI strategy — all workflow files', () => {
+    it('session.md has the 3-tier CLI strategy', () => {
+        expect(session).toContain('Method 1 (preferred)')
+        expect(session).toContain('Method 2 (fallback)')
+        expect(session).toContain('Method 3 (last resort)')
     })
 
-    it('task.md has a fallback for `autonomos agents`', () => {
-        expect(task).toContain('Fallback')
+    it('session.md includes npx --yes and find fallbacks', () => {
+        expect(session).toContain('npx --yes')
+        expect(session).toContain('find . -name AGENT.md')
+    })
+
+    it('task.md has the 3-tier CLI strategy', () => {
+        expect(task).toContain('Method 1 (preferred)')
+        expect(task).toContain('Method 2 (fallback)')
+        expect(task).toContain('Method 3 (last resort)')
+    })
+
+    it('task.md includes npx --yes fallback', () => {
+        expect(task).toContain('npx --yes')
     })
 })
 

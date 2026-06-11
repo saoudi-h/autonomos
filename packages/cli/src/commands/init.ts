@@ -1,5 +1,5 @@
 import { checkbox } from '@inquirer/prompts'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -103,6 +103,10 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
     const warnings: string[] = []
     const harnessFiles: string[] = []
 
+    // Detect package.json for npm script registration
+    const packageJsonPath = join(cwd, 'package.json')
+    const hasPackageJson = existsSync(packageJsonPath) && statSync(packageJsonPath).isFile()
+
     // Check for .git
     const gitDir = join(cwd, '.git')
     if (!existsSync(gitDir)) {
@@ -201,6 +205,32 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
         created.push(AGENT_FILE)
     } else {
         warnings.push(`${AGENT_FILE} already exists, skipping.`)
+    }
+
+    // Register npm script "autonomos" if package.json exists
+    if (hasPackageJson) {
+        try {
+            const pkgRaw = readFileSync(packageJsonPath, 'utf-8')
+            const pkg = JSON.parse(pkgRaw)
+            const hadScript = !!pkg.scripts?.['autonomos']
+
+            if (!pkg.scripts) pkg.scripts = {}
+            pkg.scripts['autonomos'] = 'npx --yes @autonomos/cli'
+
+            if (!pkg.devDependencies) pkg.devDependencies = {}
+            pkg.devDependencies['@autonomos/cli'] = `^${CLI_VERSION}`
+
+            writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 4) + '\n')
+            created.push('package.json (scripts.autonomos + devDependencies.@autonomos/cli)')
+
+            if (!hadScript) {
+                warnings.push(
+                    'Added "autonomos" npm script and @autonomos/cli devDependency. Run `npm install` to install.'
+                )
+            }
+        } catch {
+            warnings.push('Could not update package.json (invalid JSON or read error).')
+        }
     }
 
     // Install workflow files for each selected harness
