@@ -6,7 +6,7 @@
             "name": "Cline",
             "preferred": true,
             "installer": {
-                "targetDir": ".clinerules/workflows",
+                "workflowsDir": ".clinerules/workflows",
                 "fileExtension": ".md",
                 "_note": "In Cline, a single .md file in .clinerules/workflows/ acts as both a workflow (auto-discovered via the frontmatter `description` field) and a slash command (invoked via /<name>)."
             }
@@ -15,7 +15,7 @@
             "name": "Claude Code",
             "preferred": true,
             "installer": {
-                "skillsDir": ".claude/skills",
+                "workflowsDir": ".claude/skills",
                 "commandsDir": ".claude/commands",
                 "fileExtension": ".md"
             }
@@ -24,7 +24,7 @@
             "name": "Codex",
             "preferred": true,
             "installer": {
-                "skillsDir": ".agents/skills",
+                "workflowsDir": ".agents/skills",
                 "fileExtension": ".md",
                 "globalTargetDir": "~/.codex/skills",
                 "_note": "OpenAI Codex. Uses the cross-tool .agents/skills/ standard."
@@ -34,17 +34,17 @@
             "name": "Antigravity",
             "preferred": true,
             "installer": {
-                "skillsDir": ".agent/skills",
+                "workflowsDir": ".agent/workflows",
                 "fileExtension": ".md",
                 "globalTargetDir": "~/.gemini/antigravity/skills",
-                "_note": "Google Antigravity. Note the singular `.agent/` (NOT the cross-tool `.agents/` standard). Cannot be deduplicated with the others."
+                "_note": "Google Antigravity. Uses `.agent/workflows/` (not `.agent/skills/`). Singular `.agent/` (NOT the cross-tool `.agents/` standard). Cannot be deduplicated with the others."
             }
         },
         "opencode": {
             "name": "OpenCode",
             "preferred": true,
             "installer": {
-                "skillsDir": ".agents/skills",
+                "workflowsDir": ".agents/skills",
                 "commandsDir": ".opencode/commands",
                 "fileExtension": ".md"
             }
@@ -53,7 +53,7 @@
             "name": "KiloCode",
             "preferred": true,
             "installer": {
-                "skillsDir": ".agents/skills",
+                "workflowsDir": ".agents/skills",
                 "fileExtension": ".md",
                 "globalTargetDir": "~/.kilocode/skills"
             }

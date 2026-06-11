@@ -3,22 +3,30 @@ import { z } from 'zod'
 /**
  * Installer configuration for a single harness.
  *
- * Either `targetDir` (single directory for both skills and commands, used by
- * Cline) or `skillsDir` (split mode, used by Claude Code, Codex, etc.) must be
- * defined. `commandsDir` is optional in split mode (some harnesses only support
- * skills, e.g. Codex).
+ * At least one of `workflowsDir`, `targetDir`, or `skillsDir` must be defined.
+ *
+ * - `workflowsDir`: Where session.md, task.md, crystallize.md are written.
+ *    Preferred field — used by most harnesses.
+ * - `targetDir`: Single directory (legacy, like Cline's .clinerules/workflows/).
+ * - `skillsDir`: Skills directory (legacy, for harnesses that don't distinguish
+ *    skills from workflows).
+ * - `commandsDir`: Additional commands directory (optional).
  */
 export const InstallerSchema = z
     .object({
+        workflowsDir: z.string().optional(),
         targetDir: z.string().optional(),
         skillsDir: z.string().optional(),
         commandsDir: z.string().optional(),
         globalTargetDir: z.string().optional(),
         fileExtension: z.string(),
     })
-    .refine(data => Boolean(data.targetDir) || Boolean(data.skillsDir), {
-        message: 'Either `targetDir` or `skillsDir` must be defined for each harness',
-    })
+    .refine(
+        data => Boolean(data.workflowsDir) || Boolean(data.targetDir) || Boolean(data.skillsDir),
+        {
+            message: 'At least one of `workflowsDir`, `targetDir`, or `skillsDir` must be defined',
+        }
+    )
 
 /**
  * A single harness entry.

@@ -34,7 +34,7 @@ describe('harness-codes loader', () => {
         it('returns the entry for a known id', () => {
             const h = getHarness('cline')
             expect(h.name).toBe('Cline')
-            expect(h.installer.targetDir).toBe('.clinerules/workflows')
+            expect(h.installer.workflowsDir).toBe('.clinerules/workflows')
             expect(h.installer.fileExtension).toBe('.md')
         })
 
@@ -87,7 +87,7 @@ describe('harness-codes loader', () => {
 
         it('keeps Antigravity (singular .agent/) separate from the cross-tool standard', () => {
             const targets = resolveTargets(['antigravity', 'codex'], '/proj')
-            expect(targets.find(t => t.path === '/proj/.agent/skills')).toBeDefined()
+            expect(targets.find(t => t.path === '/proj/.agent/workflows')).toBeDefined()
             expect(targets.find(t => t.path === '/proj/.agents/skills')).toBeDefined()
         })
 

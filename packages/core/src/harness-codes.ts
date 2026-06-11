@@ -81,10 +81,11 @@ function collectFromInstaller(
     cwd: string
 ): void {
     const ext = installer.fileExtension
-    if (installer.targetDir) {
+    if (installer.workflowsDir) {
+        addTarget(map, joinPath(cwd, installer.workflowsDir), ext, harnessId)
+    } else if (installer.targetDir) {
         addTarget(map, joinPath(cwd, installer.targetDir), ext, harnessId)
-    }
-    if (installer.skillsDir) {
+    } else if (installer.skillsDir) {
         addTarget(map, joinPath(cwd, installer.skillsDir), ext, harnessId)
     }
     if (installer.commandsDir) {
