@@ -1,5 +1,20 @@
 # @autonomos/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- [`55ddd2a`](https://github.com/saoudi-h/autonomos/commit/55ddd2a787b93c7275e6da2f734f33d8fbef34b0) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Refactor Agent Protocol to version 0.3.0-alpha.
+    - Eliminate duplication in PROTOCOL.md template (making it a reference doc).
+    - Shorten workflows (session, task, crystallize) to under 30 lines.
+    - Improve the update command to automatically update workflow files in active harnesses.
+    - Allow safe initialization of workflows in already-initialized projects.
+
+### Patch Changes
+
+- Updated dependencies [[`55ddd2a`](https://github.com/saoudi-h/autonomos/commit/55ddd2a787b93c7275e6da2f734f33d8fbef34b0)]:
+    - @autonomos/core@0.3.0
+
 ## 0.0.3
 
 ### Patch Changes
