@@ -3,6 +3,7 @@ name: 'Autonomos'
 type: 'project'
 status: 'active'
 stack: ['Node.js', 'TypeScript', 'TurboRepo', 'pnpm', 'Commander.js', 'Vitest', 'tsdown']
+protocol: '0.3.0-alpha'
 ---
 
 # AGENT CONTEXT: Autonomos
@@ -28,11 +29,13 @@ Autonomos is a project dedicated to defining and implementing a robust, structur
 
 | Path              | Description                              |
 | ----------------- | ---------------------------------------- |
-| \`packages/core\` | Core SDK and Protocol definitions        |
-| \`packages/cli\`  | CLI tool implementation                  |
-| \`.autonomos/\`   | Protocol configuration and task registry |
+| `packages/core`   | Core SDK and Protocol definitions        |
+| `packages/cli`    | CLI tool implementation                  |
+| `.autonomos/`     | Protocol configuration and task registry |
 
 ## ⚠️ Known Constraints
 
-- Project is in early alpha stage (v0.1.0-alpha).
-- CLI commands require the protocol structure to be initialized via \`autonomos init\`.
+- Project is in early alpha stage (v0.3.0-alpha).
+- CLI commands require the protocol structure to be initialized via `autonomos init`.
+- v0.3 design: PROTOCOL.md is a read-only reference. Workflows (session/task/crystallize) are the executable contract.
+- Workflow `.md` files must stay ≤35 lines (enforced by tests) to fit in LLM working memory.

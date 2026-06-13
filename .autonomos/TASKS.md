@@ -30,6 +30,7 @@
 - [x] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
 - [x] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
 - [x] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
+- [x] **[PROTO-04]** Protocol v0.3 refactoring: shorten workflows, remove duplication, fix paths `Priority: 🔴` `Complexity: L` *See: .autonomos/worklogs/2026-06-13-PROTO-04-v03-refactoring.md*
 
 ### Testing & Quality
 

@@ -1,40 +1,31 @@
 ---
 name: protocol-task
-description: 'Mandatory procedure for starting a new task within an active session. Invoked at task start, before any code is touched.'
+description: 'Mandatory procedure before starting a new task. Invoke before touching code.'
 ---
 
-# Protocol Task
+# /task — Begin a task
 
-**Goal:** Confirm context, declare intent, and avoid scope drift.
-**Your Role:** Disciplined agent that respects local conventions.
+**Do NOT touch code before Step 2 is done.**
 
-## STEP 0 — STOP
+## STEP 1 — Build fractal context
 
-You are about to begin a new task. DO NOT touch code before the end of Step 2.
+1. From the target file/folder, walk up to the project root. Read every `AGENT.md` you find on that path (root → target).
+2. If no local `AGENT.md` exists at the target and you have worked in that folder before, propose creating one.
 
-## STEP 1 — Build the precise fractal context for this task
+## STEP 2 — Declare plan
 
-1. Get the **ordered list of ancestor AGENT.md files** for the file or folder you'll be working in. The output is root-first; non-existent ancestors are silently skipped:
-    - **Method 1 (preferred):** If the project has an npm script `autonomos`, run `npm run autonomos -- agents <path>`
-    - **Method 2 (fallback):** Otherwise run `npx --yes @autonomos/cli agents <path>`
-    - **Method 3 (last resort):** If neither is available, manually walk from the target directory up to the project root and read each `AGENT.md` you find (root → target).
-2. Read each returned AGENT.md **in order** (root → target). This is your precise fractal context for this task.
-3. If no local `AGENT.md` exists at the target AND you have worked in that folder multiple times before, propose to the user: `This folder has no AGENT.md yet. Should we create one to crystallize the conventions we have established here?`
-
-## STEP 2 — Declare the plan
-
-State in 3 to 5 steps what you intend to do for this task. No more. The user must be able to say `OK` or adjust before you begin.
+State in 3–5 steps what you will do. The user must be able to say OK or adjust.
 
 ## STEP 3 — Execute
 
-Mark the task `[/]` in TASKS.md, then execute your plan.
+Mark the task `[/]` in `.autonomos/TASKS.md`, then work.
 
-## DURING EXECUTION — three reminders
+## During execution
 
-- **REMINDER 1:** For every non-trivial decision, consult the relevant AGENT.md.
-- **REMINDER 2:** For every new learning, append a new line to an AGENT.md. If the new learning contradicts an existing one, replace the old entry in place and log the change in the worklog. AGENT.md stays a sharp current-state document, not a log.
-- **REMINDER 3:** For the root `AGENT.md`, follow the template defined in `PROTOCOL.md` (Section 2.C). For local `AGENT.md` files (subfolders) or subsequent updates, free format is fine — one line is enough if it is clear. What matters is that the next session can use it.
+1. **Before every non-trivial decision:** consult the relevant AGENT.md.
+2. **Every new learning:** append to an AGENT.md immediately. If it contradicts an existing entry, replace in place and note the change in the worklog.
+3. **Root AGENT.md** uses the structured template. **Local AGENT.md** files are free format — one line is enough.
 
-## END OF TASK
+## End of task
 
-When the task is complete, mark it `[x]` in TASKS.md and invoke the `protocol-crystallize` workflow.
+Mark `[x]` in TASKS.md. Invoke `/crystallize`.

@@ -1,50 +1,32 @@
 ---
 name: protocol-session
-description: 'Mandatory bootstrap for any new session on a project following the Autonomos protocol. Invoked at the start of every session, before any work begins.'
+description: 'Mandatory bootstrap for any new session. Invoke before any work begins.'
 ---
 
-# Protocol Session
+# /session — Start
 
-**Goal:** Load all project context, identify the next task, and establish a clean working state.
-**Your Role:** Disciplined agent that respects the project's accumulated knowledge.
+**You MUST complete Steps 1–3 before writing any code.**
 
-## STEP 0 — STOP
+## STEP 1 — Load context
 
-You are starting a new session. You MUST complete Steps 1, 2, and 3 before any other action.
+1. Run `find . -name AGENT.md -not -path '*/node_modules/*'` and read every file found, root-first.
+2. Read the most recent file in `.autonomos/worklogs/` (if any).
+3. Read `.autonomos/TASKS.md`.
 
-DO NOT skip steps. DO NOT begin work before Step 3 is complete.
+RESPOND with a **3-line max** summary of what you retained. Do not continue without this response.
 
-## STEP 1 — Load context (three mandatory reads)
+## STEP 2 — Select task
 
-1. Read the root `AGENT.md`. This is your project identity.
-2. Load the **full tree of all AGENT.md files in the project** using the project's registered `autonomos` command:
-    - **Method 1 (preferred):** If the project has an npm script `autonomos`, run `npm run autonomos -- agents`
-    - **Method 2 (fallback):** Otherwise run `npx --yes @autonomos/cli agents`
-    - **Method 3 (last resort):** If neither is available, run `find . -name AGENT.md -not -path '*/node_modules/*' -not -path '*/.autonomos/*'` and read them root-first
+Pick the highest-priority task not marked `[x]` or `[!]`. If none, ask the user.
 
-    Read each AGENT.md you discover. This is your full fractal context — it lets you discover shared packages, cross-cutting conventions, and traps before starting any work.
+RESPOND: `Task: [ID] — [title]. Starting.`
 
-3. Read the most recent file in `.autonomos/worklogs/`. This is the memory of the previous session — read it to avoid repeating the same mistakes.
+## STEP 3 — Mark and begin
 
-RESPOND to the user with a 5-line maximum summary of what you have retained. You are FORBIDDEN to continue without this response.
+Set the task to `[/]` in `.autonomos/TASKS.md`. Now you may work.
 
-## STEP 2 — Identify the next task
+## Session rules (apply until session ends)
 
-Open `.autonomos/TASKS.md`. Identify the highest-priority task that is not yet `[x]`. If none qualify, ask the user what to work on.
-
-RESPOND with: `Task selected: [ID] — [title]. Starting.`
-
-## STEP 3 — Mark the task and begin
-
-- Edit `.autonomos/TASKS.md` to change this task's status from `[ ]` to `[/]`.
-- NOW you may begin working.
-
-## REMINDER — applies to the entire session
-
-- **RAPPEL 1:** For every non-trivial decision (library choice, naming, structure, framework), STOP and ask: "Does an AGENT.md say something about this?" If yes, apply it. If no, propose the decision to the user.
-- **RAPPEL 2:** Every time you learn something important (the user corrects you, you discover a convention, you make a technical choice), STOP. Write it immediately to an AGENT.md (root or subfolder, depending on scope). Do NOT say "I'll note it later". It is NOW.
-- **RAPPEL 3:** For the root `AGENT.md`, follow the template defined in `PROTOCOL.md` (Section 2.C). For local `AGENT.md` files (subfolders) or subsequent updates to an existing `AGENT.md`, free format is fine — one line is enough if it is clear. What matters is that the next session can use it.
-
-## END OF SESSION
-
-When the session is over, invoke the `protocol-crystallize` workflow. You CANNOT close the session without it. It handles worklog creation, crystallization into `AGENT.md` files, and task status updates.
+1. **Before every non-trivial decision:** check if an AGENT.md says something about it.
+2. **Every time you learn something new** (user correction, discovered convention, technical choice): write it to the relevant AGENT.md **now**, not later.
+3. **When the session ends:** invoke the `/crystallize` workflow. You cannot close without it.

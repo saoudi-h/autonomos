@@ -5,11 +5,12 @@ import { PROTOCOL_TEMPLATE } from '../templates/protocol'
 
 /**
  * Validates the content of all workflow files and the PROTOCOL_TEMPLATE.
- * These tests guard against regressions on the v0.3 fixes:
+ * These tests guard against regressions on the v0.3 design:
  * - No crystallization questions directed at the user
  * - No duplicated close-out procedures in session.md
- * - CLI fallback instructions in all workflows
+ * - find-based AGENT.md discovery (no CLI dependency in workflows)
  * - Consistent AGENT.md format rules
+ * - Workflows are short enough to fit in LLM working memory
  */
 
 function loadWorkflow(name: string): string {
@@ -21,9 +22,27 @@ const crystallize = loadWorkflow('protocol-crystallize.md')
 const task = loadWorkflow('protocol-task.md')
 
 // ---------------------------------------------------------------------------
-// 1. Crystallization paradox fix — session.md must NOT ask the user
+// 1. Crystallization — agent-directed, never asks the user
 // ---------------------------------------------------------------------------
-describe('session.md — no user-directed crystallization', () => {
+describe('crystallize.md — self-directed crystallization', () => {
+    it('contains the MUST NOT ask the user rule', () => {
+        expect(crystallize).toContain('MUST NOT ask the user what to crystallize')
+    })
+
+    it('directs the agent to ask itself', () => {
+        expect(crystallize).toContain('Ask yourself silently')
+    })
+
+    it('does not contain a user-questioning pattern', () => {
+        const lower = crystallize.toLowerCase()
+        expect(lower).not.toMatch(/ask\s+the\s+user.*what.*learn/i)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 2. Session.md — no duplicated close-out, defers to crystallize
+// ---------------------------------------------------------------------------
+describe('session.md — clean separation of concerns', () => {
     it('does not contain "FINAL STEP"', () => {
         expect(session).not.toContain('FINAL STEP')
     })
@@ -35,94 +54,104 @@ describe('session.md — no user-directed crystallization', () => {
     })
 
     it('points to /crystallize for session close-out', () => {
-        expect(session).toContain('protocol-crystallize')
-    })
-})
-
-// ---------------------------------------------------------------------------
-// 2. Crystallize.md — must NOT ask the user
-// ---------------------------------------------------------------------------
-describe('crystallize.md — self-directed crystallization only', () => {
-    it('contains explicit anti-user-question rule', () => {
-        expect(crystallize).toContain('MUST NOT ask the user what to crystallize')
+        expect(session).toContain('/crystallize')
     })
 
-    it('directs the agent to ask itself, not the user', () => {
-        expect(crystallize).toContain('Ask yourself these three questions')
-    })
-
-    it('does not contain a user-questioning pattern', () => {
-        const lower = crystallize.toLowerCase()
-        expect(lower).not.toMatch(/ask\s+the\s+user.*what.*learn/i)
-    })
-})
-
-// ---------------------------------------------------------------------------
-// 3. No duplication of close-out — session.md defers to crystallize.md
-// ---------------------------------------------------------------------------
-describe('session.md — no duplicated close-out logic', () => {
-    it('does not contain task completion checklist (close-out)', () => {
-        expect(session).not.toMatch(/- \[ \] Task status in TASKS\.md/)
-    })
-
-    it('does not contain worklog creation checklist (close-out)', () => {
+    it('does not duplicate worklog creation logic', () => {
         expect(session).not.toMatch(/- \[ \] A worklog exists/)
     })
 })
 
 // ---------------------------------------------------------------------------
-// 4. CLI strategy in all workflow files (npm run → npx → find)
+// 3. AGENT.md discovery — find-based, no CLI dependency
 // ---------------------------------------------------------------------------
-describe('CLI strategy — all workflow files', () => {
-    it('session.md has the 3-tier CLI strategy', () => {
-        expect(session).toContain('Method 1 (preferred)')
-        expect(session).toContain('Method 2 (fallback)')
-        expect(session).toContain('Method 3 (last resort)')
-    })
-
-    it('session.md includes npx --yes and find fallbacks', () => {
-        expect(session).toContain('npx --yes')
+describe('AGENT.md discovery — universal method', () => {
+    it('session.md uses find as primary method', () => {
         expect(session).toContain('find . -name AGENT.md')
     })
 
-    it('task.md has the 3-tier CLI strategy', () => {
-        expect(task).toContain('Method 1 (preferred)')
-        expect(task).toContain('Method 2 (fallback)')
-        expect(task).toContain('Method 3 (last resort)')
-    })
-
-    it('task.md includes npx --yes fallback', () => {
-        expect(task).toContain('npx --yes')
+    it('task.md uses directory walk, not CLI', () => {
+        // task.md should instruct walking up the directory tree
+        expect(task).toContain('walk up')
+        // Should NOT require autonomos CLI as a mandatory step
+        expect(task).not.toContain('npx --yes @autonomos/cli')
     })
 })
 
 // ---------------------------------------------------------------------------
-// 5. AGENT.md format rules consistency
+// 4. AGENT.md format rules — root vs local distinction
 // ---------------------------------------------------------------------------
-describe('AGENT.md format rules — consistent across all files', () => {
-    it('session.md clarifies root vs local format', () => {
-        expect(session).toContain('root `AGENT.md`, follow the template')
+describe('AGENT.md format rules — consistent across files', () => {
+    it('session.md does not impose format on local AGENT.md', () => {
+        // Session rules should mention AGENT.md but not impose root template everywhere
+        expect(session).toContain('AGENT.md')
     })
 
     it('task.md clarifies root vs local format', () => {
-        expect(task).toContain('root `AGENT.md`, follow the template')
+        expect(task).toContain('Root AGENT.md')
+        expect(task).toContain('free format')
     })
 
-    it('crystallize.md clarifies root vs local format', () => {
-        expect(crystallize).toContain('root AGENT.md, follow the template')
+    it('crystallize.md allows free format for local files', () => {
+        expect(crystallize).toContain('free format')
     })
 
-    it('PROTOCOL_TEMPLATE has explicit format rule', () => {
-        expect(PROTOCOL_TEMPLATE).toContain('Format rule')
+    it('PROTOCOL_TEMPLATE has explicit format rules section', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('Format Rules')
     })
 })
 
 // ---------------------------------------------------------------------------
-// 6. PROTOCOL_TEMPLATE — self-directed crystallization in Phase 3
+// 5. PROTOCOL_TEMPLATE — compact reference, no workflow duplication
 // ---------------------------------------------------------------------------
-describe('PROTOCOL_TEMPLATE — crystallization is agent-driven', () => {
-    it('Phase 3 does not ask the user what to crystallize', () => {
-        const lower = PROTOCOL_TEMPLATE.toLowerCase()
-        expect(lower).not.toMatch(/ask\s+the\s+user.*what.*learn/i)
+describe('PROTOCOL_TEMPLATE — v0.3 design', () => {
+    it('does not contain Phase 1/2/3 workflow steps', () => {
+        expect(PROTOCOL_TEMPLATE).not.toContain('Phase 1:')
+        expect(PROTOCOL_TEMPLATE).not.toContain('Phase 2:')
+        expect(PROTOCOL_TEMPLATE).not.toContain('Phase 3:')
+    })
+
+    it('points to workflows as the executable contract', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('/session')
+        expect(PROTOCOL_TEMPLATE).toContain('/task')
+        expect(PROTOCOL_TEMPLATE).toContain('/crystallize')
+    })
+
+    it('contains the quick reference table', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('Quick Reference')
+    })
+
+    it('does not contain deprecated .ai/ paths', () => {
+        expect(PROTOCOL_TEMPLATE).not.toContain('.ai/')
+    })
+
+    it('uses .autonomos/ consistently', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('.autonomos/TASKS.md')
+        expect(PROTOCOL_TEMPLATE).toContain('.autonomos/worklogs/')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 6. Workflow brevity — each must be concise enough for LLM working memory
+// ---------------------------------------------------------------------------
+describe('Workflow brevity', () => {
+    const maxLines = 35 // allowing some margin over the 30-line target
+
+    it(`session.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = session.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`task.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = task.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`crystallize.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = crystallize.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
     })
 })

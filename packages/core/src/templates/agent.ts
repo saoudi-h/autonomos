@@ -38,6 +38,25 @@ status: "active"
 }
 
 /**
- * Default AGENT.md template
+ * Generate a minimal local AGENT.md for subdirectories.
+ * Free format by design — low friction encourages creation.
+ * @param dirName - Name of the directory
+ */
+export function generateLocalAgentTemplate(dirName: string): string {
+    return `# AGENT: ${dirName}
+
+- **Stack:** *(frameworks, libs specific to this module)*
+- **Conventions:** *(naming, exports, test patterns)*
+- **Constraints:** *(known issues, tech debt)*
+`
+}
+
+/**
+ * Default root AGENT.md template
  */
 export const AGENT_TEMPLATE = generateAgentTemplate()
+
+/**
+ * Default local AGENT.md template
+ */
+export const LOCAL_AGENT_TEMPLATE = generateLocalAgentTemplate('module')
