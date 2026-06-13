@@ -1,19 +1,22 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import {
     AUTONOMOS_DIR,
     generateManifestContent,
+    listHarnesses,
     MANIFEST_FILE,
     parseManifest,
     PROTOCOL_FILE,
     PROTOCOL_TEMPLATE,
     PROTOCOL_VERSION,
+    resolveTargets,
     type Manifest,
 } from '@autonomos/core'
 
-// Get CLI version from package.json
-const CLI_VERSION = '0.0.1' // TODO: Import from package.json
+import packageJson from '../../package.json' with { type: 'json' }
+const CLI_VERSION: string = packageJson.version
 
 interface UpdateOptions {
     cwd?: string
@@ -25,6 +28,34 @@ interface UpdateResult {
     previousVersion?: string
     newVersion?: string
     cliOutdated?: boolean
+}
+
+const WORKFLOW_FILES = [
+    'protocol-session.md',
+    'protocol-task.md',
+    'protocol-crystallize.md',
+] as const
+
+/**
+ * Resolve the workflows directory inside the @autonomos/core package.
+ */
+function getWorkflowsDir(): string {
+    const here = fileURLToPath(import.meta.url)
+    const candidates = [
+        resolve(here, '..', '..', '..', '..', 'core', 'src', 'workflows'),
+        resolve(here, '..', '..', '..', 'core', 'dist', 'workflows'),
+        resolve(here, '..', '..', '..', '..', 'core', 'dist', 'workflows'),
+    ]
+    for (const candidate of candidates) {
+        if (existsSync(candidate)) return candidate
+    }
+    throw new Error('Could not locate the workflows directory inside @autonomos/core')
+}
+
+function buildTargetFilename(sourceFile: string, targetExtension: string): string {
+    const withoutPrefix = sourceFile.replace(/^protocol-/, '')
+    const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '')
+    return withoutExt + targetExtension
 }
 
 /**
@@ -102,10 +133,53 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     }
     writeFileSync(manifestPath, generateManifestContent(updatedManifest))
 
+    // Update workflow files in active harnesses
+    const updatedTargets: string[] = []
+    try {
+        const allHarnesses = listHarnesses().map(({ id }) => id)
+        const targets = resolveTargets(allHarnesses, cwd)
+        const workflowsDir = getWorkflowsDir()
+
+        for (const target of targets) {
+            // Check if the target directory exists
+            if (existsSync(target.path)) {
+                // Check if any of the workflow files exist in this directory
+                let hasExistingWorkflow = false
+                for (const workflowFile of WORKFLOW_FILES) {
+                    const filename = buildTargetFilename(workflowFile, target.fileExtension)
+                    if (existsSync(join(target.path, filename))) {
+                        hasExistingWorkflow = true
+                        break
+                    }
+                }
+
+                // If at least one workflow file exists, update/rewrite all three
+                if (hasExistingWorkflow) {
+                    mkdirSync(target.path, { recursive: true })
+                    for (const workflowFile of WORKFLOW_FILES) {
+                        const source = readFileSync(join(workflowsDir, workflowFile), 'utf-8')
+                        const filename = buildTargetFilename(workflowFile, target.fileExtension)
+                        const dest = join(target.path, filename)
+                        writeFileSync(dest, source)
+                    }
+                    updatedTargets.push(target.path)
+                }
+            }
+        }
+    } catch (err) {
+        // Log warning but don't fail the update
+        console.warn(`Warning: Could not update harness workflows: ${err instanceof Error ? err.message : String(err)}`)
+    }
+
+    const harnessInfo = updatedTargets.length > 0
+        ? ` (updated workflows in ${updatedTargets.join(', ')})`
+        : ''
+
     return {
         success: true,
-        message: `Protocol updated: v${currentVersion} → v${PROTOCOL_VERSION}`,
+        message: `Protocol updated: v${currentVersion} → v${PROTOCOL_VERSION}${harnessInfo}`,
         previousVersion: currentVersion,
         newVersion: PROTOCOL_VERSION,
     }
 }
+

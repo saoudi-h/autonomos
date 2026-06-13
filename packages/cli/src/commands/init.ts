@@ -118,15 +118,7 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
 
     // Check if already initialized
     const autonomosDir = join(cwd, AUTONOMOS_DIR)
-    if (existsSync(autonomosDir)) {
-        return {
-            success: false,
-            message: `Project already initialized with Protocol v${PROTOCOL_VERSION}. Use \`autonomos update\` to update.`,
-            created: [],
-            warnings: [],
-            dryRun,
-        }
-    }
+    const isInitialized = existsSync(autonomosDir)
 
     // Resolve which harnesses to install for
     let selectedHarnesses: string[]
@@ -140,16 +132,31 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
         selectedHarnesses = await promptForHarnesses()
     }
 
+    if (isInitialized && selectedHarnesses.length === 0) {
+        return {
+            success: false,
+            message: `Project already initialized with Protocol v${PROTOCOL_VERSION}. Use \`autonomos update\` to update, or specify harnesses with --harness to install workflow files.`,
+            created: [],
+            warnings: [],
+            dryRun,
+        }
+    }
+
     // Compute the unique target directories
     const targets = resolveTargets(selectedHarnesses, cwd)
 
     // In dry-run mode, just collect what would be created
     if (dryRun) {
-        created.push(AUTONOMOS_DIR)
-        created.push(`${AUTONOMOS_DIR}/${WORKLOGS_DIR}`)
-        created.push(`${AUTONOMOS_DIR}/${MANIFEST_FILE}`)
-        created.push(`${AUTONOMOS_DIR}/${PROTOCOL_FILE}`)
-        created.push(`${AUTONOMOS_DIR}/${TASKS_FILE}`)
+        if (!isInitialized) {
+            created.push(AUTONOMOS_DIR)
+            created.push(`${AUTONOMOS_DIR}/${WORKLOGS_DIR}`)
+            created.push(`${AUTONOMOS_DIR}/${MANIFEST_FILE}`)
+            created.push(`${AUTONOMOS_DIR}/${PROTOCOL_FILE}`)
+            created.push(`${AUTONOMOS_DIR}/${TASKS_FILE}`)
+        } else {
+            created.push(`${AUTONOMOS_DIR}/${MANIFEST_FILE} (update)`)
+            created.push(`${AUTONOMOS_DIR}/${PROTOCOL_FILE} (update)`)
+        }
 
         const agentPath = join(cwd, AGENT_FILE)
         if (!existsSync(agentPath)) {
@@ -167,7 +174,7 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
 
         return {
             success: true,
-            message: `Would initialize project with Agent Protocol v${PROTOCOL_VERSION}${selectedHarnesses.length ? ` (harnesses: ${selectedHarnesses.join(', ')})` : ''}`,
+            message: `Would ${isInitialized ? 'update workflows in' : 'initialize'} project with Agent Protocol v${PROTOCOL_VERSION}${selectedHarnesses.length ? ` (harnesses: ${selectedHarnesses.join(', ')})` : ''}`,
             created,
             warnings,
             dryRun: true,
@@ -176,13 +183,17 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
     }
 
     // Create .autonomos directory
-    mkdirSync(autonomosDir, { recursive: true })
-    created.push(AUTONOMOS_DIR)
+    if (!existsSync(autonomosDir)) {
+        mkdirSync(autonomosDir, { recursive: true })
+        created.push(AUTONOMOS_DIR)
+    }
 
     // Create worklogs directory
     const worklogsDir = join(autonomosDir, WORKLOGS_DIR)
-    mkdirSync(worklogsDir, { recursive: true })
-    created.push(`${AUTONOMOS_DIR}/${WORKLOGS_DIR}`)
+    if (!existsSync(worklogsDir)) {
+        mkdirSync(worklogsDir, { recursive: true })
+        created.push(`${AUTONOMOS_DIR}/${WORKLOGS_DIR}`)
+    }
 
     // Create manifest.json
     const manifest = createManifest(CLI_VERSION)
@@ -195,10 +206,14 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
     writeFileSync(protocolPath, PROTOCOL_TEMPLATE)
     created.push(`${AUTONOMOS_DIR}/${PROTOCOL_FILE}`)
 
-    // Create TASKS.md
+    // Create TASKS.md (only if it doesn't exist)
     const tasksPath = join(autonomosDir, TASKS_FILE)
-    writeFileSync(tasksPath, TASKS_TEMPLATE)
-    created.push(`${AUTONOMOS_DIR}/${TASKS_FILE}`)
+    if (!existsSync(tasksPath)) {
+        writeFileSync(tasksPath, TASKS_TEMPLATE)
+        created.push(`${AUTONOMOS_DIR}/${TASKS_FILE}`)
+    } else {
+        warnings.push(`${TASKS_FILE} already exists, skipping.`)
+    }
 
     // Create AGENT.md at root (only if it doesn't exist)
     const agentPath = join(cwd, AGENT_FILE)

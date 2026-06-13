@@ -1,10 +1,10 @@
 {
     "name": "@autonomos/cli",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "CLI tool for the Autonomos Agent Protocol",
     "type": "module",
     "bin": {
-        "autonomos": "./dist/index.mjs"
+        "cli": "./dist/index.mjs"
     },
     "scripts": {
         "start": "node dist/index.mjs",
