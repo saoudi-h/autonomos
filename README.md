@@ -96,7 +96,10 @@ autonomos init --harness <harness-name>
 
 The CLI will detect that `.autonomos/` already exists, update the protocol specification, and safely write the workflow files into your target harness directories without overwriting your project-specific task board.
 
+This is also the recommended way to add new harnesses (e.g. `antigravity`, `claude-code`) to an already initialized project, or to repair/reinstall workflow files if a harness directory path has changed or became corrupted.
+
 ## 🌈 Rich CLI Experience
+
 
 Autonomos provides a premium CLI experience with:
 
