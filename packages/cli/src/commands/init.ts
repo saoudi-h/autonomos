@@ -1,4 +1,4 @@
-import { checkbox } from '@inquirer/prompts'
+import { checkbox, confirm } from '@inquirer/prompts'
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -7,8 +7,11 @@ import {
     AGENT_FILE,
     AUTONOMOS_DIR,
     createManifest,
+    displayRelative,
+    findProjectRoot,
     generateAgentTemplate,
     generateManifestContent,
+    isSamePath,
     listHarnesses,
     MANIFEST_FILE,
     PROTOCOL_FILE,
@@ -38,6 +41,30 @@ interface InitOptions {
     /** When true, skip installing @autonomos/cli devDependency.
      *  The npm script will use npx instead. */
     noInstall?: boolean
+    /**
+     * When true, ignore the "you're inside a bigger project" check and
+     * initialize the protocol in `cwd` no matter what. Mirrors the
+     * `AUTONOMOS_FORCE=1` env var, which is more convenient in scripts.
+     */
+    force?: boolean
+    /**
+     * When set, treat stdin as a TTY (true) or non-TTY (false) regardless
+     * of the real value. Tests use this to opt in/out of the project-root
+     * confirmation prompt without mutating the real TTY state.
+     */
+    interactiveOverride?: boolean
+}
+
+export interface ResolveInstallResult {
+    installDir: string
+    warnings: string[]
+    abort?: { message: string }
+}
+
+interface ResolveInstallOptions {
+    force: boolean
+    noPrompt: boolean
+    isInteractive: boolean
 }
 
 interface InitResult {
@@ -97,24 +124,132 @@ async function promptForHarnesses(): Promise<string[]> {
 }
 
 /**
+ * Resolve which directory the protocol should be installed into.
+ *
+ * The protocol expects to live at the root of the user's project (where
+ * `.git` / `.autonomos` already exists, or where one would be created).
+ * When `init` is invoked from a subdirectory of such a project, we must
+ * either:
+ *
+ *  - point the user at the actual root and refuse to install, or
+ *  - install at the detected root on their behalf.
+ *
+ * We pick the first option by default, because silently installing
+ * elsewhere is the bug that motivated this helper. The user can opt
+ * into the second behavior with `--force` or `AUTONOMOS_FORCE=1`.
+ *
+ * Returns the directory to install in. When the caller passes `--force`
+ * (or the env var is set), and a different project root is detected, we
+ * install at that root instead. In interactive mode we also confirm the
+ * detour with the user.
+ */
+export async function resolveInstallDir(
+    requestedCwd: string,
+    options: ResolveInstallOptions
+): Promise<ResolveInstallResult> {
+    const warnings: string[] = []
+    const detectedRoot = findProjectRoot(requestedCwd)
+
+    // No project root found above us: nothing to bubble up to. Either
+    // we're in a fresh directory (warn about no git) or we're literally
+    // at the root of a project that uses neither marker. Either way we
+    // install in place.
+    if (!detectedRoot) {
+        if (!existsSync(join(requestedCwd, '.git'))) {
+            warnings.push('No Git repository detected. Consider running `git init` first.')
+        }
+        return { installDir: requestedCwd, warnings }
+    }
+
+    // The project root is exactly where we are: ideal case, no detour.
+    if (isSamePath(detectedRoot, requestedCwd)) {
+        return { installDir: requestedCwd, warnings }
+    }
+
+    // The project root is somewhere above us. Decide what to do.
+    const relCwd = displayRelative(requestedCwd, detectedRoot)
+    const force = options.force || process.env.AUTONOMOS_FORCE === '1'
+
+    if (force) {
+        warnings.push(
+            `Detected project root at ${displayRelative(detectedRoot, requestedCwd)} ` +
+                `(AUTONOMOS_FORCE=1); installing there instead of "${relCwd}".`
+        )
+        return { installDir: detectedRoot, warnings }
+    }
+
+    if (options.isInteractive && !options.noPrompt) {
+        const proceed = await confirm({
+            message:
+                `You're inside a project rooted at ${detectedRoot}.\n` +
+                `The protocol should be installed at the project root, not in "${relCwd}".\n` +
+                `Install at the project root instead?`,
+            default: true,
+        })
+        if (proceed) {
+            warnings.push(
+                `Detected project root above "${relCwd}"; installing at ${detectedRoot}.`
+            )
+            return { installDir: detectedRoot, warnings }
+        }
+        return {
+            installDir: requestedCwd,
+            warnings,
+            abort: {
+                message:
+                    `Aborted: refusing to install Autonomos inside a subdirectory. ` +
+                    `Run the command from ${detectedRoot} (or pass --force / set AUTONOMOS_FORCE=1).`,
+            },
+        }
+    }
+
+    return {
+        installDir: requestedCwd,
+        warnings,
+        abort: {
+            message:
+                `Cannot initialize Autonomos from a subdirectory.\n` +
+                `  Current directory : ${requestedCwd}\n` +
+                `  Detected root    : ${detectedRoot}\n` +
+                `Re-run from the project root, or pass --force (or set AUTONOMOS_FORCE=1) to install here anyway.`,
+        },
+    }
+}
+
+/**
  * Initialize the Autonomos Agent Protocol in a directory.
  */
 export async function init(options: InitOptions = {}): Promise<InitResult> {
-    const cwd = options.cwd ?? process.cwd()
+    const requestedCwd = options.cwd ?? process.cwd()
     const dryRun = options.dryRun ?? false
+
+    // Resolve the install target. We do this before any other check so a
+    // bad install location fails fast with a clear message.
+    const isInteractive =
+        options.interactiveOverride ?? (process.stdin.isTTY === true && !options.dryRun)
+    const resolution = await resolveInstallDir(requestedCwd, {
+        force: options.force ?? false,
+        noPrompt: options.noPrompt ?? false,
+        isInteractive,
+    })
+    if (resolution.abort) {
+        return {
+            success: false,
+            message: resolution.abort.message,
+            created: [],
+            warnings: resolution.warnings,
+            dryRun,
+        }
+    }
+    const cwd = resolution.installDir
+    const warnings: string[] = [...resolution.warnings]
+
     const created: string[] = []
-    const warnings: string[] = []
     const harnessFiles: string[] = []
 
     // Detect package.json for npm script registration
     const packageJsonPath = join(cwd, 'package.json')
     const hasPackageJson = existsSync(packageJsonPath) && statSync(packageJsonPath).isFile()
-
-    // Check for .git
-    const gitDir = join(cwd, '.git')
-    if (!existsSync(gitDir)) {
-        warnings.push('No Git repository detected. Consider running `git init` first.')
-    }
 
     // Check if already initialized
     const autonomosDir = join(cwd, AUTONOMOS_DIR)
@@ -231,6 +366,8 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
             const pkgRaw = readFileSync(packageJsonPath, 'utf-8')
             const pkg = JSON.parse(pkgRaw)
             const hadScript = !!pkg.scripts?.['autonomos']
+            const previousDevDep = pkg.devDependencies?.['@autonomos/cli']
+            const newDevDep = `^${CLI_VERSION}`
 
             if (!pkg.scripts) pkg.scripts = {}
 
@@ -249,14 +386,33 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
                 pkg.scripts['autonomos'] = 'autonomos'
 
                 if (!pkg.devDependencies) pkg.devDependencies = {}
-                pkg.devDependencies['@autonomos/cli'] = `^${CLI_VERSION}`
+                pkg.devDependencies['@autonomos/cli'] = newDevDep
 
                 writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 4) + '\n')
                 created.push('package.json (scripts.autonomos + devDependencies.@autonomos/cli)')
 
-                if (!hadScript) {
+                // Three distinct situations to communicate:
+                //   1. fresh install: nothing existed before
+                //   2. devDep was already there but pinned to a stale
+                //      version (typical of older CLI builds that wrote
+                //      ^0.2.0, which doesn't exist on the registry)
+                //   3. devDep was already there at the current version
+                //      and only the script needed adding
+                if (!hadScript && !previousDevDep) {
                     warnings.push(
                         'Added "autonomos" npm script and @autonomos/cli devDependency. Run `npm install` to install.'
+                    )
+                } else if (previousDevDep && previousDevDep !== newDevDep) {
+                    // Covers both "old script + stale devDep" and
+                    // "no script + stale devDep" cases. Refreshing the
+                    // devDep is what unblocks `pnpm i` when the pinned
+                    // version isn't on the registry.
+                    warnings.push(
+                        `Bumped @autonomos/cli devDependency: ${previousDevDep} → ${newDevDep}. Run \`npm install\` to apply.`
+                    )
+                } else if (!hadScript && previousDevDep) {
+                    warnings.push(
+                        'Added "autonomos" npm script (devDependency was already set).'
                     )
                 }
             }

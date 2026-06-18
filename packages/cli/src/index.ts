@@ -81,6 +81,12 @@ ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos init --all')}
   $ ${pc.cyan('autonomos init --dry-run')}
   $ ${pc.cyan('cd my-project && autonomos init')}
+
+${pc.bold('Project root detection:')}
+  By default, ${pc.cyan('init')} refuses to run from a subdirectory of a
+  git/Autonomos project. Run it from the project root, or pass
+  ${pc.cyan('--force')} (or set ${pc.cyan('AUTONOMOS_FORCE=1')}) to install
+  in ${pc.cyan('cwd')} anyway. In a TTY, you'll be asked to confirm.
 `
     )
     .option('-n, --dry-run', 'Preview what would be created without writing files')
@@ -91,6 +97,10 @@ ${pc.bold('Examples:')}
     .option('--all', 'Install workflows for all known harnesses; skip the prompt')
     .option('--no-prompt', 'Skip the interactive harness prompt (use with --harness or --all)')
     .option('--no-install', 'Skip installing @autonomos/cli as devDependency; use npx instead')
+    .option(
+        '-f, --force',
+        'Install in cwd even if a parent project root is detected (also via AUTONOMOS_FORCE=1)'
+    )
     .action(
         async (opts: {
             dryRun?: boolean
@@ -98,6 +108,7 @@ ${pc.bold('Examples:')}
             all?: boolean
             prompt?: boolean
             install?: boolean
+            force?: boolean
         }) => {
             try {
                 const result = await init({
@@ -106,6 +117,7 @@ ${pc.bold('Examples:')}
                     all: opts.all,
                     noPrompt: opts.prompt === false,
                     noInstall: opts.install === false,
+                    force: opts.force,
                 })
 
                 if (!result.success) {
@@ -154,17 +166,34 @@ program
 This command updates ${pc.white('PROTOCOL.md')} to the latest version embedded in the CLI.
 Only ${pc.white('PROTOCOL.md')} is modified; your ${pc.white('TASKS.md')} and ${pc.white('AGENT.md')} files are preserved.
 
+It also:
+  - Refreshes the @autonomos/cli devDependency in your package.json to the
+    current CLI version (useful when an older init pinned an unresolvable
+    version such as ^0.2.0).
+  - When ${pc.white('--harness')} or ${pc.white('--all')} is passed, installs
+    the workflow files for the given harness(es). This is the recommended
+    way to add a new AI harness to an already-initialized project.
+
 ${pc.bold('Version comparison:')}
   - If your project has an older version: Updates to the new version
   - If your project has a newer version: Warns you to update the CLI
-  - If versions match: No action needed
+  - If versions match: No action needed (but the devDependency is still
+    refreshed and any newly requested harnesses are still installed)
 
 ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos update')}
+  $ ${pc.cyan('autonomos update --harness opencode')}
+  $ ${pc.cyan('autonomos update --harness opencode --harness kilocode')}
+  $ ${pc.cyan('autonomos update --all')}
 `
     )
-    .action(() => {
-        const result = update()
+    .option(
+        '--harness <name...>',
+        'Install workflow files for the specified harness id(s) in addition to refreshing existing ones'
+    )
+    .option('--all', 'Install workflow files for every known harness in addition to refreshing existing ones')
+    .action((opts: { harness?: string[]; all?: boolean }) => {
+        const result = update({ harnesses: opts.harness, all: opts.all })
 
         if (!result.success) {
             if (result.cliOutdated) {

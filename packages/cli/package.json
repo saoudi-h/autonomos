@@ -4,7 +4,7 @@
     "description": "CLI tool for the Autonomos Agent Protocol",
     "type": "module",
     "bin": {
-        "cli": "./dist/index.mjs"
+        "autonomos": "./dist/index.mjs"
     },
     "scripts": {
         "start": "node dist/index.mjs",

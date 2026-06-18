@@ -1,7 +1,12 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
 
-import { AGENT_FILE, AUTONOMOS_DIR, findAncestorAgents, type AncestorAgent } from '@autonomos/core'
+import {
+    AGENT_FILE,
+    findAncestorAgents,
+    findProjectRoot,
+    type AncestorAgent,
+} from '@autonomos/core'
 
 interface AgentsOptions {
     cwd?: string
@@ -23,22 +28,6 @@ interface AgentEntry {
     path: string
     relativePath: string
     depth: number
-}
-
-/**
- * Find the project root by looking for .autonomos or .git directory
- */
-function findProjectRoot(startDir: string): string | null {
-    let currentDir = startDir
-
-    while (currentDir !== '/') {
-        if (existsSync(join(currentDir, AUTONOMOS_DIR)) || existsSync(join(currentDir, '.git'))) {
-            return currentDir
-        }
-        currentDir = join(currentDir, '..')
-    }
-
-    return null
 }
 
 /**
