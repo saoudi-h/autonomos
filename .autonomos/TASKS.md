@@ -44,7 +44,7 @@
     - `init` only checked `.git` in cwd → silently installed in monorepo subpackages
     - `bin: { cli: ... }` in cli package.json → `pnpm autonomos` failed
     - Older CLIs (v0.2.0) pinned `^0.2.0` in devDep which is not on the registry
-- [/] **[BUG-02]** Publish patch releases for `@autonomos/cli` and `@autonomos/core` via changesets `Priority: 🔴` `Complexity: S`
+- [x] **[BUG-02]** Publish patch releases for `@autonomos/cli` and `@autonomos/core` via changesets `Priority: 🔴` `Complexity: S` *Published: 0.3.1 on npm*
 
 ### Documentation
 
