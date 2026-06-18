@@ -5,16 +5,20 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 /**
- * Regression test for BUG-02 (the tsdown `exports: true` regression that
- * silently rewrote the `bin` field on every build, causing 0.3.1 to ship
- * with `bin: cli` instead of `bin: automos`).
+ * Regression test for BUG-02 (the tsdown regression that silently rewrote
+ * the `bin` field on every build, causing 0.3.1 to ship with `bin: cli`
+ * instead of `bin: automos`).
  *
  * Runs the real `pnpm run build` for the CLI package in a child process
  * (so any side effects on package.json are visible to us via a fresh
- * read) and asserts the `bin` field is preserved verbatim.
+ * read) and asserts the `bin` field is preserved verbatim as
+ * `autonomos` — not the package-name-derived `cli`.
  *
- * If a future change to the tala-tools/tsdown base config re-enables
- * `exports: true` for this package, this test fails loudly.
+ * The fix (see `packages/cli/tsdown.config.ts`) keeps `exports: true`
+ * (for the auto-generated `exports` field) and declares the `bin`
+ * mapping explicitly via `exports.bin` so the published command is
+ * `autonomos`. If a future change to the tala-tools/tsdown base config
+ * removes the explicit `exports.bin`, this test fails loudly.
  */
 describe('cli build preserves the bin field', () => {
     it('does not rewrite the bin field of packages/cli/package.json', () => {
