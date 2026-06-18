@@ -16,6 +16,7 @@ export * from './templates/worklog'
 // Parsers
 export * from './parsers/agent-finder'
 export * from './parsers/agent-parser'
+export * from './parsers/project-root'
 export * from './parsers/task-parser'
 
 // Harness codes
