@@ -38,6 +38,14 @@
 - [ ] **[TEST-02]** Add integration tests for CLI commands `Priority: 🔵` `Complexity: L`
 - [ ] **[TEST-03]** Add E2E test: init → update → status workflow `Priority: ⚪` `Complexity: L`
 
+### CLI Bugfixes (2026-06-18)
+
+- [x] **[BUG-01]** Fix `init` git detection from subdirectories + fix `bin` name + `update` devDependency refresh `Priority: 🔴` `Complexity: M` *See: .autonomos/worklogs/2026-06-18-BUG-01-init-fixes.md*
+    - `init` only checked `.git` in cwd → silently installed in monorepo subpackages
+    - `bin: { cli: ... }` in cli package.json → `pnpm autonomos` failed
+    - Older CLIs (v0.2.0) pinned `^0.2.0` in devDep which is not on the registry
+- [/] **[BUG-02]** Publish patch releases for `@autonomos/cli` and `@autonomos/core` via changesets `Priority: 🔴` `Complexity: S`
+
 ### Documentation
 
 - [x] **[DOC-01]** Create README.md for @autonomos/core `Priority: 🟠` `Complexity: S`
