@@ -22,3 +22,4 @@ The crystallization handoff remains in the same response, appended after the sub
 
 - Patch releases are required for both packages: the published CLI pins an exact Core version and ships the workflow through `init` and `update`.
 - Versioned for `@autonomos/core@0.3.2` and `@autonomos/cli@0.3.4`.
+- Published both versions through the successful [Release workflow](https://github.com/saoudi-h/autonomos/actions/runs/30213743748), then confirmed each version on npm.
