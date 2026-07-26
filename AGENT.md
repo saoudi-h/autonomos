@@ -40,3 +40,4 @@ Autonomos is a project dedicated to defining and implementing a robust, structur
 - v0.3 design: PROTOCOL.md is a read-only reference. Workflows (session/task/crystallize) are the executable contract.
 - Workflow `.md` files must stay ≤35 lines (enforced by tests) to fit in LLM working memory.
 - **Adopt the protocol from the first turn of any session.** When a user explicitly asks to "use the protocol" / "adopt the protocol" / "follow the workflow", do not jump straight to code. Start a session (read AGENT.md → recent worklog → TASKS.md), pick a task, mark it `[/]`, then work. The protocol is the contract; bypassing it is a bug.
+- **Workflow releases:** the published CLI pins an exact `@autonomos/core` version. Any workflow change therefore needs a patch release of both packages so `init` and `update` distribute it.

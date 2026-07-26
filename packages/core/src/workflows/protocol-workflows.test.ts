@@ -37,6 +37,15 @@ describe('crystallize.md — self-directed crystallization', () => {
         const lower = crystallize.toLowerCase()
         expect(lower).not.toMatch(/ask\s+the\s+user.*what.*learn/i)
     })
+
+    it('preserves the substantive user-facing answer before the handoff', () => {
+        expect(crystallize).toContain('self-contained answer to the original request')
+        expect(crystallize).toContain('outcome, evidence, limitations, and relevant next step')
+        expect(crystallize).not.toContain('RESPOND with exactly')
+        expect(crystallize.indexOf('self-contained answer')).toBeLessThan(
+            crystallize.indexOf('supplementary handoff'),
+        )
+    })
 })
 
 // ---------------------------------------------------------------------------

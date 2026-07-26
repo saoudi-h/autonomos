@@ -1,5 +1,12 @@
 # @autonomos/core
 
+## 0.3.2
+
+### Patch Changes
+
+- Preserve the substantive answer to the user's original request before adding
+  the crystallization handoff at the end of a session.
+
 ## 0.3.1
 
 ### Patch Changes

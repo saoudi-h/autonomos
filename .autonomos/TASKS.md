@@ -31,7 +31,7 @@
 - [x] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
 - [x] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`
 - [x] **[PROTO-04]** Protocol v0.3 refactoring: shorten workflows, remove duplication, fix paths `Priority: 🔴` `Complexity: L` *See: .autonomos/worklogs/2026-06-13-PROTO-04-v03-refactoring.md*
-- [ ] **[PROTO-05]** Preserve the substantive user-facing result when crystallizing a session `Priority: 🟠` `Complexity: S`
+- [x] **[PROTO-05]** Preserve the substantive user-facing result when crystallizing a session `Priority: 🟠` `Complexity: S`
     - **Observed failure:** the mandatory `RESPOND with exactly` three-line report in `crystallize.md` can replace the answer to the user's original request. The user receives only a task status, a worklog path, and AGENT.md status after the agent has completed investigation or implementation.
     - **Why this is poor UX:** worklogs are durable context for successor agents, not the primary handoff for the user who initiated the work. Depending on the client, the path may not be clickable, requiring manual navigation and several extra actions before the user can learn the outcome.
     - **Expected behavior:** the agent must first deliver a self-contained answer to the original request (outcome, evidence, relevant limitations and next action). Crystallization status may remain available as a concise supplementary handoff, but must not displace that answer.
