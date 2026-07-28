@@ -2,7 +2,7 @@
  * Agent Protocol Specification Version (Independent of Package versions)
  * This refers to the schema and behavioral contract version.
  */
-export const PROTOCOL_VERSION = '0.3.0-alpha'
+export const PROTOCOL_VERSION = '0.3.1-alpha'
 
 /**
  * Directory name for Autonomos configuration

@@ -1,5 +1,15 @@
 # @autonomos/cli
 
+## 0.3.5
+
+### Patch Changes
+
+- Synchronize installed workflow files and CLI metadata during updates, even
+  when the protocol version is already current. Bump the Agent Protocol to
+  v0.3.1-alpha.
+- Updated dependencies []:
+    - @autonomos/core@0.3.3
+
 ## 0.3.4
 
 ### Patch Changes

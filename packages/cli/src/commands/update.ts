@@ -75,16 +75,25 @@ function buildTargetFilename(sourceFile: string, targetExtension: string): strin
  * Returns: -1 if a < b, 0 if a === b, 1 if a > b
  */
 function compareVersions(a: string, b: string): number {
-    const aParts = a.split('.').map(Number)
-    const bParts = b.split('.').map(Number)
+    const parse = (version: string) => {
+        const [numeric = '', prerelease] = version.split('-', 2)
+        return { parts: numeric.split('.').map(Number), prerelease }
+    }
+    const aVersion = parse(a)
+    const bVersion = parse(b)
 
     for (let i = 0; i < 3; i++) {
-        const aNum = aParts[i] ?? 0
-        const bNum = bParts[i] ?? 0
+        const aNum = aVersion.parts[i] ?? 0
+        const bNum = bVersion.parts[i] ?? 0
         if (aNum < bNum) return -1
         if (aNum > bNum) return 1
     }
-    return 0
+
+    if (aVersion.prerelease === bVersion.prerelease) return 0
+    if (aVersion.prerelease === undefined) return 1
+    if (bVersion.prerelease === undefined) return -1
+
+    return aVersion.prerelease.localeCompare(bVersion.prerelease)
 }
 
 /**
@@ -146,6 +155,41 @@ function writeHarnessWorkflows(cwd: string, harnessIds: string[]): string[] {
 }
 
 /**
+ * Refresh workflows for harnesses already installed in the project.
+ * A workflow update is independent from the protocol version: workflow files
+ * are executable artifacts and may be fixed between protocol releases.
+ */
+function refreshInstalledHarnessWorkflows(cwd: string): string[] {
+    const workflowsDir = getWorkflowsDir()
+    const targets = resolveTargets(
+        listHarnesses().map(({ id }) => id),
+        cwd
+    )
+    const updatedTargets: string[] = []
+
+    for (const target of targets) {
+        if (!existsSync(target.path)) continue
+
+        const files = WORKFLOW_FILES.map(workflowFile => ({
+            source: readFileSync(join(workflowsDir, workflowFile), 'utf-8'),
+            dest: join(target.path, buildTargetFilename(workflowFile, target.fileExtension)),
+        }))
+        if (!files.some(({ dest }) => existsSync(dest))) continue
+
+        let changed = false
+        for (const { source, dest } of files) {
+            if (!existsSync(dest) || readFileSync(dest, 'utf-8') !== source) {
+                writeFileSync(dest, source)
+                changed = true
+            }
+        }
+        if (changed) updatedTargets.push(target.path)
+    }
+
+    return updatedTargets
+}
+
+/**
  * Update the Protocol to the latest version
  */
 export function update(options: UpdateOptions = {}): UpdateResult {
@@ -182,21 +226,50 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     const comparison = compareVersions(currentVersion, PROTOCOL_VERSION)
 
     if (comparison === 0) {
-        // Still install any newly requested harnesses even when the
-        // protocol is already current. This is the path used to add
-        // (say) opencode to an already-initialized project.
+        // Workflows are executable artifacts, so refresh installed harnesses
+        // even when the protocol specification itself is already current.
+        let updatedTargets: string[] = []
+        try {
+            updatedTargets = refreshInstalledHarnessWorkflows(cwd)
+        } catch (err) {
+            console.warn(
+                `Warning: Could not update harness workflows: ${err instanceof Error ? err.message : String(err)}`
+            )
+        }
+
+        // Still install any newly requested harnesses even when the protocol
+        // is current. This is the path used to add a new harness.
         const requestedHarnesses = options.all
             ? listHarnesses().map(({ id }) => id)
             : (options.harnesses ?? [])
-        const touched = writeHarnessWorkflows(cwd, requestedHarnesses)
-        const touchedMsg = touched.length > 0 ? ` (installed: ${touched.join(', ')})` : ''
+        const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses)
+
+        if (
+            manifest.cliVersion !== CLI_VERSION ||
+            updatedTargets.length > 0 ||
+            newlyInstalled.length > 0
+        ) {
+            writeFileSync(
+                manifestPath,
+                generateManifestContent({
+                    ...manifest,
+                    cliVersion: CLI_VERSION,
+                    lastUpdated: new Date().toISOString(),
+                })
+            )
+        }
+
+        const workflowMsg =
+            updatedTargets.length > 0 ? ` Refreshed workflows in ${updatedTargets.join(', ')}.` : ''
+        const installedMsg =
+            newlyInstalled.length > 0 ? ` Installed: ${newlyInstalled.join(', ')}.` : ''
         const devDepMsg = devDepNote ? ` ${devDepNote}` : ''
         return {
             success: true,
-            message: `Already up to date (Protocol v${PROTOCOL_VERSION}).${devDepMsg}${touchedMsg}`,
+            message: `Already up to date (Protocol v${PROTOCOL_VERSION}).${workflowMsg}${installedMsg}${devDepMsg}`,
             previousVersion: currentVersion,
             newVersion: PROTOCOL_VERSION,
-            touchedHarnesses: touched,
+            touchedHarnesses: [...updatedTargets, ...newlyInstalled],
         }
     }
 
@@ -227,39 +300,12 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     // Update workflow files in active harnesses
     const updatedTargets: string[] = []
     try {
-        const allHarnesses = listHarnesses().map(({ id }) => id)
-        const targets = resolveTargets(allHarnesses, cwd)
-        const workflowsDir = getWorkflowsDir()
-
-        for (const target of targets) {
-            // Check if the target directory exists
-            if (existsSync(target.path)) {
-                // Check if any of the workflow files exist in this directory
-                let hasExistingWorkflow = false
-                for (const workflowFile of WORKFLOW_FILES) {
-                    const filename = buildTargetFilename(workflowFile, target.fileExtension)
-                    if (existsSync(join(target.path, filename))) {
-                        hasExistingWorkflow = true
-                        break
-                    }
-                }
-
-                // If at least one workflow file exists, update/rewrite all three
-                if (hasExistingWorkflow) {
-                    mkdirSync(target.path, { recursive: true })
-                    for (const workflowFile of WORKFLOW_FILES) {
-                        const source = readFileSync(join(workflowsDir, workflowFile), 'utf-8')
-                        const filename = buildTargetFilename(workflowFile, target.fileExtension)
-                        const dest = join(target.path, filename)
-                        writeFileSync(dest, source)
-                    }
-                    updatedTargets.push(target.path)
-                }
-            }
-        }
+        updatedTargets.push(...refreshInstalledHarnessWorkflows(cwd))
     } catch (err) {
         // Log warning but don't fail the update
-        console.warn(`Warning: Could not update harness workflows: ${err instanceof Error ? err.message : String(err)}`)
+        console.warn(
+            `Warning: Could not update harness workflows: ${err instanceof Error ? err.message : String(err)}`
+        )
     }
 
     // Also install any harnesses the user explicitly asked for. This
@@ -270,12 +316,10 @@ export function update(options: UpdateOptions = {}): UpdateResult {
         : (options.harnesses ?? [])
     const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses)
 
-    const harnessInfo = updatedTargets.length > 0
-        ? ` (updated workflows in ${updatedTargets.join(', ')})`
-        : ''
-    const installedInfo = newlyInstalled.length > 0
-        ? ` (installed: ${newlyInstalled.join(', ')})`
-        : ''
+    const harnessInfo =
+        updatedTargets.length > 0 ? ` (updated workflows in ${updatedTargets.join(', ')})` : ''
+    const installedInfo =
+        newlyInstalled.length > 0 ? ` (installed: ${newlyInstalled.join(', ')})` : ''
     const devDepInfo = devDepNote ? ` ${devDepNote}` : ''
 
     return {

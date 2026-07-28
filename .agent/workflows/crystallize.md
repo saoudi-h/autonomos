@@ -10,6 +10,7 @@ description: 'Mandatory close-out before ending a session. Forces durable knowle
 ## STEP 1 — Worklog
 
 Create `.autonomos/worklogs/YYYY-MM-DD-[TASK_ID].md` containing:
+
 - What was done
 - Key decisions and why
 - Files modified
@@ -27,11 +28,10 @@ Ask yourself silently — do NOT ask the user:
 
 Mark the task `[x]` (or `[!]` if blocked) in `.autonomos/TASKS.md`.
 
-## STEP 4 — Report
+## STEP 4 — User response
 
-RESPOND with exactly:
-- `Task: [x] / [!] — [ID]`
-- `Worklog: .autonomos/worklogs/...`
-- `AGENT.md updated: [yes / no — reason]`
+First, deliver a self-contained answer to the original request: outcome, evidence, limitations, and relevant next step. Do not replace it with crystallization status.
 
-If you cannot produce these 3 lines, resume from Step 1.
+Then append this supplementary handoff:
+
+`Crystallization — Task: [x] / [!] — [ID] | Worklog: .autonomos/worklogs/... | AGENT.md updated: [yes / no — reason]`
