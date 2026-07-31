@@ -1,5 +1,18 @@
 # @autonomos/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- [`6fb0402`](https://github.com/saoudi-h/autonomos/commit/6fb04020b8b3b3579b054e319cca99738c80f26c) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Release Protocol v0.4 with intent-first sessions, explicit user-authority boundaries,
+  durable-memory routing, optional issue intake, evidence-aware reconciliation, and
+  versioned protocol artifact integrity checks.
+
+### Patch Changes
+
+- Updated dependencies [[`6fb0402`](https://github.com/saoudi-h/autonomos/commit/6fb04020b8b3b3579b054e319cca99738c80f26c)]:
+    - @autonomos/core@0.4.0
+
 ## 0.3.5
 
 ### Patch Changes
