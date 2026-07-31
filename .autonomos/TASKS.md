@@ -27,7 +27,7 @@
 
 ### Protocol Refinements
 
-- [/] **[RELEASE-01]** Validate and publish Protocol v0.4 with coordinated Core and CLI releases `Priority: 🔴` `Complexity: M`
+- [x] **[RELEASE-01]** Validate and publish Protocol v0.4 with coordinated Core and CLI releases `Priority: 🔴` `Complexity: M` *See: .autonomos/worklogs/2026-07-31-RELEASE-01-v0.4.md*
 - [x] **[PROTO-06]** Audit protocol information architecture and register focused remediation tasks `Priority: 🟠` `Complexity: M` *See: .autonomos/worklogs/2026-07-31-PROTO-06-information-architecture-audit.md*
     - Examine memory placement, artifact ownership, drift correction, and the distinction between reported problems and implementation tasks.
     - Produce scoped follow-up tasks without changing the shipped protocol behavior in the same session.
