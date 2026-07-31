@@ -1,5 +1,12 @@
 # @autonomos/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- [`7ddc869`](https://github.com/saoudi-h/autonomos/commit/7ddc869174b2b5c7742a136b256138fbbdea004e) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Fix workflow discovery from the published npm package layout and preflight packaged
+  workflow availability before mutating consumer projects during `autonomos update`.
+
 ## 0.4.0
 
 ### Minor Changes
