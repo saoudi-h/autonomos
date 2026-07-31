@@ -80,7 +80,7 @@
 
 ### CLI Bugfixes (2026-06-18)
 
-- [/] **[BUG-03]** Fix published CLI workflow resolution and prevent partial protocol updates `Priority: 🔴` `Complexity: S`
+- [x] **[BUG-03]** Fix published CLI workflow resolution and prevent partial protocol updates `Priority: 🔴` `Complexity: S` *See: .autonomos/worklogs/2026-07-31-BUG-03-published-workflow-resolution.md*
     - `npx @autonomos/cli@0.4.0 update --all` cannot locate the sibling `@autonomos/core/dist/workflows` package directory.
     - The failed precondition is discovered after protocol, manifest, and package metadata mutations, leaving consumer projects in a mixed state.
 - [x] **[BUG-01]** Fix `init` git detection from subdirectories + fix `bin` name + `update` devDependency refresh `Priority: 🔴` `Complexity: M` *See: .autonomos/worklogs/2026-06-18-BUG-01-init-fixes.md*
