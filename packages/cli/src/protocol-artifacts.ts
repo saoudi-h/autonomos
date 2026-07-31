@@ -26,13 +26,17 @@ export interface ArtifactIntegrityResult {
     driftedFiles: string[]
 }
 
-export function getWorkflowsDir(): string {
-    const here = fileURLToPath(import.meta.url)
-    const candidates = [
+export function getWorkflowDirCandidates(moduleUrl: string = import.meta.url): string[] {
+    const here = fileURLToPath(moduleUrl)
+    return [
         resolve(here, '..', '..', '..', 'core', 'src', 'workflows'),
-        resolve(here, '..', '..', 'core', 'dist', 'workflows'),
+        resolve(here, '..', '..', '..', 'core', 'dist', 'workflows'),
         resolve(here, '..', '..', '..', '..', 'core', 'dist', 'workflows'),
     ]
+}
+
+export function getWorkflowsDir(): string {
+    const candidates = getWorkflowDirCandidates()
     for (const candidate of candidates) {
         if (existsSync(candidate)) return candidate
     }

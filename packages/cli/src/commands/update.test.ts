@@ -69,4 +69,35 @@ describe('update', () => {
         expect(result.message).toContain(`v0.3.0-alpha → v${PROTOCOL_VERSION}`)
         expect(updatedManifest.protocolVersion).toBe(PROTOCOL_VERSION)
     })
+
+    it('fails before mutating project files when packaged workflows are unavailable', () => {
+        root = mkdtempSync(join(tmpdir(), 'autonomos-update-'))
+        const manifestPath = join(root, '.autonomos', 'manifest.json')
+        const protocolPath = join(root, '.autonomos', 'PROTOCOL.md')
+        const packagePath = join(root, 'package.json')
+        mkdirSync(join(root, '.autonomos'), { recursive: true })
+        const manifest = {
+            protocolVersion: '0.3.0-alpha',
+            cliVersion: '0.3.0',
+            initializedAt: '2026-01-01T00:00:00.000Z',
+            lastUpdated: '2026-01-01T00:00:00.000Z',
+        } satisfies Manifest
+        writeFileSync(manifestPath, JSON.stringify(manifest))
+        writeFileSync(protocolPath, 'old protocol')
+        writeFileSync(packagePath, JSON.stringify({ name: 'fixture' }))
+
+        const result = update({
+            cwd: root,
+            all: true,
+            resolveWorkflowsDir: () => {
+                throw new Error('missing packaged workflows')
+            },
+        })
+
+        expect(result.success).toBe(false)
+        expect(result.message).toContain('missing packaged workflows')
+        expect(readFileSync(manifestPath, 'utf-8')).toBe(JSON.stringify(manifest))
+        expect(readFileSync(protocolPath, 'utf-8')).toBe('old protocol')
+        expect(readFileSync(packagePath, 'utf-8')).toBe(JSON.stringify({ name: 'fixture' }))
+    })
 })

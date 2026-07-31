@@ -30,6 +30,8 @@ interface UpdateOptions {
     harnesses?: string[]
     /** Convenience flag equivalent to `harnesses: listHarnesses().map(id)`. */
     all?: boolean
+    /** Test seam for packaged workflow resolution. */
+    resolveWorkflowsDir?: () => string
 }
 
 interface UpdateResult {
@@ -108,9 +110,8 @@ function refreshDevDependency(cwd: string): string | null {
         : `Added @autonomos/cli devDependency: ${newSpec}.`
 }
 
-function writeHarnessWorkflows(cwd: string, harnessIds: string[]): string[] {
+function writeHarnessWorkflows(cwd: string, harnessIds: string[], workflowsDir: string): string[] {
     if (harnessIds.length === 0) return []
-    const workflowsDir = getWorkflowsDir()
     const targets = resolveTargets(harnessIds, cwd)
     const written: string[] = []
     for (const target of targets) {
@@ -131,8 +132,7 @@ function writeHarnessWorkflows(cwd: string, harnessIds: string[]): string[] {
  * A workflow update is independent from the protocol version: workflow files
  * are executable artifacts and may be fixed between protocol releases.
  */
-function refreshInstalledHarnessWorkflows(cwd: string): string[] {
-    const workflowsDir = getWorkflowsDir()
+function refreshInstalledHarnessWorkflows(cwd: string, workflowsDir: string): string[] {
     const targets = resolveTargets(
         listHarnesses().map(({ id }) => id),
         cwd
@@ -189,6 +189,20 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     const manifest: Manifest = parseManifest(manifestContent)
     const currentVersion = manifest.protocolVersion
 
+    // Resolve every packaged input before mutating project-owned files. A broken
+    // CLI installation must fail without leaving a partially updated protocol.
+    let workflowsDir: string
+    try {
+        workflowsDir = (options.resolveWorkflowsDir ?? getWorkflowsDir)()
+    } catch (error) {
+        return {
+            success: false,
+            message: `Cannot update protocol artifacts: ${error instanceof Error ? error.message : String(error)}`,
+            previousVersion: currentVersion,
+            newVersion: PROTOCOL_VERSION,
+        }
+    }
+
     // Refresh devDependency. We do this even when the protocol version
     // is already up to date, because the user may have run `update`
     // precisely to repair a pinned-but-unresolvable version.
@@ -202,7 +216,7 @@ export function update(options: UpdateOptions = {}): UpdateResult {
         // even when the protocol specification itself is already current.
         let updatedTargets: string[] = []
         try {
-            updatedTargets = refreshInstalledHarnessWorkflows(cwd)
+            updatedTargets = refreshInstalledHarnessWorkflows(cwd, workflowsDir)
         } catch (err) {
             console.warn(
                 `Warning: Could not update harness workflows: ${err instanceof Error ? err.message : String(err)}`
@@ -214,7 +228,7 @@ export function update(options: UpdateOptions = {}): UpdateResult {
         const requestedHarnesses = options.all
             ? listHarnesses().map(({ id }) => id)
             : (options.harnesses ?? [])
-        const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses)
+        const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses, workflowsDir)
 
         if (
             manifest.cliVersion !== CLI_VERSION ||
@@ -272,7 +286,7 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     // Update workflow files in active harnesses
     const updatedTargets: string[] = []
     try {
-        updatedTargets.push(...refreshInstalledHarnessWorkflows(cwd))
+        updatedTargets.push(...refreshInstalledHarnessWorkflows(cwd, workflowsDir))
     } catch (err) {
         // Log warning but don't fail the update
         console.warn(
@@ -286,7 +300,7 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     const requestedHarnesses = options.all
         ? listHarnesses().map(({ id }) => id)
         : (options.harnesses ?? [])
-    const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses)
+    const newlyInstalled = writeHarnessWorkflows(cwd, requestedHarnesses, workflowsDir)
 
     const harnessInfo =
         updatedTargets.length > 0 ? ` (updated workflows in ${updatedTargets.join(', ')})` : ''
