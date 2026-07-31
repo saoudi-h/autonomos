@@ -10,8 +10,13 @@ AI agents should walk into any codebase and immediately understand:
 
 1.  **Who** the agent is and what its boundaries are (`AGENT.md`).
 2.  **What** needs to be done next and what's completed (`TASKS.md`).
-3.  **How** it should behave and interact (`PROTOCOL.md`).
-4.  **Why** previous sessions made certain decisions (`worklogs/`).
+3.  **Which signals need triage**, when the optional `ISSUES.md` is useful.
+4.  **How** it should behave and interact (`PROTOCOL.md`).
+5.  **Why** previous sessions made certain decisions (`worklogs/`).
+
+The `/reconcile` workflow periodically audits accumulated protocol drift. It
+repairs only evidence-backed deterministic findings, preserves historical records,
+and returns uncertain semantic conflicts to the user for joint resolution.
 
 ## 📦 Monorepo Structure
 
@@ -57,8 +62,9 @@ autonomos agents --all
 The protocol is centered around the `.autonomos/` directory:
 
 - **`manifest.json`**: Structured metadata and versioning.
-- **`PROTOCOL.md`**: The immutable kernel of the AI workflow.
+- **`PROTOCOL.md`**: The read-only kernel for the declared protocol version.
 - **`TASKS.md`**: The single source of truth for task state.
+- **`ISSUES.md`**: Optional intake for problems, proposals, and questions that need triage before implementation.
 - **`worklogs/`**: Detailed history of sessions to save context tokens.
 - **`AGENT.md`**: (Root level) The identity and context anchor for the agent.
 
@@ -80,6 +86,11 @@ This will safely:
 2. Update `.autonomos/manifest.json`.
 3. Scan for active harness folders (e.g. `.agents/skills`, `.clinerules/workflows`, `.claude/skills`) and **automatically update** the `session.md`, `task.md`, and `crystallize.md` workflow files in them.
 4. **Preserve** your existing `AGENT.md`, `TASKS.md` roadmap, and session `worklogs/`.
+
+For a declared protocol version, `PROTOCOL.md` and installed harness workflows
+must exactly match the published artifacts. Project agents treat them as read-only;
+`autonomos update` is the supported path to install another published version or
+repair local drift. Run `autonomos status` to check artifact integrity.
 
 ### Migrating a Legacy Project (v0.1.x → v0.3.0)
 
@@ -114,4 +125,3 @@ This project is currently in **active alpha development**. Feel free to explore 
 ## ⚖️ License
 
 MIT
-

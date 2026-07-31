@@ -1,7 +1,6 @@
 import { checkbox, confirm } from '@inquirer/prompts'
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 import {
     AGENT_FILE,
@@ -27,6 +26,7 @@ import {
 // inlines this JSON, so the resolved value is always current.
 // (package.json import — inlined by the bundler)
 import packageJson from '../../package.json' with { type: 'json' }
+import { buildTargetFilename, getWorkflowsDir, WORKFLOW_FILES } from '../protocol-artifacts'
 const CLI_VERSION: string = packageJson.version
 
 interface InitOptions {
@@ -74,35 +74,6 @@ interface InitResult {
     warnings: string[]
     dryRun?: boolean
     harnessFiles?: string[]
-}
-
-const WORKFLOW_FILES = [
-    'protocol-session.md',
-    'protocol-task.md',
-    'protocol-crystallize.md',
-] as const
-
-/**
- * Resolve the workflows directory inside the @autonomos/core package.
- * In dev (tsdown not yet run), this points to src/workflows. In published
- * builds, it falls back to dist/workflows.
- */
-function getWorkflowsDir(): string {
-    const here = fileURLToPath(import.meta.url)
-    // here is .../packages/cli/dist/commands/init.mjs (or src/commands/init.ts in dev)
-    // Walk up until we find @autonomos/core
-    const candidates = [
-        // Dev (running from src via tsdown --watch): packages/cli/src/commands/init.ts
-        resolve(here, '..', '..', '..', '..', 'core', 'src', 'workflows'),
-        // Built (single bundle at packages/cli/dist/index.mjs): packages/core/dist/workflows
-        resolve(here, '..', '..', '..', 'core', 'dist', 'workflows'),
-        // Built (per-entry at packages/cli/dist/commands/init.mjs): packages/core/dist/workflows
-        resolve(here, '..', '..', '..', '..', 'core', 'dist', 'workflows'),
-    ]
-    for (const candidate of candidates) {
-        if (existsSync(candidate)) return candidate
-    }
-    throw new Error('Could not locate the workflows directory inside @autonomos/core')
 }
 
 /**
@@ -187,9 +158,7 @@ export async function resolveInstallDir(
             default: true,
         })
         if (proceed) {
-            warnings.push(
-                `Detected project root above "${relCwd}"; installing at ${detectedRoot}.`
-            )
+            warnings.push(`Detected project root above "${relCwd}"; installing at ${detectedRoot}.`)
             return { installDir: detectedRoot, warnings }
         }
         return {
@@ -411,9 +380,7 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
                         `Bumped @autonomos/cli devDependency: ${previousDevDep} → ${newDevDep}. Run \`npm install\` to apply.`
                     )
                 } else if (!hadScript && previousDevDep) {
-                    warnings.push(
-                        'Added "autonomos" npm script (devDependency was already set).'
-                    )
+                    warnings.push('Added "autonomos" npm script (devDependency was already set).')
                 }
             }
         } catch {
@@ -447,16 +414,4 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
         dryRun: false,
         harnessFiles,
     }
-}
-
-/**
- * Strip the leading `protocol-` prefix from a workflow filename so that
- * the installed file is just `session.md`, `task.md`, `crystallize.md`.
- * This gives shorter invocation names (`/session` instead of `/protocol-session`).
- */
-function buildTargetFilename(sourceFile: string, targetExtension: string): string {
-    // sourceFile: "protocol-session.md" -> "session.md" (drop prefix, drop source ext, add target ext)
-    const withoutPrefix = sourceFile.replace(/^protocol-/, '')
-    const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '')
-    return withoutExt + targetExtension
 }

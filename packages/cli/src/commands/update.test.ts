@@ -39,6 +39,8 @@ describe('update', () => {
         expect(readFileSync(workflowPath, 'utf-8')).toContain(
             'self-contained answer to the original request'
         )
+        expect(existsSync(join(root, '.agent', 'workflows', 'issue.md'))).toBe(true)
+        expect(existsSync(join(root, '.agent', 'workflows', 'reconcile.md'))).toBe(true)
 
         const firstUpdate = updatedManifest.lastUpdated
         const second = update({ cwd: root })

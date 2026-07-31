@@ -8,8 +8,8 @@ import { PROTOCOL_TEMPLATE } from '../templates/protocol'
  * These tests guard against regressions on the v0.3 design:
  * - No crystallization questions directed at the user
  * - No duplicated close-out procedures in session.md
- * - find-based AGENT.md discovery (no CLI dependency in workflows)
- * - Consistent AGENT.md format rules
+ * - Scoped AGENT.md discovery (no CLI dependency in workflows)
+ * - Durable-memory admission, placement, and retirement
  * - Workflows are short enough to fit in LLM working memory
  */
 
@@ -20,6 +20,8 @@ function loadWorkflow(name: string): string {
 const session = loadWorkflow('protocol-session.md')
 const crystallize = loadWorkflow('protocol-crystallize.md')
 const task = loadWorkflow('protocol-task.md')
+const issue = loadWorkflow('protocol-issue.md')
+const reconcile = loadWorkflow('protocol-reconcile.md')
 
 // ---------------------------------------------------------------------------
 // 1. Crystallization — agent-directed, never asks the user
@@ -30,7 +32,7 @@ describe('crystallize.md — self-directed crystallization', () => {
     })
 
     it('directs the agent to ask itself', () => {
-        expect(crystallize).toContain('Ask yourself silently')
+        expect(crystallize).toContain('For each candidate ask')
     })
 
     it('does not contain a user-questioning pattern', () => {
@@ -43,7 +45,7 @@ describe('crystallize.md — self-directed crystallization', () => {
         expect(crystallize).toContain('outcome, evidence, limitations, and relevant next step')
         expect(crystallize).not.toContain('RESPOND with exactly')
         expect(crystallize.indexOf('self-contained answer')).toBeLessThan(
-            crystallize.indexOf('supplementary handoff'),
+            crystallize.indexOf('supplementary handoff')
         )
     })
 })
@@ -72,18 +74,23 @@ describe('session.md — clean separation of concerns', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 3. AGENT.md discovery — find-based, no CLI dependency
+// 3. Scoped context discovery and workflow composition
 // ---------------------------------------------------------------------------
-describe('AGENT.md discovery — universal method', () => {
-    it('session.md uses find as primary method', () => {
-        expect(session).toContain('find . -name AGENT.md')
+describe('Scoped context discovery and workflow composition', () => {
+    it('orients from root without loading every context branch', () => {
+        expect(session).toContain('Read the root `AGENT.md`')
+        expect(session).not.toContain('find . -name AGENT.md')
     })
 
-    it('task.md uses directory walk, not CLI', () => {
-        // task.md should instruct walking up the directory tree
+    it('task.md loads only the target ancestor chain and relevant worklog', () => {
         expect(task).toContain('walk up')
-        // Should NOT require autonomos CLI as a mandatory step
+        expect(task).toContain('Do not load unrelated worklogs or context branches')
         expect(task).not.toContain('npx --yes @autonomos/cli')
+    })
+
+    it('delegates scoped planning and task transition to /task', () => {
+        expect(session).toContain('Invoke `/task`')
+        expect(session).toContain('it owns scoped context, planning, and the `[/]` transition')
     })
 })
 
@@ -96,17 +103,10 @@ describe('AGENT.md format rules — consistent across files', () => {
         expect(session).toContain('AGENT.md')
     })
 
-    it('task.md clarifies root vs local format', () => {
-        expect(task).toContain('Root AGENT.md')
-        expect(task).toContain('free format')
-    })
-
-    it('crystallize.md allows free format for local files', () => {
-        expect(crystallize).toContain('free format')
-    })
-
-    it('PROTOCOL_TEMPLATE has explicit format rules section', () => {
+    it('PROTOCOL_TEMPLATE owns root vs local format rules', () => {
         expect(PROTOCOL_TEMPLATE).toContain('Format Rules')
+        expect(PROTOCOL_TEMPLATE).toContain('Root `AGENT.md`')
+        expect(PROTOCOL_TEMPLATE).toContain('Local `AGENT.md`')
     })
 })
 
@@ -123,6 +123,8 @@ describe('PROTOCOL_TEMPLATE — v0.3 design', () => {
     it('points to workflows as the executable contract', () => {
         expect(PROTOCOL_TEMPLATE).toContain('/session')
         expect(PROTOCOL_TEMPLATE).toContain('/task')
+        expect(PROTOCOL_TEMPLATE).toContain('/issue')
+        expect(PROTOCOL_TEMPLATE).toContain('/reconcile')
         expect(PROTOCOL_TEMPLATE).toContain('/crystallize')
     })
 
@@ -138,10 +140,125 @@ describe('PROTOCOL_TEMPLATE — v0.3 design', () => {
         expect(PROTOCOL_TEMPLATE).toContain('.autonomos/TASKS.md')
         expect(PROTOCOL_TEMPLATE).toContain('.autonomos/worklogs/')
     })
+
+    it('documents scoped context and intent-first objective resolution', () => {
+        expect(PROTOCOL_TEMPLATE).toContain("selected scope's ancestor chain")
+        expect(PROTOCOL_TEMPLATE).toContain('Explicit user request first')
+        expect(PROTOCOL_TEMPLATE).not.toContain('find . -name AGENT.md')
+    })
+
+    it('distinguishes durable guidance from historical evidence', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('Durable guidance for its directory scope')
+        expect(PROTOCOL_TEMPLATE).toContain('Historical session evidence')
+        expect(PROTOCOL_TEMPLATE).toContain('consolidate or replace obsolete entries')
+    })
 })
 
 // ---------------------------------------------------------------------------
-// 6. Workflow brevity — each must be concise enough for LLM working memory
+// 6. Durable-memory admission, placement, and retirement
+// ---------------------------------------------------------------------------
+describe('Durable-memory lifecycle', () => {
+    it('does not append every learning immediately', () => {
+        expect(task).toContain('crystallization candidate')
+        expect(task).not.toContain('Every new learning')
+        expect(task).not.toContain('append to an AGENT.md immediately')
+    })
+
+    it('routes session evidence, operational docs, and durable guidance separately', () => {
+        expect(crystallize).toContain('Would this still guide a different future task?')
+        expect(crystallize).toContain('observations, measurements, chronology')
+        expect(crystallize).toContain('existing component documentation')
+        expect(crystallize).toContain('stable, normative, non-duplicated guidance')
+        expect(crystallize).toContain('narrowest applicable `AGENT.md`')
+    })
+
+    it('retires stale guidance and rejects arbitrary file-count heuristics', () => {
+        expect(crystallize).toContain('Consolidate or replace superseded entries')
+        expect(crystallize).toContain('remove disproven guidance')
+        expect(crystallize).toContain('Never create an `AGENT.md` based on file count alone')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 7. Optional issue intake and task separation
+// ---------------------------------------------------------------------------
+describe('Issue intake and task separation', () => {
+    it('keeps issue intake optional for requests that need triage', () => {
+        expect(issue).toContain('Use this workflow only when the need or solution requires triage')
+        expect(issue).toContain('A direct, clear, authorized change may start as a task')
+        expect(PROTOCOL_TEMPLATE).toContain('optional `ISSUES.md`')
+    })
+
+    it('records solution-independent evidence before implementation', () => {
+        expect(issue).toContain('Record without prescribing implementation')
+        expect(issue).toContain('Evidence: observed facts or motivation')
+        expect(issue).toContain('Desired outcome: solution-independent success')
+        expect(issue).toContain('search for duplicates')
+    })
+
+    it('creates tasks only after acceptance and links both directions', () => {
+        expect(issue).toContain('do not create a task before an approach is accepted')
+        expect(issue).toContain('create one or more scoped tasks through `/task`')
+        expect(issue).toContain('link both directions')
+        expect(PROTOCOL_TEMPLATE).toContain('Tasks describe an accepted intervention')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 8. Evidence-aware reconciliation
+// ---------------------------------------------------------------------------
+describe('Evidence-aware reconciliation', () => {
+    it('classifies current, historical, and version-pinned artifacts', () => {
+        expect(reconcile).toContain('current guidance, current state, historical evidence')
+        expect(reconcile).toContain('version-pinned protocol content')
+        expect(reconcile).toContain('autonomos status')
+        expect(reconcile).toContain('autonomos update')
+    })
+
+    it('checks the expected drift classes against authoritative evidence', () => {
+        expect(reconcile).toContain('duplicates, contradictions, obsolete paths or technologies')
+        expect(reconcile).toContain('authoritative repository source, configuration, tests')
+        expect(reconcile).toContain('certain**, **uncertain**, or **historical-only')
+    })
+
+    it('corrects only certain findings and converges idempotently', () => {
+        expect(reconcile).toContain('Certain:** make the smallest correction')
+        expect(reconcile).toContain('Uncertain:** do not mutate the disputed facts')
+        expect(reconcile).toContain('Historical-only:** preserve it')
+        expect(reconcile).toContain('second pass produces no deterministic changes')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 9. User authority and truthful lifecycle status
+// ---------------------------------------------------------------------------
+describe('User authority and lifecycle status', () => {
+    it('keeps answer-only, read-only, and diagnostic requests non-mutating', () => {
+        expect(session).toContain("never expands the user's requested scope")
+        expect(session).toContain('answer, and do not start a task')
+        expect(task).toContain('diagnosis-without-fix requests must not mutate')
+        expect(crystallize).toContain('limited the work to read-only or no changes')
+        expect(crystallize).toContain('do not modify any artifact')
+    })
+
+    it('prioritizes explicit intent, then resumed work, then backlog priority', () => {
+        expect(session).toContain('user supplied an objective, it takes precedence')
+        expect(session).toContain('resume a `[/]` task')
+        expect(session).toContain('highest-priority `[ ]` task')
+    })
+
+    it('distinguishes complete, partial, and genuinely blocked work', () => {
+        for (const workflow of [task, crystallize]) {
+            expect(workflow).toContain('only if complete')
+            expect(workflow).toContain('unresolved dependency prevents progress')
+            expect(workflow).toContain('keep `[/]` for partial work')
+        }
+        expect(crystallize).toContain('Task: [x] / [/] / [!]')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 10. Workflow brevity — each must be concise enough for LLM working memory
 // ---------------------------------------------------------------------------
 describe('Workflow brevity', () => {
     const maxLines = 35 // allowing some margin over the 30-line target
@@ -160,6 +277,18 @@ describe('Workflow brevity', () => {
 
     it(`crystallize.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
         const body = crystallize.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`issue.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = issue.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`reconcile.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = reconcile.replace(/^---[\s\S]*?---\n/, '')
         const lines = body.trim().split('\n').length
         expect(lines).toBeLessThanOrEqual(maxLines)
     })

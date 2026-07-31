@@ -121,6 +121,8 @@ describe('init', () => {
         expect(existsSync(join(root, '.autonomos', 'manifest.json'))).toBe(true)
         expect(existsSync(join(root, 'AGENT.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'session.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'skills', 'issue.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'skills', 'reconcile.md'))).toBe(true)
     })
 
     it('refuses to install from a subdirectory in non-interactive mode', async () => {

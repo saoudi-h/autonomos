@@ -9,6 +9,7 @@ import {
     TASKS_FILE,
     type Manifest,
 } from '@autonomos/core'
+import { verifyProtocolArtifacts, type ArtifactIntegrity } from '../protocol-artifacts'
 
 interface StatusOptions {
     cwd?: string
@@ -22,13 +23,15 @@ interface TaskSummary {
     blocked: number
 }
 
-interface StatusResult {
+export interface StatusResult {
     success: boolean
     message: string
     protocolVersion?: string
     cliVersion?: string
     initialized: boolean
     taskSummary?: TaskSummary
+    artifactIntegrity?: ArtifactIntegrity
+    driftedArtifacts?: string[]
 }
 
 /**
@@ -83,6 +86,8 @@ export function status(options: StatusOptions = {}): StatusResult {
         }
     }
 
+    const integrity = verifyProtocolArtifacts(cwd, manifest.protocolVersion)
+
     return {
         success: true,
         message: 'Project status retrieved',
@@ -90,5 +95,7 @@ export function status(options: StatusOptions = {}): StatusResult {
         cliVersion: manifest.cliVersion,
         initialized: true,
         taskSummary,
+        artifactIntegrity: integrity.state,
+        driftedArtifacts: integrity.driftedFiles,
     }
 }

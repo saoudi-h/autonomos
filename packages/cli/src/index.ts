@@ -191,7 +191,10 @@ ${pc.bold('Examples:')}
         '--harness <name...>',
         'Install workflow files for the specified harness id(s) in addition to refreshing existing ones'
     )
-    .option('--all', 'Install workflow files for every known harness in addition to refreshing existing ones')
+    .option(
+        '--all',
+        'Install workflow files for every known harness in addition to refreshing existing ones'
+    )
     .action((opts: { harness?: string[]; all?: boolean }) => {
         const result = update({ harnesses: opts.harness, all: opts.all })
 
@@ -215,6 +218,7 @@ program
         `
 Displays information about the current project:
   - Protocol version
+  - Protocol artifact integrity for the installed version
   - CLI version used for initialization
   - Task summary (todo, in-progress, done, blocked)
 
@@ -233,6 +237,20 @@ ${pc.bold('Examples:')}
         console.log(
             `\n${pc.bold('📦 Protocol')} ${pc.green(`v${result.protocolVersion}`)} ${pc.dim(`(CLI v${result.cliVersion})`)}`
         )
+
+        if (result.artifactIntegrity === 'valid') {
+            console.log(`   ${pc.green('✓ Artifacts match the published protocol version')}`)
+        } else if (result.artifactIntegrity === 'drifted') {
+            console.log(`   ${pc.red('✗ Protocol artifact drift detected')}`)
+            for (const file of result.driftedArtifacts ?? []) {
+                console.log(`     ${pc.red('•')} ${file}`)
+            }
+            console.log(`   ${pc.dim('Run `autonomos update` to restore canonical artifacts.')}`)
+        } else {
+            console.log(
+                `   ${pc.yellow('! Artifact integrity is unverifiable with this CLI version')}`
+            )
+        }
 
         if (result.taskSummary) {
             const s = result.taskSummary

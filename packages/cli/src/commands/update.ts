@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 import {
     AUTONOMOS_DIR,
@@ -17,6 +16,7 @@ import {
 } from '@autonomos/core'
 
 import packageJson from '../../package.json' with { type: 'json' }
+import { buildTargetFilename, getWorkflowsDir, WORKFLOW_FILES } from '../protocol-artifacts'
 const CLI_VERSION: string = packageJson.version
 
 interface UpdateOptions {
@@ -40,34 +40,6 @@ interface UpdateResult {
     cliOutdated?: boolean
     /** Harnesses that had workflow files installed (or refreshed) by this run. */
     touchedHarnesses?: string[]
-}
-
-const WORKFLOW_FILES = [
-    'protocol-session.md',
-    'protocol-task.md',
-    'protocol-crystallize.md',
-] as const
-
-/**
- * Resolve the workflows directory inside the @autonomos/core package.
- */
-function getWorkflowsDir(): string {
-    const here = fileURLToPath(import.meta.url)
-    const candidates = [
-        resolve(here, '..', '..', '..', '..', 'core', 'src', 'workflows'),
-        resolve(here, '..', '..', '..', 'core', 'dist', 'workflows'),
-        resolve(here, '..', '..', '..', '..', 'core', 'dist', 'workflows'),
-    ]
-    for (const candidate of candidates) {
-        if (existsSync(candidate)) return candidate
-    }
-    throw new Error('Could not locate the workflows directory inside @autonomos/core')
-}
-
-function buildTargetFilename(sourceFile: string, targetExtension: string): string {
-    const withoutPrefix = sourceFile.replace(/^protocol-/, '')
-    const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '')
-    return withoutExt + targetExtension
 }
 
 /**
