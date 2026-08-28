@@ -16,6 +16,7 @@ export const WORKFLOW_FILES = [
     'protocol-task.md',
     'protocol-crystallize.md',
     'protocol-issue.md',
+    'protocol-adopt.md',
     'protocol-reconcile.md',
 ] as const
 

@@ -74,6 +74,15 @@ The CLI manages the `.autonomos/` directory in your project, which contains:
 
 It also creates a root `AGENT.md` file if it doesn't exist, which serves as the primary context for AI agents.
 
+Optional project-owned `.autonomos/specs/` and `.autonomos/decisions/` directories
+are first-use artifacts, not empty directories created by `init`. `update`
+refreshes managed protocol files and harness workflows while preserving those
+directories, `AGENT.md`, `TASKS.md`, `ISSUES.md`, worklogs, and user documentation.
+For semantic migration of an existing project's scattered knowledge, use the
+installed `/adopt` workflow: it proposes a source-to-destination map, waits for
+user approval, writes draft/proposed records, and leaves historical records
+unchanged. Follow it with `/reconcile`.
+
 ## License
 
 MIT

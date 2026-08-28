@@ -2,7 +2,7 @@
  * Agent Protocol Specification Version (Independent of Package versions)
  * This refers to the schema and behavioral contract version.
  */
-export const PROTOCOL_VERSION = '0.4.0-alpha'
+export const PROTOCOL_VERSION = '0.5.0-alpha'
 
 /**
  * Directory name for Autonomos configuration
@@ -33,3 +33,13 @@ export const AGENT_FILE = 'AGENT.md'
  * Worklogs directory name
  */
 export const WORKLOGS_DIR = 'worklogs'
+
+/**
+ * Optional project-owned directory for durable target-state specifications
+ */
+export const SPECS_DIR = 'specs'
+
+/**
+ * Optional project-owned directory for technical decision records (ADRs)
+ */
+export const DECISIONS_DIR = 'decisions'

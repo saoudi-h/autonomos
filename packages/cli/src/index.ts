@@ -43,6 +43,10 @@ ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos status')}        Show project status and task summary
   $ ${pc.cyan('autonomos agents')}        List all AGENT.md files in the project
 
+Project knowledge workflows installed for supported harnesses include
+${pc.cyan('/issue')} (triage), ${pc.cyan('/adopt')} (reviewable migration),
+${pc.cyan('/reconcile')} (drift audit), and ${pc.cyan('/crystallize')} (close-out).
+
 ${pc.bold('More info:')}
   Run '${pc.cyan('autonomos <command> --help')}' for detailed information about a command.
 `
@@ -63,9 +67,11 @@ This command creates the following structure:
   ${pc.white('AGENT.md')}             # Project context file (at root)
 
 Additionally, when one or more harnesses are selected, the protocol workflow
-files (session / task / crystallize) are installed at the harness-specific
+files (session / task / issue / adopt / reconcile / crystallize) are installed at the harness-specific
 target directory, e.g. .clinerules/workflows/ for Cline, .claude/skills/ for
 Claude Code, .agents/skills/ for the cross-tool standard (Cursor, Codex, etc.).
+Optional project-owned specs and decisions directories are created only when the
+project first adopts them; init never creates empty directories for them.
 
 ${pc.bold('Harness selection:')}
   (default)     Interactive multi-select prompt at the start of init.
@@ -163,8 +169,9 @@ program
     .addHelpText(
         'after',
         `
-This command updates ${pc.white('PROTOCOL.md')} to the latest version embedded in the CLI.
-Only ${pc.white('PROTOCOL.md')} is modified; your ${pc.white('TASKS.md')} and ${pc.white('AGENT.md')} files are preserved.
+This command updates the managed protocol artifacts embedded in the CLI.
+Your ${pc.white('AGENT.md')}, ${pc.white('TASKS.md')}, ${pc.white('ISSUES.md')},
+worklogs, specifications, decisions, and user documentation are preserved.
 
 It also:
   - Refreshes the @autonomos/cli devDependency in your package.json to the

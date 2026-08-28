@@ -8,8 +8,9 @@ This package contains the shared constants, types, templates, and parsers that d
 
 ## Features
 
-- **Constants**: Shared directory and file names (`.autonomos`, `manifest.json`, etc.)
+- **Constants**: Shared directory and file names (`.autonomos`, `manifest.json`, optional `specs/`, and `decisions/`)
 - **Templates**: Immutable templates for `PROTOCOL.md`, `TASKS.md`, `AGENT.md`, and `manifest.json`.
+- **Knowledge boundaries**: Markdown-first conventions for optional specifications and decision records (ADR), without requiring a parser.
 - **Types**: TypeScript definitions for protocol entities (Tasks, Agents, Manifest).
 - **Parsers**: Tools for extracting structured data from markdown (e.g., `TaskParser`).
 
@@ -28,6 +29,7 @@ const tasks = TaskParser.parse(markdownContent)
 - `src/constants.ts`: Global constants and versioning.
 - `src/types.ts`: Core type definitions.
 - `src/templates/`: Protocol file templates.
+- `src/workflows/`: Distributed harness workflow sources, including `/adopt` for reviewable legacy-knowledge migration.
 - `src/parsers/`: Logic for parsing protocol files.
 
 ## License
