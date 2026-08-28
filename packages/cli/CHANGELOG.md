@@ -1,5 +1,16 @@
 # @autonomos/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- [#9](https://github.com/saoudi-h/autonomos/pull/9) [`ab95834`](https://github.com/saoudi-h/autonomos/commit/ab95834b8d3226758ec0cbd1a53e9601a6eaa691) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Add optional project-owned specifications and decision records with a reviewable adoption workflow.
+
+### Patch Changes
+
+- Updated dependencies [[`ab95834`](https://github.com/saoudi-h/autonomos/commit/ab95834b8d3226758ec0cbd1a53e9601a6eaa691)]:
+    - @autonomos/core@0.5.0
+
 ## 0.4.1
 
 ### Patch Changes
