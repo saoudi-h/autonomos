@@ -62,6 +62,12 @@
     - **Impact:** following the protocol literally can broaden authorization, create artificial tasks, modify unrelated state, or report completion/blockage inaccurately.
     - **Expected behavior:** user authorization and requested interaction mode always bound protocol side effects. Permit read-only sessions without repository mutation, preserve `[/]` for honest partial progress, and reserve `[!]` for a concrete dependency that prevents progress.
     - **Validation:** cover answer-only requests, diagnostics without fixes, interrupted implementation, genuine blockage, and completed work.
+- [x] **[PROTO-13]** Define and distribute optional project-owned specifications and decision records with safe adoption workflow `Priority: 🔴` `Complexity: XL` *See: .autonomos/ISSUES.md#issue-01*
+    - Define the boundary between `specs/`, decision records (ADR), `AGENT.md`, `ISSUES.md`, `TASKS.md`, worklogs, and user-facing documentation.
+    - Add a Markdown-first specification and decision-record contract with status, scope, provenance, acceptance criteria, and replacement links.
+    - Extend protocol discovery and reconciliation with an explicit, reviewable adoption pass for existing projects; never rewrite historical worklogs, issues, or tasks.
+    - Keep `init` and `update` non-destructive: optional project-owned directories are first-use only and never treated as managed protocol artifacts.
+    - Validate workflows, distribution, idempotence, and migration safety before release.
 - [x] **[PROTO-01]** Define AGENT.md frontmatter spec (YAML metadata) `Priority: 🟠` `Complexity: M`
 - [x] **[PROTO-02]** Add "Quick Reference" section to PROTOCOL.md `Priority: 🔵` `Complexity: S`
 - [x] **[PROTO-03]** Define standard sections for package-level AGENT.md `Priority: ⚪` `Complexity: S`

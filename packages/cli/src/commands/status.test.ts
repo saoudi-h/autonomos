@@ -51,6 +51,7 @@ describe('status protocol artifact integrity', () => {
                 '.agent/workflows/session.md',
                 '.agent/workflows/task.md',
                 '.agent/workflows/crystallize.md',
+                '.agent/workflows/adopt.md',
             ])
         )
     })

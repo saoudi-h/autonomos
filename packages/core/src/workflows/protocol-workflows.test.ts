@@ -5,11 +5,12 @@ import { PROTOCOL_TEMPLATE } from '../templates/protocol'
 
 /**
  * Validates the content of all workflow files and the PROTOCOL_TEMPLATE.
- * These tests guard against regressions on the v0.3 design:
+ * These tests guard against regressions on the v0.5 design:
  * - No crystallization questions directed at the user
  * - No duplicated close-out procedures in session.md
  * - Scoped AGENT.md discovery (no CLI dependency in workflows)
  * - Durable-memory admission, placement, and retirement
+ * - Project-owned specifications, decision records, and safe adoption
  * - Workflows are short enough to fit in LLM working memory
  */
 
@@ -22,6 +23,7 @@ const crystallize = loadWorkflow('protocol-crystallize.md')
 const task = loadWorkflow('protocol-task.md')
 const issue = loadWorkflow('protocol-issue.md')
 const reconcile = loadWorkflow('protocol-reconcile.md')
+const adopt = loadWorkflow('protocol-adopt.md')
 
 // ---------------------------------------------------------------------------
 // 1. Crystallization — agent-directed, never asks the user
@@ -113,7 +115,7 @@ describe('AGENT.md format rules — consistent across files', () => {
 // ---------------------------------------------------------------------------
 // 5. PROTOCOL_TEMPLATE — compact reference, no workflow duplication
 // ---------------------------------------------------------------------------
-describe('PROTOCOL_TEMPLATE — v0.3 design', () => {
+describe('PROTOCOL_TEMPLATE — v0.5 design', () => {
     it('does not contain Phase 1/2/3 workflow steps', () => {
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 1:')
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 2:')
@@ -124,6 +126,7 @@ describe('PROTOCOL_TEMPLATE — v0.3 design', () => {
         expect(PROTOCOL_TEMPLATE).toContain('/session')
         expect(PROTOCOL_TEMPLATE).toContain('/task')
         expect(PROTOCOL_TEMPLATE).toContain('/issue')
+        expect(PROTOCOL_TEMPLATE).toContain('/adopt')
         expect(PROTOCOL_TEMPLATE).toContain('/reconcile')
         expect(PROTOCOL_TEMPLATE).toContain('/crystallize')
     })
@@ -168,13 +171,16 @@ describe('Durable-memory lifecycle', () => {
         expect(crystallize).toContain('Would this still guide a different future task?')
         expect(crystallize).toContain('observations, measurements, chronology')
         expect(crystallize).toContain('existing component documentation')
-        expect(crystallize).toContain('stable, normative, non-duplicated guidance')
-        expect(crystallize).toContain('narrowest applicable `AGENT.md`')
+        expect(crystallize).toContain('stable operating guidance')
+        expect(crystallize).toContain('target requirements to `specs/`')
+        expect(crystallize).toContain('decision rationale to `decisions/`')
     })
 
     it('retires stale guidance and rejects arbitrary file-count heuristics', () => {
-        expect(crystallize).toContain('Consolidate or replace superseded entries')
-        expect(crystallize).toContain('remove disproven guidance')
+        expect(crystallize).toContain('Consolidate or replace superseded and disproven guidance')
+        expect(crystallize).toContain(
+            'do not turn historical worklogs, issues, or tasks into current specs/decisions'
+        )
         expect(crystallize).toContain('Never create an `AGENT.md` based on file count alone')
     })
 })
@@ -205,7 +211,38 @@ describe('Issue intake and task separation', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 8. Evidence-aware reconciliation
+// 8. Project-owned specifications, decisions, and adoption
+// ---------------------------------------------------------------------------
+describe('Project knowledge boundaries and adoption', () => {
+    it('defines optional specifications and decision records without automation', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('`.autonomos/specs/`')
+        expect(PROTOCOL_TEMPLATE).toContain('`.autonomos/decisions/`')
+        expect(PROTOCOL_TEMPLATE).toContain('do not create or overwrite them')
+        expect(PROTOCOL_TEMPLATE).toContain(
+            'no parser or independent version is required initially'
+        )
+        expect(PROTOCOL_TEMPLATE).toContain('Acceptance does not mean implementation is complete')
+    })
+
+    it('routes accepted target state separately from decisions and history', () => {
+        expect(task).toContain('accepted specifications and decision records')
+        expect(issue).toContain('Proposed directions remain hypotheses')
+        expect(crystallize).toContain('target requirements to `specs/`')
+        expect(crystallize).toContain('decision rationale to `decisions/`')
+        expect(reconcile).toContain('Use `/adopt` for history-to-artifact extraction')
+    })
+
+    it('requires a reviewable, additive adoption pass', () => {
+        expect(adopt).toContain('source → destination map')
+        expect(adopt).toContain('Show the map and unresolved conflicts to the user before writing')
+        expect(adopt).toContain('Do not rewrite `worklogs/`, `ISSUES.md`, `TASKS.md`')
+        expect(adopt).toContain('Copy and link by default')
+        expect(adopt).toContain('run `/reconcile` for a second pass')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 9. Evidence-aware reconciliation
 // ---------------------------------------------------------------------------
 describe('Evidence-aware reconciliation', () => {
     it('classifies current, historical, and version-pinned artifacts', () => {
@@ -230,7 +267,7 @@ describe('Evidence-aware reconciliation', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 9. User authority and truthful lifecycle status
+// 10. User authority and truthful lifecycle status
 // ---------------------------------------------------------------------------
 describe('User authority and lifecycle status', () => {
     it('keeps answer-only, read-only, and diagnostic requests non-mutating', () => {
@@ -258,7 +295,7 @@ describe('User authority and lifecycle status', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 10. Workflow brevity — each must be concise enough for LLM working memory
+// 11. Workflow brevity — each must be concise enough for LLM working memory
 // ---------------------------------------------------------------------------
 describe('Workflow brevity', () => {
     const maxLines = 35 // allowing some margin over the 30-line target
@@ -289,6 +326,12 @@ describe('Workflow brevity', () => {
 
     it(`reconcile.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
         const body = reconcile.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`adopt.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = adopt.replace(/^---[\s\S]*?---\n/, '')
         const lines = body.trim().split('\n').length
         expect(lines).toBeLessThanOrEqual(maxLines)
     })

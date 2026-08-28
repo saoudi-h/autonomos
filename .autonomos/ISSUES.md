@@ -3,7 +3,7 @@
 ## [ISSUE-01] Specifications have no first-class artifact boundary
 
 - **Type:** proposal
-- **Status:** open
+- **Status:** resolved
 - **Evidence:** While planning Herald V1, the project needed durable product scope,
   engineering operating rules, validation criteria, and architectural constraints
   that guide several future tasks. `AGENT.md` is intentionally concise guidance,
@@ -36,4 +36,9 @@
   a directory, whether a dedicated workflow is necessary, how accepted
   specifications produce or constrain tasks, and how specifications relate to ADRs
   without duplicating decision rationale.
-- **Tasks:** none
+- **Resolution:** Protocol v0.5.0-alpha adopts optional Markdown-first `specs/` and
+  `decisions/` directories, keeps `init` and `update` non-destructive, and adds the
+  explicit `/adopt` workflow for reviewable legacy-knowledge migration. No parser or
+  automatic historical rewrite is included.
+- **Tasks:** PROTO-13
+- **Artifacts:** [SPEC-001](specs/SPEC-001-project-knowledge-artifacts.md), [ADR-001](decisions/ADR-001-project-knowledge-and-adoption.md)

@@ -5,7 +5,7 @@ import { z } from 'zod'
  *
  * At least one of `workflowsDir`, `targetDir`, or `skillsDir` must be defined.
  *
- * - `workflowsDir`: Where session.md, task.md, crystallize.md are written.
+ * - `workflowsDir`: Where the protocol workflow files are written.
  *    Preferred field — used by most harnesses.
  * - `targetDir`: Single directory (legacy, like Cline's .clinerules/workflows/).
  * - `skillsDir`: Skills directory (legacy, for harnesses that don't distinguish

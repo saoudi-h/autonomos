@@ -122,7 +122,43 @@ describe('init', () => {
         expect(existsSync(join(root, 'AGENT.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'session.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'issue.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'reconcile.md'))).toBe(true)
+        expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
+        expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
+    })
+
+    it('preserves project-owned knowledge when adding a harness to an initialized project', async () => {
+        root = buildTree()
+        mkdirSync(join(root, '.autonomos', 'worklogs'), { recursive: true })
+        mkdirSync(join(root, '.autonomos', 'specs'), { recursive: true })
+        mkdirSync(join(root, '.autonomos', 'decisions'), { recursive: true })
+        mkdirSync(join(root, 'docs'), { recursive: true })
+
+        const preserved = {
+            [join(root, 'AGENT.md')]: '# Project guidance\n',
+            [join(root, '.autonomos', 'TASKS.md')]: '- [/] Project task\n',
+            [join(root, '.autonomos', 'ISSUES.md')]: '# Existing issue\n',
+            [join(root, '.autonomos', 'worklogs', 'history.md')]: '# Historical record\n',
+            [join(root, '.autonomos', 'specs', 'SPEC-01.md')]: '# Project specification\n',
+            [join(root, '.autonomos', 'decisions', 'ADR-01.md')]: '# Project decision\n',
+            [join(root, 'docs', 'notes.md')]: '# Project notes\n',
+        }
+        for (const [file, content] of Object.entries(preserved)) writeFileSync(file, content)
+
+        const result = await init({
+            cwd: root,
+            noPrompt: true,
+            noInstall: true,
+            harnesses: ['claude-code'],
+            interactiveOverride: false,
+        })
+
+        expect(result.success).toBe(true)
+        for (const [file, content] of Object.entries(preserved)) {
+            expect(readFileSync(file, 'utf-8')).toBe(content)
+        }
+        expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
     })
 
     it('refuses to install from a subdirectory in non-interactive mode', async () => {
@@ -177,9 +213,8 @@ describe('init', () => {
         })
         expect(result.success).toBe(true)
         const updated = JSON.parse(readFileSync(pkgPath, 'utf-8'))
-        // The current CLI_VERSION (from the local package.json) is 0.3.0;
-        // we don't want to hardcode that here, so we just assert that
-        // the new spec is not the old stale one and that it starts with ^.
+        // Do not hardcode the current CLI version here; assert only that
+        // the stale spec was replaced and that the new spec starts with ^.
         expect(updated.devDependencies['@autonomos/cli']).toMatch(/^\^/)
         expect(updated.devDependencies['@autonomos/cli']).not.toBe('^0.2.0')
         expect(result.warnings.join('\n')).toMatch(/Bumped @autonomos\/cli/)
