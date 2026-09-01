@@ -18,6 +18,17 @@
 - [x] **[CLI-04]** Implement `autonomos status` command (show protocol version, tasks summary) `Priority: 🔵` `Complexity: M`
 - [x] **[CLI-05]** Add colorized output with chalk/picocolors `Priority: ⚪` `Complexity: S`
 
+### Design Intelligence
+
+- [x] **[DESIGN-01]** Research and prototype a project-specific design meta-skill `Priority: 🔴` `Complexity: XL`
+    - Audit the supplied design skills and the Cursor plugins repository, then identify other authoritative or demonstrably useful practices.
+    - Separate reusable design reasoning from project-owned art direction, content/data modeling, examples, prohibitions, and review criteria.
+    - Produce a draft specification and a first skill prototype with a decision tree, required artifacts, anti-template heuristics, critique loop, and pilot exit criteria.
+    - Keep the first release project-owned and Markdown-first; do not alter the shipped Autonomos protocol until a pilot demonstrates stable value.
+- [x] **[DESIGN-03]** Turn `design-direction` into a practical calibration loop with project contracts, scenarios, correction promotion, and lightweight validation `Priority: 🔴` `Complexity: L`
+- [x] **[DESIGN-02]** Pilot `design-direction` on three different interface surface types and measure correction cost, generic-pattern findings, rendered evidence, and continuation fidelity `Priority: 🔴` `Complexity: L` *See: .autonomos/worklogs/2026-09-01-DESIGN-02.md*
+- [x] **[DESIGN-04]** Promote the optional `/design` workflow into Protocol v0.6.0-alpha and coordinate consumer reference boundaries `Priority: 🔴` `Complexity: L` *See: .autonomos/worklogs/2026-09-01-DESIGN-04.md*
+
 ### Core Enhancements
 
 - [x] **[CORE-01]** Add AGENT.md parser (extract sections, metadata) `Priority: 🟠` `Complexity: M`

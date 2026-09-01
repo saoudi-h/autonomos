@@ -18,6 +18,7 @@ status: "active"
 
 - **Commits:** Conventional Commits
 - **Language:** English
+- **Design:** If present, read root \`DESIGN.md\` before changing a user-facing surface; use \`/design\` for new direction, critique, or design-knowledge extraction.
 
 ## 🏗 Stack & Architecture
 

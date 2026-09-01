@@ -1,9 +1,9 @@
 import { PROTOCOL_VERSION } from '../constants'
 
 /**
- * The Protocol kernel template — v0.5
+ * The Protocol kernel template — v0.6
  *
- * Design principles (v0.5):
+ * Design principles (v0.6):
  * - PROTOCOL.md is a compact REFERENCE, not an executable workflow.
  * - All step-by-step instructions live in the workflow files.
  * - No duplication between PROTOCOL.md and workflows.
@@ -22,6 +22,7 @@ export const PROTOCOL_TEMPLATE = `# AUTONOMOS PROTOCOL (v${PROTOCOL_VERSION})
 | Triage a problem or proposal     | Read the optional \`/issue\` workflow                                                |
 | Adopt existing project knowledge | Read the optional \`/adopt\` workflow                                                |
 | Audit accumulated drift          | Read the \`/reconcile\` workflow                                                     |
+| Design or critique a surface     | Read the optional \`/design\` workflow                                               |
 | End a session                    | Read the \`/crystallize\` workflow                                                   |
 | Get context                      | Read root \`AGENT.md\`, then only the selected scope's ancestor chain                |
 | Resolve objective                | Explicit user request first; otherwise resume \`[/]\` or pick highest-priority \`[ ]\` |
@@ -37,8 +38,16 @@ export const PROTOCOL_TEMPLATE = `# AUTONOMOS PROTOCOL (v${PROTOCOL_VERSION})
 | \`worklogs/\`     | \`.autonomos/worklogs/\`     | Historical session evidence, not current guidance |
 | \`specs/\`        | \`.autonomos/specs/\`        | Optional project-owned normative target state     |
 | \`decisions/\`    | \`.autonomos/decisions/\`    | Optional project-owned decision records (ADRs)    |
+| \`DESIGN.md\`     | Root or target scope      | Optional project-owned visual/interaction direction |
 | \`PROTOCOL.md\`   | \`.autonomos/PROTOCOL.md\`   | This file — read-only reference                   |
 | \`manifest.json\` | \`.autonomos/manifest.json\` | Protocol version metadata                         |
+
+## Design Direction Boundary
+
+\`DESIGN.md\` is optional project-owned direction, not a managed protocol
+artifact. Use \`/design\` when a surface needs direction, critique, or
+design-knowledge extraction; keep the project's identity and examples local.
+The workflow supplies routing and evidence rules, not a universal visual style.
 
 ## AGENT.md Format Rules
 

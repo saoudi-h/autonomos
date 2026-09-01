@@ -59,7 +59,7 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.5.0-alpha)
+## 📜 The Protocol (v0.6.0-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 
@@ -70,6 +70,7 @@ The protocol is centered around the `.autonomos/` directory:
 - **`worklogs/`**: Detailed history of sessions to save context tokens.
 - **`specs/`**: Optional, project-owned Markdown records for accepted target behavior and requirements.
 - **`decisions/`**: Optional, project-owned Markdown records for technical choices and rationale. ADR is a common convention, not a required external standard.
+- **`DESIGN.md`**: Optional, project-owned visual and interaction direction; use the installed `/design` workflow when a surface needs direction, critique, or design-knowledge extraction.
 - **`AGENT.md`**: (Root level) The identity and context anchor for the agent.
 
 ## 🔄 Upgrading & Migration
@@ -94,6 +95,10 @@ This performs the mechanical update:
 
 It does not create empty `specs/` or `decisions/` directories and it does not
 infer missing records from project history.
+
+The update also installs the optional `/design` workflow for harnesses already
+present in the project. It does not create or overwrite `DESIGN.md`; that
+contract stays project-owned.
 
 For a declared protocol version, `PROTOCOL.md` and installed harness workflows
 must exactly match the published artifacts. Project agents treat them as read-only;

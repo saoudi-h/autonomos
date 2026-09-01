@@ -5,7 +5,7 @@ import { PROTOCOL_TEMPLATE } from '../templates/protocol'
 
 /**
  * Validates the content of all workflow files and the PROTOCOL_TEMPLATE.
- * These tests guard against regressions on the v0.5 design:
+ * These tests guard against regressions on the v0.6 design:
  * - No crystallization questions directed at the user
  * - No duplicated close-out procedures in session.md
  * - Scoped AGENT.md discovery (no CLI dependency in workflows)
@@ -24,6 +24,7 @@ const task = loadWorkflow('protocol-task.md')
 const issue = loadWorkflow('protocol-issue.md')
 const reconcile = loadWorkflow('protocol-reconcile.md')
 const adopt = loadWorkflow('protocol-adopt.md')
+const design = loadWorkflow('protocol-design.md')
 
 // ---------------------------------------------------------------------------
 // 1. Crystallization — agent-directed, never asks the user
@@ -115,7 +116,7 @@ describe('AGENT.md format rules — consistent across files', () => {
 // ---------------------------------------------------------------------------
 // 5. PROTOCOL_TEMPLATE — compact reference, no workflow duplication
 // ---------------------------------------------------------------------------
-describe('PROTOCOL_TEMPLATE — v0.5 design', () => {
+describe('PROTOCOL_TEMPLATE — v0.6 design', () => {
     it('does not contain Phase 1/2/3 workflow steps', () => {
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 1:')
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 2:')
@@ -129,6 +130,7 @@ describe('PROTOCOL_TEMPLATE — v0.5 design', () => {
         expect(PROTOCOL_TEMPLATE).toContain('/adopt')
         expect(PROTOCOL_TEMPLATE).toContain('/reconcile')
         expect(PROTOCOL_TEMPLATE).toContain('/crystallize')
+        expect(PROTOCOL_TEMPLATE).toContain('/design')
     })
 
     it('contains the quick reference table', () => {
@@ -154,6 +156,7 @@ describe('PROTOCOL_TEMPLATE — v0.5 design', () => {
         expect(PROTOCOL_TEMPLATE).toContain('Durable guidance for its directory scope')
         expect(PROTOCOL_TEMPLATE).toContain('Historical session evidence')
         expect(PROTOCOL_TEMPLATE).toContain('consolidate or replace obsolete entries')
+        expect(PROTOCOL_TEMPLATE).toContain('Optional project-owned visual/interaction direction')
     })
 })
 
@@ -211,7 +214,28 @@ describe('Issue intake and task separation', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 8. Project-owned specifications, decisions, and adoption
+// 8. Project-specific design direction
+// ---------------------------------------------------------------------------
+describe('/design — project-specific direction and evidence', () => {
+    it('routes grounding, branching, contract, review, and persistence', () => {
+        expect(design).toContain('real or representative content')
+        expect(design).toContain('2–3 structurally different candidates')
+        expect(design).toContain('project-owned `DESIGN.md`')
+        expect(design).toContain('at least one')
+        expect(design).toContain('revision')
+        expect(design).toContain('source → destination map')
+        expect(design).toContain('wait for approval')
+    })
+
+    it('keeps project direction optional and anti-defaults diagnostic', () => {
+        expect(design).toContain('never create it merely to add ceremony')
+        expect(design).toContain('not bans')
+        expect(design).toMatch(/do not\s+mutate on answer-only or read-only requests/)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 9. Project-owned specifications, decisions, and adoption
 // ---------------------------------------------------------------------------
 describe('Project knowledge boundaries and adoption', () => {
     it('defines optional specifications and decision records without automation', () => {
@@ -242,7 +266,7 @@ describe('Project knowledge boundaries and adoption', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 9. Evidence-aware reconciliation
+// 10. Evidence-aware reconciliation
 // ---------------------------------------------------------------------------
 describe('Evidence-aware reconciliation', () => {
     it('classifies current, historical, and version-pinned artifacts', () => {
@@ -267,7 +291,7 @@ describe('Evidence-aware reconciliation', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 10. User authority and truthful lifecycle status
+// 11. User authority and truthful lifecycle status
 // ---------------------------------------------------------------------------
 describe('User authority and lifecycle status', () => {
     it('keeps answer-only, read-only, and diagnostic requests non-mutating', () => {
@@ -295,7 +319,7 @@ describe('User authority and lifecycle status', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 11. Workflow brevity — each must be concise enough for LLM working memory
+// 12. Workflow brevity — each must be concise enough for LLM working memory
 // ---------------------------------------------------------------------------
 describe('Workflow brevity', () => {
     const maxLines = 35 // allowing some margin over the 30-line target
@@ -332,6 +356,12 @@ describe('Workflow brevity', () => {
 
     it(`adopt.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
         const body = adopt.replace(/^---[\s\S]*?---\n/, '')
+        const lines = body.trim().split('\n').length
+        expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+
+    it(`design.md is ≤${maxLines} lines (excluding frontmatter)`, () => {
+        const body = design.replace(/^---[\s\S]*?---\n/, '')
         const lines = body.trim().split('\n').length
         expect(lines).toBeLessThanOrEqual(maxLines)
     })

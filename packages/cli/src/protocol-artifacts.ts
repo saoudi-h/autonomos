@@ -18,6 +18,7 @@ export const WORKFLOW_FILES = [
     'protocol-issue.md',
     'protocol-adopt.md',
     'protocol-reconcile.md',
+    'protocol-design.md',
 ] as const
 
 export type ArtifactIntegrity = 'valid' | 'drifted' | 'unverifiable'

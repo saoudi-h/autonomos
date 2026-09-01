@@ -45,7 +45,8 @@ ${pc.bold('Examples:')}
 
 Project knowledge workflows installed for supported harnesses include
 ${pc.cyan('/issue')} (triage), ${pc.cyan('/adopt')} (reviewable migration),
-${pc.cyan('/reconcile')} (drift audit), and ${pc.cyan('/crystallize')} (close-out).
+${pc.cyan('/reconcile')} (drift audit), ${pc.cyan('/design')} (project-specific
+direction), and ${pc.cyan('/crystallize')} (close-out).
 
 ${pc.bold('More info:')}
   Run '${pc.cyan('autonomos <command> --help')}' for detailed information about a command.
@@ -67,11 +68,12 @@ This command creates the following structure:
   ${pc.white('AGENT.md')}             # Project context file (at root)
 
 Additionally, when one or more harnesses are selected, the protocol workflow
-files (session / task / issue / adopt / reconcile / crystallize) are installed at the harness-specific
+files (session / task / issue / adopt / reconcile / design / crystallize) are installed at the harness-specific
 target directory, e.g. .clinerules/workflows/ for Cline, .claude/skills/ for
 Claude Code, .agents/skills/ for the cross-tool standard (Cursor, Codex, etc.).
 Optional project-owned specs and decisions directories are created only when the
-project first adopts them; init never creates empty directories for them.
+project first adopts them; \`DESIGN.md\` is never created automatically, and init
+never creates empty directories for project-owned records.
 
 ${pc.bold('Harness selection:')}
   (default)     Interactive multi-select prompt at the start of init.

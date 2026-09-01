@@ -42,6 +42,7 @@ describe('update', () => {
         expect(existsSync(join(root, '.agent', 'workflows', 'issue.md'))).toBe(true)
         expect(existsSync(join(root, '.agent', 'workflows', 'adopt.md'))).toBe(true)
         expect(existsSync(join(root, '.agent', 'workflows', 'reconcile.md'))).toBe(true)
+        expect(existsSync(join(root, '.agent', 'workflows', 'design.md'))).toBe(true)
         expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
 

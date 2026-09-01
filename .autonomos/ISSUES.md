@@ -1,5 +1,43 @@
 # PROJECT ISSUES & PROPOSALS
 
+## [ISSUE-02] AI-assisted interfaces converge on recognizable template slop
+
+- **Type:** proposal
+- **Status:** resolved
+- **Evidence:** The user reports that current AI-assisted interface generation can
+  produce polished fragments while repeatedly converging on a small set of
+  recognizable visual patterns. The result often ignores the product's actual
+  content, lacks a coherent project-specific art direction, and requires costly
+  human iteration to correct defects that the agent does not reliably notice.
+- **Impact:** Autonomos has no reusable way to make an agent discover a distinct
+  visual direction, connect design decisions to real product data, reject generic
+  or AI-signaling patterns, and preserve the resulting design language for later
+  tasks. Merely adding more generic design rules risks reproducing the same
+  convergence problem at a higher level.
+- **Desired outcome:** A Markdown-first, project-owned design operating system
+  that begins with art-direction discovery, branches on product context, records
+  decisions and examples, guides implementation and critique, and evaluates
+  outputs for coherence, originality, usability, and fidelity to the source
+  material. It should be possible to reuse generic principles without forcing a
+  generic visual result.
+- **Proposed direction:** Research existing design-oriented agent skills and
+  workflows, including the supplied repositories, then extract a small
+  meta-skill plus project-specific artifacts. Treat anti-template rules as
+  heuristics and review gates rather than a universal visual style. Pilot the
+  model before changing the core Autonomos protocol or making new artifacts
+  mandatory for all projects.
+- **Questions:** Which existing practices materially improve design outcomes?
+  What questions and branching decisions are needed to derive a genuinely
+  project-specific direction? Which rules belong in the reusable meta-skill,
+  which belong in a project's art-direction record, and how can visual review
+  become more reliable than subjective back-and-forth?
+- **Tasks:** DESIGN-01, DESIGN-02, DESIGN-03, DESIGN-04
+- **Resolution:** The H-06 through H-11 pilot produced an optional, concise
+  `/design` workflow for Protocol v0.6.0-alpha. It grounds decisions in
+  product content, keeps project identity in an optional `DESIGN.md`, routes
+  scattered knowledge through a reviewable source → destination map, and
+  requires rendered evidence without imposing a universal visual style.
+
 ## [ISSUE-01] Specifications have no first-class artifact boundary
 
 - **Type:** proposal

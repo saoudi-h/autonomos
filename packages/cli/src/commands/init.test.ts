@@ -124,6 +124,7 @@ describe('init', () => {
         expect(existsSync(join(root, '.claude', 'skills', 'issue.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'reconcile.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'skills', 'design.md'))).toBe(true)
         expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
     })
