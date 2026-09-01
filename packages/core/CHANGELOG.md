@@ -1,5 +1,11 @@
 # @autonomos/core
 
+## 0.6.0
+
+### Minor Changes
+
+- [`f20d396`](https://github.com/saoudi-h/autonomos/commit/f20d3962df53f4262eac482ab14908c22a465b8a) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Add the optional `/design` protocol workflow for project-specific visual and interaction direction, critique, rendered evidence, and reviewable design-knowledge extraction.
+
 ## 0.5.0
 
 ### Minor Changes
