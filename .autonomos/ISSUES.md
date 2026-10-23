@@ -80,3 +80,42 @@
   automatic historical rewrite is included.
 - **Tasks:** PROTO-13
 - **Artifacts:** [SPEC-001](specs/SPEC-001-project-knowledge-artifacts.md), [ADR-001](decisions/ADR-001-project-knowledge-and-adoption.md)
+
+## [ISSUE-03] Define archival lifecycle and bounded context for accumulated project artifacts
+
+- **Type:** problem
+- **Status:** open
+- **Evidence:** A long-running consumer project (Postdot) measured its Autonomos
+  directory at approximately 5.3 MB, with a 231 KB task registry dominated by
+  completed work, about 4,400 issue lines, 634 worklogs and 88 decision records.
+  Its ISSUE-182 and ISSUE-183 also report AGENT.md accumulating dated progress
+  and journal entries. The protocol defines artifact creation and preservation,
+  but no explicit archival lifecycle. `/reconcile` detects drift and preserves
+  historical evidence; it does not define archival eligibility, bounded discovery
+  or how oversized current-state registries should be organized.
+- **Impact:** Routine bootstrap can load mostly obsolete history. Old constraints,
+  expired directives and superseded experiments can compete with current code and
+  distort an agent's decisions. Unstructured deletion risks losing provenance;
+  indefinite retention in active context also causes harm. AGENT.md can become a
+  journal instead of concise current operating guidance.
+- **Desired outcome:** The protocol defines explicit, reviewable criteria for
+  keeping, consolidating, superseding and archiving each artifact class. Current
+  guidance/state stays small enough to inspect routinely, while history remains
+  traceable and discoverable on demand without being loaded by default. Active
+  directives and unresolved dependencies remain discoverable. Archival preserves
+  identifiers, provenance and references, and can be reviewed and reversed.
+- **Questions:** Evaluate a dedicated archival workflow and its relationship to
+  `/reconcile` and `/crystallize`; eligibility and exceptions beyond age alone;
+  lifecycle of dated owner directives; separation of normative guidance and
+  historical evidence; bounded indexes, pagination or splitting of TASKS.md and
+  ISSUES.md; broken-link and CLI discovery/status behavior; migration of existing
+  projects; and whether recurring cleanup sessions need explicit triggers.
+  Pagination, a new workflow and metadata are candidates, not selected designs.
+- **Constraints:** Keep the design Markdown-first, tool-neutral and low-friction.
+  No automatic bulk deletion or historical rewrite. Preserve immutable installed
+  protocol artifacts in consumer projects; evolve doctrine and tooling here and
+  distribute coordinated versions. Prefer criteria and a small workflow over
+  mandatory infrastructure unless repository evidence justifies more.
+- **Related:** Postdot ISSUE-182 and ISSUE-183; current `/reconcile`, `/crystallize`
+  and `/adopt` workflows; SPEC-001 project knowledge artifact boundaries.
+- **Tasks:** none — problem intake only; implementation approach not yet chosen.
