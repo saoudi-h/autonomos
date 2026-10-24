@@ -121,3 +121,35 @@
 - **Tasks:** PROTO-14 — owner accepted the archival proposal on 2026-10-24; SPEC-003 records the contract. Implementation and coordinated release preparation are complete; remote publication is not part of this task.
 
 - **Resolution (2026-10-24):** PROTO-14 implements accepted SPEC-003: Protocol v0.7.0-alpha doctrine, evidence-aware batch archival in `/reconcile`, stronger `/crystallize`, scoped history discovery and `status --history`. A coordinated minor changeset prepares both packages. Unit, distribution/preservation, static and packaged CLI checks pass. No consumer cleanup or remote publication was performed. [Evidence](worklogs/2026-10-24-PROTO-14.md).
+
+## [ISSUE-04] Duplicate task IDs have no enforcement or sanctioned resolution path
+
+- **Type:** problem
+- **Status:** open
+- **Evidence:** A consumer project (commerce, protocol 0.7.0-alpha) has three task
+  IDs reused across unrelated completed tasks in its current `TASKS.md`: `OPS-01`
+  (BuildKit cache, and a Chatwoot install), `PERF-09` (storefront rendering audit,
+  and the product-route `instant-shell-url-data` warning), and `SEC-02` (Meilisearch
+  sync key, and production secret rotation). Their worklogs reuse the same IDs in
+  filenames. `readTaskRegistry` and `status` already return `duplicateIds` /
+  `duplicateTaskIds` by default, yet nothing fails, warns in the workflows, or
+  prompts resolution. The protocol's ID rule (Archived IDs remain reserved; search
+  before assigning) is guidance only.
+- **Impact:** References such as `[PERF-09]` in `ISSUES.md` and worklog links resolve
+  to more than one task. Agents can attach evidence to the wrong task. The protocol
+  forbids rewriting historical identifiers and archival is "move, not rewrite", so a
+  consumer that wants to fix an existing duplicate has no documented non-destructive
+  procedure and must invent one locally.
+- **Desired outcome:** Duplicate IDs are caught where they are introduced (intake,
+  task creation, or the pre-commit/`status` path) with a clear non-zero or blocking
+  signal. Existing duplicates in a consumer project have a documented resolution that
+  keeps historical evidence and filenames intact (for example, a disambiguating alias
+  recorded in the registry, with the reassignment noted in the task body).
+- **Constraints:** Keep the design Markdown-first and tool-neutral. Any new check must
+  remain optional for projects without the CLI. No historical rewrite or automatic
+  renaming of archived or completed work.
+- **Related:** SPEC-003 (archived IDs remain reserved; `status --history` duplicate
+  reporting); PROTO-14; `packages/core/src/parsers/task-registry.ts`;
+  `packages/cli/src/commands/status.ts`; commerce `.autonomos/TASKS.md` (lines 29,
+  112, 113, 133, 172, 223).
+- **Tasks:** none
