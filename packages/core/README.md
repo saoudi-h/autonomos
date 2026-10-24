@@ -8,7 +8,7 @@ This package contains the shared constants, types, templates, and parsers that d
 
 ## Features
 
-- **Constants**: Shared directory and file names (`.autonomos`, `manifest.json`, optional `specs/`, and `decisions/`)
+- **Constants**: Shared directory and file names (`.autonomos`, `manifest.json`, optional `archive/`, `specs/`, and `decisions/`)
 - **Templates**: Immutable templates for `PROTOCOL.md`, `TASKS.md`, `AGENT.md`, and `manifest.json`.
 - **Knowledge boundaries**: Markdown-first conventions for optional specifications and decision records (ADR), without requiring a parser.
 - **Types**: TypeScript definitions for protocol entities (Tasks, Agents, Manifest).
@@ -23,6 +23,26 @@ console.log(`Current Protocol Version: ${PROTOCOL_VERSION}`)
 
 const tasks = TaskParser.parse(markdownContent)
 ```
+
+## Current and Historical Task IDs
+
+```typescript
+import { readTaskRegistry } from '@autonomos/core'
+
+const registry = readTaskRegistry(projectRoot, { history: true })
+const reservedIds = new Set([...registry.current, ...registry.archived].map(task => task.id))
+// Do not allocate a new ID until registry.complete is true and duplicates are resolved.
+console.log(registry.duplicateIds, registry.warnings, reservedIds)
+```
+
+The default reads only the current task registry. Explicit history recursively
+reads `.autonomos/archive/**/TASKS.md`, without following symbolic links. References
+include ID, status, source path relative to the supplied root, and line number.
+`TaskParser.references` recognizes task IDs/status without optional metadata and
+ignores fenced examples; the existing detailed `TaskParser.parse` API is unchanged.
+`complete` describes the requested read, not semantic validity or task completion.
+The reader never mutates or decides which records are obsolete. Archives and their
+index remain project-owned Markdown; no CLI or Git is required for retrieval.
 
 ## Structure
 

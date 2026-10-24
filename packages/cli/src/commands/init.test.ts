@@ -125,6 +125,7 @@ describe('init', () => {
         expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'reconcile.md'))).toBe(true)
         expect(existsSync(join(root, '.claude', 'skills', 'design.md'))).toBe(true)
+        expect(existsSync(join(root, '.autonomos', 'archive'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
     })
@@ -135,8 +136,15 @@ describe('init', () => {
         mkdirSync(join(root, '.autonomos', 'specs'), { recursive: true })
         mkdirSync(join(root, '.autonomos', 'decisions'), { recursive: true })
         mkdirSync(join(root, 'docs'), { recursive: true })
+        mkdirSync(join(root, '.autonomos', 'archive', 'old-batch', 'worklogs'), { recursive: true })
 
         const preserved = {
+            [join(root, '.autonomos', 'archive', 'README.md')]: '# Archive topic index\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'TASKS.md')]:
+                '- [x] **[OLD-01]** Historical task\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'ISSUES.md')]: '# Resolved issue\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'worklogs', 'evidence.md')]:
+                '# Original evidence\n',
             [join(root, 'AGENT.md')]: '# Project guidance\n',
             [join(root, '.autonomos', 'TASKS.md')]: '- [/] Project task\n',
             [join(root, '.autonomos', 'ISSUES.md')]: '# Existing issue\n',

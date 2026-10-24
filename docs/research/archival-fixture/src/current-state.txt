@@ -1,0 +1,3 @@
+Build inventory: plain CSS, no Tailwind package or utility generator.
+Docs source conversion exists; no behavioral acceptance result is available.
+No offline export implementation.

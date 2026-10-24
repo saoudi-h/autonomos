@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -65,5 +65,49 @@ describe('status protocol artifact integrity', () => {
 
         expect(result.artifactIntegrity).toBe('unverifiable')
         expect(result.driftedArtifacts).toEqual([])
+    })
+
+    it('reports current and historical tasks separately, including legacy metadata-free IDs', () => {
+        initialize()
+        writeFileSync(join(root, '.autonomos', 'TASKS.md'), '- [/] **[T-02]** Current\n')
+        mkdirSync(join(root, '.autonomos', 'archive', 'batch'), { recursive: true })
+        writeFileSync(
+            join(root, '.autonomos', 'archive', 'batch', 'TASKS.md'),
+            '- [x] **[T-01]** Done\n- [ ] **[T-03]** Abandoned with reason\n'
+        )
+        const current = status({ cwd: root })
+        expect(current.taskSummary).toMatchObject({ total: 1, inProgress: 1, done: 0 })
+        expect(current).not.toHaveProperty('archivedTaskSummary')
+        const history = status({ cwd: root, history: true })
+        expect(history.taskSummary).toEqual(current.taskSummary)
+        expect(history.archivedTaskSummary).toMatchObject({ total: 2, done: 1, todo: 1 })
+        expect(history.historyComplete).toBe(true)
+        expect(history.artifactIntegrity).toBe('valid')
+    })
+
+    it('surfaces duplicate IDs and incomplete history without implying a complete total', () => {
+        initialize()
+        writeFileSync(join(root, '.autonomos', 'TASKS.md'), '- [ ] **[T-01]** Current\n')
+        mkdirSync(join(root, '.autonomos', 'archive', 'batch'), { recursive: true })
+        writeFileSync(
+            join(root, '.autonomos', 'archive', 'batch', 'TASKS.md'),
+            '- [x] **[T-01]** History\n'
+        )
+        symlinkSync('missing', join(root, '.autonomos', 'archive', 'unreadable'))
+        const result = status({ cwd: root, history: true })
+        expect(result.duplicateTaskIds).toEqual(['T-01'])
+        expect(result.historyComplete).toBe(false)
+        expect(result.warnings).toHaveLength(1)
+        expect(result.archivedTaskSummary?.total).toBe(1)
+    })
+
+    it('rejects a linked protocol root instead of reading its manifest and archive', () => {
+        root = mkdtempSync(join(tmpdir(), 'autonomos-status-'))
+        mkdirSync(join(root, 'external'))
+        writeFileSync(join(root, 'external', 'manifest.json'), '{}')
+        symlinkSync(join(root, 'external'), join(root, '.autonomos'))
+        const result = status({ cwd: root, history: true })
+        expect(result.success).toBe(false)
+        expect(result.message).toContain('symbolic links are not followed')
     })
 })

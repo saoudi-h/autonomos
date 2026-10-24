@@ -38,6 +38,10 @@
 
 ### Protocol Refinements
 
+- [x] **[PROTO-14]** Implement archival and bounded current context with coordinated release preparation `Priority: 🔴` `Complexity: XL` `Completed: 2026-10-24` _See: .autonomos/worklogs/2026-10-24-PROTO-14.md; ISSUE-03_
+    - Implement the owner-accepted archival lifecycle, reconcile/crystallize/session behavior, optional batch layout, history-aware status and reserved identifiers.
+    - Preserve project-owned archives on init/update; validate distribution, historical discovery, source preservation and current-context continuity.
+    - Prepare coordinated Core/CLI release metadata without publishing or applying broad consumer cleanup.
 - [x] **[RELEASE-01]** Validate and publish Protocol v0.4 with coordinated Core and CLI releases `Priority: 🔴` `Complexity: M` *See: .autonomos/worklogs/2026-07-31-RELEASE-01-v0.4.md*
 - [x] **[PROTO-06]** Audit protocol information architecture and register focused remediation tasks `Priority: 🟠` `Complexity: M` *See: .autonomos/worklogs/2026-07-31-PROTO-06-information-architecture-audit.md*
     - Examine memory placement, artifact ownership, drift correction, and the distinction between reported problems and implementation tasks.

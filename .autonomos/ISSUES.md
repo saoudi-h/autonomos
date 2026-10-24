@@ -84,7 +84,7 @@
 ## [ISSUE-03] Define archival lifecycle and bounded context for accumulated project artifacts
 
 - **Type:** problem
-- **Status:** open
+- **Status:** resolved
 - **Evidence:** A long-running consumer project (Postdot) measured its Autonomos
   directory at approximately 5.3 MB, with a 231 KB task registry dominated by
   completed work, about 4,400 issue lines, 634 worklogs and 88 decision records.
@@ -118,4 +118,6 @@
   mandatory infrastructure unless repository evidence justifies more.
 - **Related:** Postdot ISSUE-182 and ISSUE-183; current `/reconcile`, `/crystallize`
   and `/adopt` workflows; SPEC-001 project knowledge artifact boundaries.
-- **Tasks:** none — problem intake only; implementation approach not yet chosen.
+- **Tasks:** PROTO-14 — owner accepted the archival proposal on 2026-10-24; SPEC-003 records the contract. Implementation and coordinated release preparation are complete; remote publication is not part of this task.
+
+- **Resolution (2026-10-24):** PROTO-14 implements accepted SPEC-003: Protocol v0.7.0-alpha doctrine, evidence-aware batch archival in `/reconcile`, stronger `/crystallize`, scoped history discovery and `status --history`. A coordinated minor changeset prepares both packages. Unit, distribution/preservation, static and packaged CLI checks pass. No consumer cleanup or remote publication was performed. [Evidence](worklogs/2026-10-24-PROTO-14.md).

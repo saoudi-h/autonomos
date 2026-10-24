@@ -45,7 +45,7 @@ ${pc.bold('Examples:')}
 
 Project knowledge workflows installed for supported harnesses include
 ${pc.cyan('/issue')} (triage), ${pc.cyan('/adopt')} (reviewable migration),
-${pc.cyan('/reconcile')} (drift audit), ${pc.cyan('/design')} (project-specific
+${pc.cyan('/reconcile')} (drift repair and archival), ${pc.cyan('/design')} (project-specific
 direction), and ${pc.cyan('/crystallize')} (close-out).
 
 ${pc.bold('More info:')}
@@ -71,7 +71,7 @@ Additionally, when one or more harnesses are selected, the protocol workflow
 files (session / task / issue / adopt / reconcile / design / crystallize) are installed at the harness-specific
 target directory, e.g. .clinerules/workflows/ for Cline, .claude/skills/ for
 Claude Code, .agents/skills/ for the cross-tool standard (Cursor, Codex, etc.).
-Optional project-owned specs and decisions directories are created only when the
+Optional project-owned archives, specs and decisions directories are created only when the
 project first adopts them; \`DESIGN.md\` is never created automatically, and init
 never creates empty directories for project-owned records.
 
@@ -173,7 +173,8 @@ program
         `
 This command updates the managed protocol artifacts embedded in the CLI.
 Your ${pc.white('AGENT.md')}, ${pc.white('TASKS.md')}, ${pc.white('ISSUES.md')},
-worklogs, specifications, decisions, and user documentation are preserved.
+worklogs, archives, specifications, decisions, and user documentation are preserved.
+Installing an update never archives project records automatically.
 
 It also:
   - Refreshes the @autonomos/cli devDependency in your package.json to the
@@ -229,14 +230,19 @@ Displays information about the current project:
   - Protocol version
   - Protocol artifact integrity for the installed version
   - CLI version used for initialization
-  - Task summary (todo, in-progress, done, blocked)
+  - Current task registry summary (todo, in-progress, done, blocked)
+  - With --history: separate archived counts and task ID collisions
+    Only archive/**/TASKS.md registries are counted; history is not read by default.
+    Archived does not imply completed. Read diagnostics and partial counts are explicit.
 
 ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos status')}
+  $ ${pc.cyan('autonomos status --history')}
 `
     )
-    .action(() => {
-        const result = status()
+    .option('--history', 'Include archived task registries and check reserved task IDs')
+    .action((opts: { history?: boolean }) => {
+        const result = status({ history: opts.history })
 
         if (!result.success) {
             console.error(pc.red(`\n❌ ${result.message}`))
@@ -263,7 +269,7 @@ ${pc.bold('Examples:')}
 
         if (result.taskSummary) {
             const s = result.taskSummary
-            console.log(`\n${pc.bold('📋 Tasks:')} ${pc.cyan(s.total)} total`)
+            console.log(`\n${pc.bold('📋 Current tasks:')} ${pc.cyan(s.total)} total`)
             console.log(`   ${pc.white('⬜ Todo:')} ${pc.white(s.todo)}`)
             console.log(`   ${pc.blue('🔄 In Progress:')} ${pc.blue(s.inProgress)}`)
             console.log(`   ${pc.green('✅ Done:')} ${pc.green(s.done)}`)
@@ -271,6 +277,25 @@ ${pc.bold('Examples:')}
                 console.log(`   ${pc.red('🚫 Blocked:')} ${pc.red(s.blocked)}`)
             }
         }
+        if (result.archivedTaskSummary) {
+            const s = result.archivedTaskSummary
+            console.log(
+                `\n${pc.bold('Historical task records:')} ${s.total}${result.historyComplete ? '' : ' (incomplete scan)'}`
+            )
+            console.log(
+                `   Todo: ${s.todo}; in progress: ${s.inProgress}; done: ${s.done}; blocked: ${s.blocked}`
+            )
+            console.log(
+                pc.dim(
+                    '   Historical status is not current work; archived does not mean completed.'
+                )
+            )
+        }
+        for (const warning of result.warnings ?? []) console.warn(pc.yellow(`! ${warning}`))
+        if (result.duplicateTaskIds?.length) {
+            console.warn(pc.yellow(`! Duplicate task IDs: ${result.duplicateTaskIds.join(', ')}`))
+        }
+        if (result.warnings?.length || result.duplicateTaskIds?.length) process.exitCode = 1
     })
 
 program

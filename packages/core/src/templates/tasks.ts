@@ -5,10 +5,10 @@ export const TASKS_TEMPLATE = `# PROJECT TASKS & ROADMAP
 
 > **LEGEND**
 > **Priority:** [🔴 Critical] [🟠 High] [🔵 Medium] [⚪ Low]
-> **Complexity:** [S] Small (1h), [M] Medium (4h), [L] Large (1-2 days), [XL] Huge (Planning req.)
+> **Complexity:** [S] Small, [M] Medium, [L] Large, [XL] Huge (Planning required)
 > **Status:** [ ] Todo, [/] In Progress, [x] Done, [!] Blocked
 
-## 🚀 Active Sprint
+## 🚀 Current work
 
 - [ ] **[INIT-01]** Review project context and structure \`Priority: 🔵\` \`Complexity: S\`
 

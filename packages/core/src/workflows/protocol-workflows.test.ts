@@ -5,7 +5,7 @@ import { PROTOCOL_TEMPLATE } from '../templates/protocol'
 
 /**
  * Validates the content of all workflow files and the PROTOCOL_TEMPLATE.
- * These tests guard against regressions on the v0.6 design:
+ * These tests guard against regressions on the v0.7 design:
  * - No crystallization questions directed at the user
  * - No duplicated close-out procedures in session.md
  * - Scoped AGENT.md discovery (no CLI dependency in workflows)
@@ -116,7 +116,7 @@ describe('AGENT.md format rules — consistent across files', () => {
 // ---------------------------------------------------------------------------
 // 5. PROTOCOL_TEMPLATE — compact reference, no workflow duplication
 // ---------------------------------------------------------------------------
-describe('PROTOCOL_TEMPLATE — v0.6 design', () => {
+describe('PROTOCOL_TEMPLATE — v0.7 design', () => {
     it('does not contain Phase 1/2/3 workflow steps', () => {
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 1:')
         expect(PROTOCOL_TEMPLATE).not.toContain('Phase 2:')
@@ -182,7 +182,7 @@ describe('Durable-memory lifecycle', () => {
     it('retires stale guidance and rejects arbitrary file-count heuristics', () => {
         expect(crystallize).toContain('Consolidate or replace superseded and disproven guidance')
         expect(crystallize).toContain(
-            'do not turn historical worklogs, issues, or tasks into current specs/decisions'
+            'Do not turn historical worklogs, issues, or tasks into current specs/decisions'
         )
         expect(crystallize).toContain('Never create an `AGENT.md` based on file count alone')
     })
@@ -364,5 +364,39 @@ describe('Workflow brevity', () => {
         const body = design.replace(/^---[\s\S]*?---\n/, '')
         const lines = body.trim().split('\n').length
         expect(lines).toBeLessThanOrEqual(maxLines)
+    })
+})
+
+describe('Archival and current-context continuity', () => {
+    it('keeps history out of bootstrap and preserves current requirements', () => {
+        expect(session).toContain('Archives are not bootstrap context')
+        expect(PROTOCOL_TEMPLATE).toContain(
+            'Current context must support ordinary work without archives'
+        )
+        expect(PROTOCOL_TEMPLATE).toContain('dated temporary directives remain active')
+        expect(PROTOCOL_TEMPLATE).toContain('Applicable specs/decisions stay current independently')
+        expect(PROTOCOL_TEMPLATE).toContain(
+            'A completed child does not satisfy unmet parent acceptance criteria'
+        )
+    })
+    it('preserves evidence, identifiers and project ownership without calendar-driven archival', () => {
+        expect(PROTOCOL_TEMPLATE).toContain('Archived task and issue IDs remain reserved')
+        expect(PROTOCOL_TEMPLATE).toContain('repair relative paths when necessary')
+        expect(PROTOCOL_TEMPLATE).toContain(
+            'Installing a new protocol performs no automatic cleanup'
+        )
+        expect(reconcile).toContain('not permanent per-completion stubs')
+        expect(crystallize).toContain('Do not turn a current choice into a broader prohibition')
+        expect(crystallize).toContain(
+            'Do not reorganize archives mechanically after every task or by calendar age'
+        )
+    })
+    it('checks actual output and preserves valid parts of mixed claims', () => {
+        expect(reconcile).toContain('Re-read exact source text before edits')
+        expect(reconcile).toContain('preserve valid subclaims')
+        expect(reconcile).toContain('Check the final proposed text')
+        expect(crystallize).toContain('claim by claim')
+        expect(task).toContain('reserve new IDs against current and archived registries')
+        expect(issue).toContain('identifier reuse')
     })
 })

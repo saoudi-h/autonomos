@@ -59,19 +59,53 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.6.0-alpha)
+## 📜 The Protocol (v0.7.0-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 
 - **`manifest.json`**: Structured metadata and versioning.
 - **`PROTOCOL.md`**: The read-only kernel for the declared protocol version.
-- **`TASKS.md`**: The single source of truth for task state.
+- **`TASKS.md`**: Current task state, with optional Current direction for continuity.
 - **`ISSUES.md`**: Optional intake for problems, proposals, and questions that need triage before implementation.
 - **`worklogs/`**: Detailed history of sessions to save context tokens.
+- **`archive/`**: Optional settled history, created on first use and searched only for a specific question.
 - **`specs/`**: Optional, project-owned Markdown records for accepted target behavior and requirements.
 - **`decisions/`**: Optional, project-owned Markdown records for technical choices and rationale. ADR is a common convention, not a required external standard.
 - **`DESIGN.md`**: Optional, project-owned visual and interaction direction; use the installed `/design` workflow when a surface needs direction, critique, or design-knowledge extraction.
 - **`AGENT.md`**: (Root level) The identity and context anchor for the agent.
+
+## Keeping Current Context Useful
+
+Use `/reconcile` to investigate drift, consolidate current knowledge and archive
+settled work in coherent batches. A completed checkbox alone is not enough:
+current requirements, decisions, restrictions, dependencies and next actions must
+remain discoverable. A completed child task does not close an issue whose other
+acceptance criteria remain unmet.
+
+Archives are Markdown under `.autonomos/archive/<batch>/`, with a topic index in
+`archive/README.md`. Preserve record content, IDs and provenance, repair moved
+links, and search by ID or subject when needed. Do not load history at startup or
+leave a permanent current-registry stub for every completed task. Applicable
+accepted specs/decisions stay current independently of implementation history.
+
+`/crystallize` updates existing knowledge rather than appending journals to
+`AGENT.md`. Optional Current direction in `TASKS.md` explains present aims and
+consequential outcomes; rewrite it as the project changes. Archive by completed
+work boundary, without mandatory Sprint objects or calendar schedules.
+
+```bash
+autonomos status            # Current task records only
+autonomos status --history  # Separate archive counts and task ID diagnostics
+```
+
+History reports only archive `TASKS.md` registries. Metadata-free legacy IDs are
+recognized; fenced examples are ignored. Skipped/unreadable registries and ID
+collisions are reported with exit code 1, so a partial count is not mistaken for
+complete history. Archived does not necessarily mean completed. There is no
+automatic semantic archiver or cleanup during installation or update.
+
+See the [exploratory evaluation and fictional fixture](docs/research/archival-evaluation.md)
+for repeatable manual scenarios and limitations of model-directed cleanup.
 
 ## 🔄 Upgrading & Migration
 
@@ -91,9 +125,9 @@ This performs the mechanical update:
 1. Update `.autonomos/PROTOCOL.md` to the latest version.
 2. Update `.autonomos/manifest.json`.
 3. Scan for active harness folders (e.g. `.agents/skills`, `.clinerules/workflows`, `.claude/skills`) and **automatically update** the managed workflow files in them.
-4. **Preserve** your existing `AGENT.md`, `TASKS.md`, `ISSUES.md`, worklogs, `specs/`, `decisions/`, and user documentation.
+4. **Preserve** your existing `AGENT.md`, `TASKS.md`, `ISSUES.md`, worklogs, archives, `specs/`, `decisions/`, and user documentation.
 
-It does not create empty `specs/` or `decisions/` directories and it does not
+It does not create empty archive, `specs/` or `decisions/` directories and it does not
 infer missing records from project history.
 
 The update also installs the optional `/design` workflow for harnesses already

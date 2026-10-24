@@ -43,6 +43,7 @@ describe('update', () => {
         expect(existsSync(join(root, '.agent', 'workflows', 'adopt.md'))).toBe(true)
         expect(existsSync(join(root, '.agent', 'workflows', 'reconcile.md'))).toBe(true)
         expect(existsSync(join(root, '.agent', 'workflows', 'design.md'))).toBe(true)
+        expect(existsSync(join(root, '.autonomos', 'archive'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
 
@@ -84,6 +85,7 @@ describe('update', () => {
         mkdirSync(join(root, '.autonomos', 'decisions'), { recursive: true })
         mkdirSync(join(root, '.autonomos', 'worklogs'), { recursive: true })
         mkdirSync(join(root, 'docs'), { recursive: true })
+        mkdirSync(join(root, '.autonomos', 'archive', 'old-batch', 'worklogs'), { recursive: true })
         const manifest: Manifest = {
             protocolVersion: '0.3.0-alpha',
             cliVersion: '0.3.3',
@@ -94,6 +96,12 @@ describe('update', () => {
         const decision = '# ADR-001\n\n- Status: accepted\n'
         writeFileSync(manifestPath, JSON.stringify(manifest))
         const preservedFiles = {
+            [join(root, '.autonomos', 'archive', 'README.md')]: '# Archive topic index\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'TASKS.md')]:
+                '- [x] **[OLD-01]** Historical task\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'ISSUES.md')]: '# Resolved issue\n',
+            [join(root, '.autonomos', 'archive', 'old-batch', 'worklogs', 'evidence.md')]:
+                '# Original evidence\n',
             [join(root, 'AGENT.md')]: '# Existing guidance\n',
             [join(root, '.autonomos', 'TASKS.md')]: '- [/] Existing task\n',
             [join(root, '.autonomos', 'ISSUES.md')]: '# Existing issue\n',

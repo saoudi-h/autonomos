@@ -18,6 +18,7 @@ export * from './parsers/agent-finder'
 export * from './parsers/agent-parser'
 export * from './parsers/project-root'
 export * from './parsers/task-parser'
+export * from './parsers/task-registry'
 
 // Harness codes
 export * from './harness-codes'

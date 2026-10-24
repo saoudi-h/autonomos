@@ -1,18 +1,20 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import {
     AUTONOMOS_DIR,
     MANIFEST_FILE,
     parseManifest,
-    TaskParser,
+    readTaskRegistry,
     TASKS_FILE,
     type Manifest,
+    type TaskReference,
 } from '@autonomos/core'
 import { verifyProtocolArtifacts, type ArtifactIntegrity } from '../protocol-artifacts'
 
 interface StatusOptions {
     cwd?: string
+    history?: boolean
 }
 
 interface TaskSummary {
@@ -30,6 +32,10 @@ export interface StatusResult {
     cliVersion?: string
     initialized: boolean
     taskSummary?: TaskSummary
+    archivedTaskSummary?: TaskSummary
+    historyComplete?: boolean
+    duplicateTaskIds?: string[]
+    warnings?: string[]
     artifactIntegrity?: ArtifactIntegrity
     driftedArtifacts?: string[]
 }
@@ -43,6 +49,14 @@ export function status(options: StatusOptions = {}): StatusResult {
     // Check if initialized
     const autonomosDir = join(cwd, AUTONOMOS_DIR)
     const manifestPath = join(autonomosDir, MANIFEST_FILE)
+
+    if (existsSync(autonomosDir) && !lstatSync(autonomosDir).isDirectory()) {
+        return {
+            success: false,
+            message: 'Expected a regular .autonomos directory; symbolic links are not followed.',
+            initialized: false,
+        }
+    }
 
     if (!existsSync(manifestPath)) {
         return {
@@ -65,25 +79,18 @@ export function status(options: StatusOptions = {}): StatusResult {
         }
     }
 
-    // Parse tasks
+    // History stays opt-in: ordinary bootstrap must not traverse archives.
     let taskSummary: TaskSummary | undefined
-    const tasksPath = join(autonomosDir, TASKS_FILE)
-
-    if (existsSync(tasksPath)) {
-        try {
-            const tasksContent = readFileSync(tasksPath, 'utf-8')
-            const tasks = TaskParser.parse(tasksContent)
-
-            taskSummary = {
-                total: tasks.length,
-                todo: tasks.filter(t => t.status === 'TODO').length,
-                inProgress: tasks.filter(t => t.status === 'IN_PROGRESS').length,
-                done: tasks.filter(t => t.status === 'DONE').length,
-                blocked: tasks.filter(t => t.status === 'BLOCKED').length,
-            }
-        } catch {
-            // Tasks file exists but couldn't be parsed
-        }
+    const registry = readTaskRegistry(cwd, { history: options.history })
+    const summarize = (tasks: TaskReference[]): TaskSummary => ({
+        total: tasks.length,
+        todo: tasks.filter(t => t.status === 'TODO').length,
+        inProgress: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+        done: tasks.filter(t => t.status === 'DONE').length,
+        blocked: tasks.filter(t => t.status === 'BLOCKED').length,
+    })
+    if (existsSync(join(autonomosDir, TASKS_FILE))) {
+        taskSummary = summarize(registry.current)
     }
 
     const integrity = verifyProtocolArtifacts(cwd, manifest.protocolVersion)
@@ -95,6 +102,14 @@ export function status(options: StatusOptions = {}): StatusResult {
         cliVersion: manifest.cliVersion,
         initialized: true,
         taskSummary,
+        ...(options.history
+            ? {
+                  archivedTaskSummary: summarize(registry.archived),
+                  historyComplete: registry.complete,
+              }
+            : {}),
+        duplicateTaskIds: registry.duplicateIds,
+        warnings: registry.warnings,
         artifactIntegrity: integrity.state,
         driftedArtifacts: integrity.driftedFiles,
     }
