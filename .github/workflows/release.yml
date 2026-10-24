@@ -1,6 +1,7 @@
 name: Release
 
 on:
+    workflow_dispatch:
     push:
         branches:
             - main
@@ -15,6 +16,7 @@ jobs:
         permissions:
             contents: write
             pull-requests: write
+            id-token: write
         steps:
             - name: Checkout branch
               uses: actions/checkout@v4
@@ -23,6 +25,11 @@ jobs:
 
             - name: Install dependencies
               uses: ./.github/actions/install
+
+            - name: Install npm with trusted publishing support
+              run: |
+                  npm install --global npm@11
+                  npm --version
 
             - name: Build
               run: pnpm build
@@ -39,6 +46,4 @@ jobs:
                   commit: 'ci(changesets): version packages'
                   setupGitUser: false
               env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

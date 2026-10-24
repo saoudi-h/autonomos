@@ -16,7 +16,6 @@ runs:
           uses: actions/setup-node@v4
           with:
               node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
-              registry-url: 'https://registry.npmjs.org'
               cache: 'pnpm'
 
         - name: Setup Git User
