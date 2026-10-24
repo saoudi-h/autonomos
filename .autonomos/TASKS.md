@@ -38,7 +38,7 @@
 
 ### Protocol Refinements
 
-- [/] **[RELEASE-03]** Publish coordinated 0.7 Core/CLI packages through npm trusted publishing `Priority: 🔴` `Complexity: M`
+- [x] **[RELEASE-03]** Publish coordinated 0.7 Core/CLI packages through npm trusted publishing `Priority: 🔴` `Complexity: M` `Completed: 2026-10-24` _See: .autonomos/worklogs/2026-10-24-RELEASE-03.md_
     - Owner authorizes publication and reports configuring OIDC after removing the npm Actions token.
     - Remove token-based workflow configuration, validate, publish via GitHub Actions, and verify registry versions, dependency pin and distributed protocol.
 - [x] **[PROTO-14]** Implement archival and bounded current context with coordinated release preparation `Priority: 🔴` `Complexity: XL` `Completed: 2026-10-24` _See: .autonomos/worklogs/2026-10-24-PROTO-14.md; ISSUE-03_

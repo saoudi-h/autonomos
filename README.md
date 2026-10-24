@@ -109,6 +109,14 @@ for repeatable manual scenarios and limitations of model-directed cleanup.
 
 ## 🔄 Upgrading & Migration
 
+Package releases use Changesets and `.github/workflows/release.yml` on GitHub-hosted
+runners. The job requests `id-token: write` and installs npm 11 for trusted
+publishing; no npm token secret is required. Configure each package's npm trusted
+publisher for this repository and the `release.yml` workflow. The normal version
+PR coordinates Core and CLI; merging it triggers publication. `workflow_dispatch`
+can retry the release flow after an operational failure. Project initialization
+and updates remain separate from package publication.
+
 As the protocol evolves, you can easily migrate your projects to the latest version.
 
 ### Upgrading an Existing Project (mechanical update)

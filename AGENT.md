@@ -18,6 +18,7 @@ Autonomos is a project dedicated to defining and implementing a robust, structur
 - **Linting:** Strict linting and type-checking must pass before every commit.
 - **Language:** English (US) for all documentation and code.
 - **Protocol design:** Keep the contract tool-neutral, low-friction, and usable without specialized infrastructure. New mandatory artifacts or metadata require evidence that the simpler Markdown workflow is insufficient.
+- **Package releases:** Use the Changesets flow in `.github/workflows/release.yml` and npm trusted publishing (OIDC) on GitHub-hosted runners. Keep Core/CLI coordinated and the published CLI's Core dependency exact; do not restore long-lived npm tokens or publish from an agent workstation.
 
 ## 🏗 Stack & Architecture
 
