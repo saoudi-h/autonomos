@@ -1,5 +1,15 @@
 # @autonomos/core
 
+## 0.7.1
+
+### Patch Changes
+
+- [#13](https://github.com/saoudi-h/autonomos/pull/13) [`1b472db`](https://github.com/saoudi-h/autonomos/commit/1b472db932dc74420204cee0ba89e9b68b405962) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Align native slash command locations and agent skills directory bundles across AI harnesses.
+    - Distinguish flat command targets (e.g. `.claude/commands/`, `.opencode/commands/`, `.codex/prompts/`, `.agents/workflows/`) from directory-based skills targets (`.agents/skills/protocol-*/SKILL.md`).
+    - Add native prompt support for OpenAI Codex CLI in `.codex/prompts/`.
+    - Update Google Antigravity target to `.agents/workflows/` and shared `.agents/skills/`.
+    - Add automated migration in `autonomos update` to clean legacy flat files in `.agents/skills/` and migrate legacy `.agent/workflows/` without affecting custom tools or user project knowledge.
+
 ## 0.7.0
 
 ### Minor Changes
