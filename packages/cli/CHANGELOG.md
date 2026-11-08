@@ -1,5 +1,14 @@
 # @autonomos/cli
 
+## 0.8.1
+
+### Patch Changes
+
+- [#17](https://github.com/saoudi-h/autonomos/pull/17) [`cee0646`](https://github.com/saoudi-h/autonomos/commit/cee0646d1db2b757ccab6bbdc5f53f4cb26820d1) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Close the gaps found when agents migrated real projects to format 2: `migrate` moves checked items without an ID tag, keeps git-ignored worklogs ignored, quarantines legacy worklogs merged in later from other checkouts and lists closed records that still mention unfinished work; `close` groups same-day closures under one `Closed <date>` heading instead of appending under the last migration batch; workflows tell agents to use the project's own CLI and to proceed on delegated plans.
+
+- Updated dependencies [[`cee0646`](https://github.com/saoudi-h/autonomos/commit/cee0646d1db2b757ccab6bbdc5f53f4cb26820d1)]:
+    - @autonomos/core@0.8.1
+
 ## 0.8.0
 
 ### Minor Changes
