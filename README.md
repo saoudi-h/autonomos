@@ -59,16 +59,16 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.7.0-alpha)
+## 📜 The Protocol (v0.8.0-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 
-- **`manifest.json`**: Structured metadata and versioning.
+- **`manifest.json`**: Protocol version and artifact format.
 - **`PROTOCOL.md`**: The read-only kernel for the declared protocol version.
-- **`TASKS.md`**: Current task state, with optional Current direction for continuity.
-- **`ISSUES.md`**: Optional intake for problems, proposals, and questions that need triage before implementation.
-- **`worklogs/`**: Detailed history of sessions to save context tokens.
-- **`archive/`**: Optional settled history, created on first use and searched only for a specific question.
+- **`TASKS.md`**: Open tasks only, with optional Current direction for continuity.
+- **`ISSUES.md`**: Optional intake: open and accepted issues only.
+- **`worklogs/`**: Short session records: outcome, decisions, validation, open items.
+- **`archive/`**: History (`closed/` registries, batches), searched only for a specific question.
 - **`specs/`**: Optional, project-owned Markdown records for accepted target behavior and requirements.
 - **`decisions/`**: Optional, project-owned Markdown records for technical choices and rationale. ADR is a common convention, not a required external standard.
 - **`DESIGN.md`**: Optional, project-owned visual and interaction direction; use the installed `/design` workflow when a surface needs direction, critique, or design-knowledge extraction.
@@ -76,35 +76,26 @@ The protocol is centered around the `.autonomos/` directory:
 
 ## Keeping Current Context Useful
 
-Use `/reconcile` to investigate drift, consolidate current knowledge and archive
-settled work in coherent batches. A completed checkbox alone is not enough:
-current requirements, decisions, restrictions, dependencies and next actions must
-remain discoverable. A completed child task does not close an issue whose other
-acceptance criteria remain unmet.
+What an agent reads at startup follows open work, not project age:
 
-Archives are Markdown under `.autonomos/archive/<batch>/`, with a topic index in
-`archive/README.md`. Preserve record content, IDs and provenance, repair moved
-links, and search by ID or subject when needed. Do not load history at startup or
-leave a permanent current-registry stub for every completed task. Applicable
-accepted specs/decisions stay current independently of implementation history.
-
-`/crystallize` updates existing knowledge rather than appending journals to
-`AGENT.md`. Optional Current direction in `TASKS.md` explains present aims and
-consequential outcomes; rewrite it as the project changes. Archive by completed
-work boundary, without mandatory Sprint objects or calendar schedules.
+- Finished work leaves current context when it closes: `autonomos close <ID>` moves a
+  `[x]` task (adding `Completed:`) or a resolved/declined issue, intact, to
+  `.autonomos/archive/closed/` and repairs its links.
+- Task entries are one line; evidence belongs in the worklog. Worklogs keep only
+  what outlives the session (`Outcome`, `Decisions`, `Validation`, `Open`).
+- Root `AGENT.md` admits guidance that applies to most tasks; scoped knowledge goes
+  to a narrower `AGENT.md` or project documentation.
+- `autonomos status` reports context-budget findings (advisory; `--strict` fails).
+  `/reconcile` consolidates them and archives other history in named batches.
 
 ```bash
-autonomos status            # Current task records only
-autonomos status --history  # Separate archive counts and task ID diagnostics
+autonomos status            # Integrity, current tasks, context budgets
+autonomos status --history  # Adds archive counts and task ID diagnostics
+autonomos close PROTO-15    # Move a finished task or issue out of current context
 ```
 
-History reports only archive `TASKS.md` registries. Metadata-free legacy IDs are
-recognized; fenced examples are ignored. Skipped/unreadable registries and ID
-collisions are reported with exit code 1, so a partial count is not mistaken for
-complete history. Archived does not necessarily mean completed. There is no
-automatic semantic archiver or cleanup during installation or update.
-
-See the [exploratory evaluation and fictional fixture](docs/research/archival-evaluation.md)
+Archived does not necessarily mean completed. See the
+[exploratory evaluation and fictional fixture](docs/research/archival-evaluation.md)
 for repeatable manual scenarios and limitations of model-directed cleanup.
 
 ## 🔄 Upgrading & Migration
@@ -146,6 +137,23 @@ For a declared protocol version, `PROTOCOL.md` and installed harness workflows
 must exactly match the published artifacts. Project agents treat them as read-only;
 `autonomos update` is the supported path to install another published version or
 repair local drift. Run `autonomos status` to check artifact integrity.
+
+### Upgrading project records (artifact format)
+
+`autonomos update` never rewrites project records. When a protocol version changes
+what projects write, it bumps the artifact format and `update` says so. Then, on a
+clean working tree:
+
+```bash
+autonomos migrate --dry-run
+autonomos migrate
+autonomos status            # remaining findings → run /reconcile
+```
+
+Format 1 → 2 moves completed tasks and closed issues to `.autonomos/archive/closed/`
+and existing worklogs to `.autonomos/archive/worklogs-format-1/` (so they stop
+serving as examples), repairs Markdown references across the project and records
+`artifactFormat: 2`. Nothing is deleted; a second run changes nothing.
 
 ### Adopting Existing Project Knowledge
 

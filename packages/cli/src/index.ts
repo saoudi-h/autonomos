@@ -5,6 +5,7 @@ import pc from 'picocolors'
 import { PROTOCOL_VERSION } from '@autonomos/core'
 import { agents } from './commands/agents'
 import { init } from './commands/init'
+import { close, migrate } from './commands/records'
 import { status } from './commands/status'
 import { update } from './commands/update'
 
@@ -42,6 +43,8 @@ ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos update')}        Update Protocol to the latest version
   $ ${pc.cyan('autonomos status')}        Show project status and task summary
   $ ${pc.cyan('autonomos agents')}        List all AGENT.md files in the project
+  $ ${pc.cyan('autonomos close <ID>')}    Move a finished task or issue out of current context
+  $ ${pc.cyan('autonomos migrate')}       Upgrade project records to the current artifact format
 
 Project knowledge workflows installed for supported harnesses include
 ${pc.cyan('/issue')} (triage), ${pc.cyan('/adopt')} (reviewable migration),
@@ -231,6 +234,9 @@ Displays information about the current project:
   - Protocol artifact integrity for the installed version
   - CLI version used for initialization
   - Current task registry summary (todo, in-progress, done, blocked)
+  - Context budgets: closed records left in current registries, oversized
+    TASKS.md/ISSUES.md/AGENT.md/task entries/worklogs, outdated artifact format.
+    Advisory unless --strict.
   - With --history: separate archived counts and task ID collisions
     Only archive/**/TASKS.md registries are counted; history is not read by default.
     Archived does not imply completed. Read diagnostics and partial counts are explicit.
@@ -238,10 +244,12 @@ Displays information about the current project:
 ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos status')}
   $ ${pc.cyan('autonomos status --history')}
+  $ ${pc.cyan('autonomos status --strict')}
 `
     )
     .option('--history', 'Include archived task registries and check reserved task IDs')
-    .action((opts: { history?: boolean }) => {
+    .option('--strict', 'Exit non-zero when context-budget findings exist')
+    .action((opts: { history?: boolean; strict?: boolean }) => {
         const result = status({ history: opts.history })
 
         if (!result.success) {
@@ -291,11 +299,101 @@ ${pc.bold('Examples:')}
                 )
             )
         }
+        const findings = result.budgetFindings ?? []
+        console.log(
+            `\n${pc.bold('📏 Context budgets:')} ${findings.length ? pc.yellow(`${findings.length} finding(s)`) : pc.green('within budget')} ${pc.dim(`(artifact format ${result.artifactFormat})`)}`
+        )
+        for (const finding of findings) {
+            console.log(`   ${pc.yellow('•')} ${pc.white(finding.path)}: ${finding.message}`)
+            if (finding.items?.length) {
+                const shown = finding.items.slice(0, 5).join(', ')
+                const more = finding.items.length > 5 ? `, +${finding.items.length - 5} more` : ''
+                console.log(`     ${pc.dim(shown + more)}`)
+            }
+        }
+        if (findings.length && opts.strict) process.exitCode = 1
         for (const warning of result.warnings ?? []) console.warn(pc.yellow(`! ${warning}`))
         if (result.duplicateTaskIds?.length) {
             console.warn(pc.yellow(`! Duplicate task IDs: ${result.duplicateTaskIds.join(', ')}`))
         }
         if (result.warnings?.length || result.duplicateTaskIds?.length) process.exitCode = 1
+    })
+
+program
+    .command('close')
+    .description(
+        'Move finished tasks or issues from current registries to .autonomos/archive/closed/'
+    )
+    .argument('<ids...>', 'Task or issue IDs')
+    .option('--date <YYYY-MM-DD>', 'Completion date to record (default: today)')
+    .option('--abandoned <reason>', 'Close unfinished tasks as abandoned, recording the reason')
+    .option('-n, --dry-run', 'Report what would move without writing')
+    .addHelpText(
+        'after',
+        `
+A task must be marked [x] (a \`Completed:\` date is added when missing) unless
+--abandoned is given. An issue must be resolved, declined, closed or superseded.
+Entries are moved intact; relative links are repaired for the new location.
+
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos close PROTO-15')}
+  $ ${pc.cyan('autonomos close PROTO-15 ISSUE-05')}
+  $ ${pc.cyan('autonomos close SPIKE-02 --abandoned "superseded by PROTO-15"')}
+`
+    )
+    .action((ids: string[], opts: { date?: string; abandoned?: string; dryRun?: boolean }) => {
+        const result = close({ ids, ...opts })
+        if (!result.success) {
+            console.error(pc.red(`\n❌ ${result.message}`))
+            process.exit(1)
+        }
+        console.log(pc.green(`✅ ${result.message}`))
+    })
+
+program
+    .command('migrate')
+    .description('Upgrade project records to the current artifact format')
+    .option('-n, --dry-run', 'Report the plan without writing')
+    .addHelpText(
+        'after',
+        `
+Mechanical, content-preserving upgrade (format 1 → 2):
+  - completed tasks and closed issues move to .autonomos/archive/closed/
+  - existing worklogs move to .autonomos/archive/worklogs-format-1/ so they
+    stop serving as examples for new worklogs
+  - Markdown references to moved files are repaired across the project
+  - the archive index and manifest record the change
+Nothing is deleted or rewritten. Commit first; review the diff afterwards.
+Remaining findings (AGENT.md size, long open tasks) are semantic work for /reconcile.
+
+${pc.bold('Examples:')}
+  $ ${pc.cyan('autonomos migrate --dry-run')}
+  $ ${pc.cyan('autonomos migrate')}
+`
+    )
+    .action((opts: { dryRun?: boolean }) => {
+        const result = migrate({ dryRun: opts.dryRun })
+        if (!result.success) {
+            console.error(pc.red(`\n❌ ${result.message}`))
+            process.exit(1)
+        }
+        console.log(pc.green(`\n✅ ${result.message}`))
+        const kb = (n: number): string => `${(n / 1000).toFixed(1)} KB`
+        if (result.bytes) {
+            console.log(
+                `   TASKS.md: ${kb(result.bytes.tasks[0])} → ${kb(result.bytes.tasks[1])} (${result.closedTasks.length} closed tasks moved)`
+            )
+            console.log(
+                `   ISSUES.md: ${kb(result.bytes.issues[0])} → ${kb(result.bytes.issues[1])} (${result.closedIssues.length} closed issues moved)`
+            )
+        }
+        console.log(`   Worklogs quarantined: ${result.movedWorklogs}`)
+        console.log(`   Files with repaired references: ${result.rewrittenFiles.length}`)
+        if (result.findings.length) {
+            console.log(pc.bold('\nRemaining work for /reconcile:'))
+            for (const finding of result.findings)
+                console.log(`   ${pc.yellow('•')} ${finding.path}: ${finding.message}`)
+        }
     })
 
 program

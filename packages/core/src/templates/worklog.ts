@@ -2,39 +2,31 @@ import type { TaskStatus } from '../types'
 
 interface WorklogOptions {
     taskId: string
-    taskName: string
-    date?: string
-    status: 'Complete' | 'Partial' | 'Blocked'
-    description: string
-    filesModified: string[]
-    decisions: string[]
-    challenges: string[]
-    nextSteps: string[]
+    title: string
+    /** 1–3 lines: what is now true. */
+    outcome: string
+    /** Non-obvious choices with their reason. */
+    decisions?: string[]
+    /** Checks actually run, `command → result`. */
+    validation?: string[]
+    /** Limits and follow-ups. */
+    open?: string[]
 }
 
+const list = (items: string[] | undefined): string =>
+    items?.length ? '\n' + items.map(item => `- ${item}`).join('\n') : ' none'
+
 /**
- * Generate a Worklog markdown content
+ * Generate a proportionate worklog (artifact format 2): only what a future
+ * agent cannot recover from code, git, tests or other records.
  */
 export function generateWorklogContent(options: WorklogOptions): string {
-    const date = options.date ?? new Date().toISOString().split('T')[0]
+    return `# [${options.taskId}] ${options.title}
 
-    return `# WORKLOG: [${options.taskId}] ${options.taskName}
-**Date:** ${date}
-**Agent Status:** [${options.status}]
-
-## 📝 Description
-${options.description}
-
-## 🛠 Technical Details
-- **Files Modified:**
-${options.filesModified.map(f => `  - ${f}`).join('\n')}
-- **Key Decisions:**
-${options.decisions.map(d => `  - ${d}`).join('\n')}
-- **Challenges:**
-${options.challenges.map(c => `  - ${c}`).join('\n')}
-
-## ⏭ Next Steps / Context for Successor
-${options.nextSteps.map(s => `- ${s}`).join('\n')}
+Outcome: ${options.outcome}
+Decisions:${list(options.decisions)}
+Validation:${list(options.validation)}
+Open:${list(options.open)}
 `
 }
 

@@ -2,11 +2,13 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join } from 'node:path'
 
 import {
+    ARTIFACT_FORMAT,
     AUTONOMOS_DIR,
     findProjectRoot,
     generateManifestContent,
     listHarnesses,
     MANIFEST_FILE,
+    manifestArtifactFormat,
     parseManifest,
     PROTOCOL_FILE,
     PROTOCOL_TEMPLATE,
@@ -393,10 +395,14 @@ export function update(options: UpdateOptions = {}): UpdateResult {
     const installedInfo =
         newlyInstalled.length > 0 ? ` (installed: ${newlyInstalled.join(', ')})` : ''
     const devDepInfo = devDepNote ? ` ${devDepNote}` : ''
+    const formatInfo =
+        manifestArtifactFormat(manifest) < ARTIFACT_FORMAT
+            ? ` Project records still use artifact format ${manifestArtifactFormat(manifest)}: run \`autonomos migrate --dry-run\`, then \`autonomos migrate\`, then \`/reconcile\` on the reported findings.`
+            : ''
 
     return {
         success: true,
-        message: `Protocol updated: v${currentVersion} → v${PROTOCOL_VERSION}${harnessInfo}${installedInfo}${devDepInfo}`,
+        message: `Protocol updated: v${currentVersion} → v${PROTOCOL_VERSION}${harnessInfo}${installedInfo}${devDepInfo}${formatInfo}`,
         previousVersion: currentVersion,
         newVersion: PROTOCOL_VERSION,
         touchedHarnesses: [...updatedTargets, ...newlyInstalled],
