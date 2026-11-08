@@ -75,7 +75,10 @@ autonomos close SPIKE-02 --abandoned "superseded by PROTO-15"
 Upgrade project records to the current artifact format, content-preserving and
 idempotent. Format 1 → 2 moves closed records to `archive/closed/`, quarantines
 existing worklogs in `archive/worklogs-format-1/`, repairs Markdown references and
-records `artifactFormat`. Run `--dry-run` first on a clean working tree.
+records `artifactFormat`. Untagged checked items move too, git-ignored worklogs stay
+ignored, and closed records mentioning unfinished work are listed for review. Run
+`--dry-run` first with unrelated changes committed; rerun after merging into a
+checkout that holds git-ignored legacy worklogs.
 
 ```bash
 autonomos migrate --dry-run

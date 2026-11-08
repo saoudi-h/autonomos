@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -24,6 +25,8 @@ Ship format 2.
 ## Old sprint — [spec](specs/SPEC-1.md)
 
 - [x] **[T-4]** Older \`Priority: 🔵\` \`Complexity: S\` _See: .autonomos/worklogs/2026-01-02-T-4.md_
+- [x] SITE-9 Untagged done item
+    - [ ] follow-up left behind
 `
 
 const ISSUES = `# Issues
@@ -122,6 +125,18 @@ describe('records commands', () => {
             )
         })
 
+        it('groups closures of the same day under one heading', () => {
+            close({ cwd: root, ids: ['T-1'], date: '2026-11-08' })
+            writeFileSync(
+                dot('TASKS.md'),
+                read('TASKS.md').replace('- [ ] **[T-2]**', '- [x] **[T-2]**')
+            )
+            close({ cwd: root, ids: ['T-2'], date: '2026-11-08' })
+            const closed = read('archive', 'closed', 'TASKS.md')
+            expect(closed.match(/## Closed 2026-11-08/g)).toHaveLength(1)
+            expect(closed).toMatch(/\[T-1\].*\n {4}- detail\n- \[x\] \*\*\[T-2\]\*\*/)
+        })
+
         it('writes nothing in dry-run', () => {
             expect(close({ cwd: root, ids: ['T-1'], dryRun: true }).closedTasks).toEqual(['T-1'])
             expect(read('TASKS.md')).toBe(TASKS)
@@ -132,8 +147,9 @@ describe('records commands', () => {
     describe('migrate', () => {
         it('dry-run reports the plan without writing', () => {
             const result = migrate({ cwd: root, dryRun: true, date: '2026-11-08' })
-            expect(result.closedTasks).toEqual(['T-1', 'T-4'])
+            expect(result.closedTasks).toEqual(['T-1', 'T-4', 'SITE-9'])
             expect(result.closedIssues).toEqual(['I-2'])
+            expect(result.followUps).toEqual(['SITE-9'])
             expect(result.movedWorklogs).toBe(4)
             expect(read('TASKS.md')).toBe(TASKS)
             expect(existsSync(dot('worklogs', 'results.json'))).toBe(true)
@@ -200,6 +216,38 @@ describe('records commands', () => {
             expect(second.movedWorklogs).toBe(0)
             expect(read('archive', 'closed', 'TASKS.md')).toBe(snapshot)
             expect(existsSync(dot('worklogs', '2026-11-09-T-2.md'))).toBe(true)
+        })
+    })
+
+    describe('migrate with git', () => {
+        const gitIn = (...args: string[]): string =>
+            execFileSync('git', args, { cwd: root, encoding: 'utf8' })
+
+        it('keeps ignored worklogs ignored and quarantines late arrivals', () => {
+            gitIn('init', '-q')
+            writeFileSync(join(root, '.gitignore'), '.autonomos/worklogs/*-private.md\n')
+            writeFileSync(dot('worklogs', '2026-01-03-private.md'), '# secret\n')
+            const first = migrate({ cwd: root, date: '2026-11-08' })
+            expect(read('archive', 'worklogs-format-1', '.gitignore')).toContain(
+                '/2026-01-03-private.md'
+            )
+            expect(first.notes.join(' ')).toContain('stay ignored')
+            expect(
+                gitIn('check-ignore', '.autonomos/archive/worklogs-format-1/2026-01-03-private.md')
+            ).toContain('private')
+
+            // An ignored legacy worklog arriving from another checkout after the upgrade.
+            writeFileSync(dot('worklogs', '2026-01-05-private.md'), '# late\n')
+            writeFileSync(dot('worklogs', '2026-11-09-T-2.md'), '# new\n')
+            const second = migrate({ cwd: root, date: '2026-11-09' })
+            expect(second.movedWorklogs).toBe(1)
+            expect(existsSync(dot('archive', 'worklogs-format-1', '2026-01-05-private.md'))).toBe(
+                true
+            )
+            expect(existsSync(dot('worklogs', '2026-11-09-T-2.md'))).toBe(true)
+            expect(read('archive', 'worklogs-format-1', '.gitignore')).toContain(
+                '/2026-01-05-private.md'
+            )
         })
     })
 

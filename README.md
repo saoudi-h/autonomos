@@ -59,7 +59,7 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.8.0-alpha)
+## 📜 The Protocol (v0.8.1-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 
@@ -141,8 +141,8 @@ repair local drift. Run `autonomos status` to check artifact integrity.
 ### Upgrading project records (artifact format)
 
 `autonomos update` never rewrites project records. When a protocol version changes
-what projects write, it bumps the artifact format and `update` says so. Then, on a
-clean working tree:
+what projects write, it bumps the artifact format and `update` says so. Then, with
+unrelated changes committed:
 
 ```bash
 autonomos migrate --dry-run
@@ -153,7 +153,11 @@ autonomos status            # remaining findings → run /reconcile
 Format 1 → 2 moves completed tasks and closed issues to `.autonomos/archive/closed/`
 and existing worklogs to `.autonomos/archive/worklogs-format-1/` (so they stop
 serving as examples), repairs Markdown references across the project and records
-`artifactFormat: 2`. Nothing is deleted; a second run changes nothing.
+`artifactFormat: 2`. Checked items without an ID tag move too, git-ignored worklogs
+stay ignored, and closed records that still mention unfinished work are listed so
+their follow-ups can move to open records. Nothing is deleted; a second run changes
+nothing, except quarantining legacy worklogs that arrive later (for example
+git-ignored ones from another checkout once a worktree branch is merged).
 
 ### Adopting Existing Project Knowledge
 

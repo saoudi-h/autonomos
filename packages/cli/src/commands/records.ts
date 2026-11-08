@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import {
     existsSync,
     lstatSync,
@@ -29,6 +30,7 @@ import {
     LEGACY_WORKLOGS_DIR,
     MANIFEST_FILE,
     manifestArtifactFormat,
+    mentionsUnfinishedWork,
     parseIssueEntries,
     parseManifest,
     parseTaskEntries,
@@ -126,6 +128,8 @@ class Plan {
 interface ClosedRecords {
     tasks: string[]
     issues: string[]
+    /** Closed records that still mention unfinished work. */
+    followUps: string[]
 }
 
 /**
@@ -140,10 +144,13 @@ function planClose(
     options: {
         mapPath?: PathMapper
         transformTask?: (text: string, status: string) => string
+        /** Date for migration batches grouped by source heading. */
         groupByHeading?: string
+        /** Fixed group heading, e.g. `Closed 2026-11-08`. */
+        heading?: string
     } = {}
 ): ClosedRecords {
-    const closed: ClosedRecords = { tasks: [], issues: [] }
+    const closed: ClosedRecords = { tasks: [], issues: [], followUps: [] }
     const relocate = (text: string): string =>
         relocateLinks(text, paths.autonomos, paths.closedDir, options.mapPath)
 
@@ -156,13 +163,14 @@ function planClose(
             const groups = new Map<string, string[]>()
             for (const entry of moved) {
                 closed.tasks.push(entry.id)
+                if (mentionsUnfinishedWork(entry.text)) closed.followUps.push(entry.id)
                 let text = dedentEntry(entry.text)
                 if (options.transformTask) text = options.transformTask(text, entry.status)
                 const key = options.groupByHeading
                     ? relocate(
                           `${['From TASKS.md', ...entry.headings].join(' › ')} (moved ${options.groupByHeading})`
                       )
-                    : ''
+                    : (options.heading ?? '')
                 groups.set(key, [...(groups.get(key) ?? []), relocate(text)])
             }
             for (const [heading, entries] of groups)
@@ -178,7 +186,7 @@ function planClose(
             plan.write(paths.issues, remaining)
             const heading = options.groupByHeading
                 ? `From ISSUES.md (moved ${options.groupByHeading})`
-                : undefined
+                : options.heading
             plan.write(
                 paths.closedIssues,
                 appendToClosedRegistry(
@@ -189,6 +197,9 @@ function planClose(
                 )
             )
             closed.issues.push(...moved.map(e => e.id))
+            closed.followUps.push(
+                ...moved.filter(e => mentionsUnfinishedWork(e.text)).map(e => e.id)
+            )
         }
     }
     return closed
@@ -264,6 +275,7 @@ export function close(options: CloseOptions): CloseResult {
         id => wanted.has(id),
         id => wanted.has(id) && !tasks.some(t => t.id === id),
         {
+            heading: `Closed ${date}`,
             transformTask: (text, status) =>
                 status === 'x'
                     ? stampCompleted(text, date)
@@ -299,6 +311,10 @@ export interface MigrateResult {
     closedIssues: string[]
     movedWorklogs: number
     rewrittenFiles: string[]
+    /** Closed records that still mention unfinished work; review before relying on the archive. */
+    followUps: string[]
+    /** Notes about what this run could not see or did to keep ignored files ignored. */
+    notes: string[]
     bytes?: { tasks: [number, number]; issues: [number, number] }
     /** Remaining semantic work for `/reconcile`. */
     findings: BudgetFinding[]
@@ -355,6 +371,40 @@ function toPosix(path: string): string {
     return path.split(sep).join('/')
 }
 
+function git(root: string, args: string[], input?: string): string | undefined {
+    try {
+        return execFileSync('git', args, {
+            cwd: root,
+            input,
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'],
+        })
+    } catch (error) {
+        // check-ignore exits 1 when nothing matches.
+        const out = (error as { stdout?: string }).stdout
+        return typeof out === 'string' ? out : undefined
+    }
+}
+
+/** Paths (relative to root, posix) that git ignores among `paths`. */
+function ignoredPaths(root: string, paths: string[]): Set<string> {
+    if (!paths.length) return new Set()
+    const out = git(root, ['check-ignore', '--stdin'], paths.join('\n') + '\n')
+    return new Set((out ?? '').split('\n').filter(Boolean))
+}
+
+function isLinkedWorktree(root: string): boolean {
+    const dir = git(root, ['rev-parse', '--path-format=absolute', '--git-dir'])?.trim()
+    const common = git(root, ['rev-parse', '--path-format=absolute', '--git-common-dir'])?.trim()
+    return Boolean(dir && common && dir !== common)
+}
+
+/** Date legacy worklogs were quarantined, read from the archive index. */
+function quarantineDate(index: string | undefined): string | undefined {
+    const line = index?.split('\n').find(l => l.includes(`\`${LEGACY_WORKLOGS_DIR}/\``))
+    return line?.match(/moved on (\d{4}-\d{2}-\d{2})/)?.[1]
+}
+
 const INDEX_HEADER = `# Archive index
 
 > Project history, searched by topic or ID only when a question requires it. Not startup context.
@@ -367,6 +417,8 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         closedIssues: [],
         movedWorklogs: 0,
         rewrittenFiles: [],
+        followUps: [],
+        notes: [],
         findings: [],
     }
     const manifest = readManifest(paths)
@@ -384,11 +436,16 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
     const tasksBefore = Buffer.byteLength(readOptional(paths.tasks) ?? '')
     const issuesBefore = Buffer.byteLength(readOptional(paths.issues) ?? '')
 
-    // 1. Quarantine legacy worklogs so they stop serving as examples.
-    const legacy =
-        fromFormat < ARTIFACT_FORMAT
-            ? listFiles(paths.worklogs).filter(path => !path.endsWith(`${sep}.gitkeep`))
-            : []
+    // 1. Quarantine legacy worklogs so they stop serving as examples. After the
+    // upgrade, files dated before the quarantine (e.g. git-ignored worklogs of
+    // another checkout, merged later) still belong to the old format.
+    const since = quarantineDate(readOptional(paths.archiveIndex))
+    const legacy = listFiles(paths.worklogs).filter(path => {
+        if (path.endsWith(`${sep}.gitkeep`)) return false
+        if (fromFormat < ARTIFACT_FORMAT) return true
+        const date = relative(paths.worklogs, path).match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
+        return Boolean(since && date && date < since)
+    })
     const conflicts = legacy.filter(path =>
         existsSync(join(paths.legacyWorklogs, relative(paths.worklogs, path)))
     )
@@ -404,6 +461,32 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
     const movedNames = new Set(legacy.map(path => toPosix(relative(paths.worklogs, path))))
     const fromPrefix = toPosix(relative(paths.root, paths.worklogs))
     const toPrefix = toPosix(relative(paths.root, paths.legacyWorklogs))
+    const notes: string[] = []
+    // Keep git-ignored (private) worklogs ignored at their new location.
+    const rel = (path: string): string => toPosix(relative(paths.root, path))
+    const ignoredSources = ignoredPaths(paths.root, legacy.map(rel))
+    const ignoredTargets = ignoredPaths(
+        paths.root,
+        legacy.map(p => rel(mapPath(p)))
+    )
+    const keepIgnored = legacy
+        .filter(p => ignoredSources.has(rel(p)) && !ignoredTargets.has(rel(mapPath(p))))
+        .map(p => `/${toPosix(relative(paths.legacyWorklogs, mapPath(p)))}`)
+    if (keepIgnored.length) {
+        const ignoreFile = join(paths.legacyWorklogs, '.gitignore')
+        const current =
+            plan.read(ignoreFile) ?? '# Worklogs that were git-ignored before the move.\n'
+        const known = new Set(current.split('\n'))
+        const added = keepIgnored.filter(line => !known.has(line))
+        if (added.length) plan.write(ignoreFile, current + added.join('\n') + '\n')
+        notes.push(
+            `${keepIgnored.length} git-ignored worklog(s) stay ignored via ${rel(ignoreFile)}.`
+        )
+    }
+    if (isLinkedWorktree(paths.root))
+        notes.push(
+            'Linked git worktree: git-ignored worklogs of other checkouts are not visible here. After merging, run `autonomos migrate` in each checkout that has them.'
+        )
     for (const path of legacy) {
         const target = mapPath(path)
         if (/\.mdx?$/.test(path)) {
@@ -452,7 +535,7 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         )
     if (legacy.length)
         indexLines.push(
-            `- \`${LEGACY_WORKLOGS_DIR}/\` — ${legacy.length} files written before artifact format 2, moved on ${date}. Historical evidence only; not a model for new worklogs.`
+            `- \`${LEGACY_WORKLOGS_DIR}/\` — files written before artifact format 2, moved on ${since ?? date}. Historical evidence only; not a model for new worklogs.`
         )
     if (indexLines.length) {
         let index = plan.read(paths.archiveIndex) ?? INDEX_HEADER
@@ -503,6 +586,8 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         closedIssues: closed.issues,
         movedWorklogs: legacy.length,
         rewrittenFiles,
+        followUps: closed.followUps,
+        notes,
         bytes: { tasks: [tasksBefore, tasksAfter], issues: [issuesBefore, issuesAfter] },
         findings,
     }
