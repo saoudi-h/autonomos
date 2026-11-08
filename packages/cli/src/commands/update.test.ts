@@ -208,4 +208,26 @@ describe('update', () => {
         // 3. Legacy flat claude/skills cleaned
         expect(existsSync(join(claudeSkills, 'session.md'))).toBe(false)
     })
+
+    it('bumps an existing CLI pin but never adds one', () => {
+        root = mkdtempSync(join(tmpdir(), 'autonomos-update-'))
+        mkdirSync(join(root, '.autonomos'), { recursive: true })
+        const manifest: Manifest = {
+            protocolVersion: PROTOCOL_VERSION,
+            cliVersion: '0.3.3',
+            initializedAt: '2026-01-01T00:00:00.000Z',
+            lastUpdated: '2026-01-01T00:00:00.000Z',
+        }
+        writeFileSync(join(root, '.autonomos', 'manifest.json'), JSON.stringify(manifest))
+        const pkgPath = join(root, 'package.json')
+        writeFileSync(pkgPath, JSON.stringify({ name: 'x', private: true }))
+        update({ cwd: root })
+        expect(JSON.parse(readFileSync(pkgPath, 'utf-8')).devDependencies).toBeUndefined()
+
+        writeFileSync(pkgPath, JSON.stringify({ devDependencies: { '@autonomos/cli': '^0.1.0' } }))
+        update({ cwd: root })
+        expect(JSON.parse(readFileSync(pkgPath, 'utf-8')).devDependencies['@autonomos/cli']).toBe(
+            `^${packageJson.version}`
+        )
+    })
 })

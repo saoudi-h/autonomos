@@ -101,9 +101,11 @@ function refreshDevDependency(cwd: string): string | null {
 
     const newSpec = `^${CLI_VERSION}`
     const previous = pkg.devDependencies?.['@autonomos/cli']
-    if (previous === newSpec) return null
+    // Only bump an existing pin: adding one would impose a dependency the
+    // project chose not to have (e.g. a workspace that builds the CLI itself).
+    if (typeof previous !== 'string' || previous === newSpec) return null
+    if (previous.startsWith('workspace:')) return null
 
-    if (!pkg.devDependencies) pkg.devDependencies = {}
     pkg.devDependencies['@autonomos/cli'] = newSpec
 
     try {
@@ -112,9 +114,7 @@ function refreshDevDependency(cwd: string): string | null {
         return null
     }
 
-    return previous
-        ? `Bumped @autonomos/cli devDependency: ${previous} → ${newSpec}.`
-        : `Added @autonomos/cli devDependency: ${newSpec}.`
+    return `Bumped @autonomos/cli devDependency: ${previous} → ${newSpec}.`
 }
 
 function writeHarnessWorkflows(cwd: string, harnessIds: string[], workflowsDir: string): string[] {

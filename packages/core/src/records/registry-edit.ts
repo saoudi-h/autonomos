@@ -4,6 +4,9 @@
  */
 
 const TASK_LINE = /^\s*- \[([ x/!])\] \*\*\[([^\]]+)\]\*\*/
+/** A checked item without a bold ID, e.g. `- [x] SITE-12 Ship it` or `- [x] Ship it`. */
+const UNTAGGED_DONE = /^\s*- \[x\] (?!\*\*\[)(\S.*)$/i
+const LEADING_ID = /^`?([A-Z][A-Z0-9]*-\d+[a-z]?)\b/
 const HEADING = /^(#{1,6})[ \t]+(\S.*)?$/
 const FENCE = /^\s{0,3}(`{3,}|~{3,})/
 const ISSUE_HEADING = /^##\s+\[([^\]]+)\]/
@@ -22,6 +25,11 @@ export interface TaskEntry {
     /** Heading path enclosing the entry, outermost first (title excluded). */
     headings: string[]
     text: string
+    /**
+     * False for a top-level checked item without a `**[ID]**` tag. Its `id` is a
+     * leading plain ID when present, otherwise `line-<n>`.
+     */
+    tagged: boolean
 }
 
 export interface IssueEntry {
@@ -77,6 +85,7 @@ export function parseTaskEntries(markdown: string): TaskEntry[] {
     const fenced = fencedLines(lines)
     const entries: TaskEntry[] = []
     const headingStack: { level: number; text: string }[] = []
+    let coveredUntil = 0
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i] ?? ''
         if (fenced[i]) continue
@@ -89,7 +98,10 @@ export function parseTaskEntries(markdown: string): TaskEntry[] {
             continue
         }
         const match = line.match(TASK_LINE)
-        if (!match) continue
+        const untagged = match ? undefined : line.match(UNTAGGED_DONE)
+        // Untagged checkboxes only count at top level: inside another entry they
+        // are acceptance criteria or evidence, part of that entry.
+        if (!match && (!untagged || i < coveredUntil)) continue
         const indent = indentOf(line)
         let end = i + 1
         let lastContent = i + 1
@@ -106,9 +118,13 @@ export function parseTaskEntries(markdown: string): TaskEntry[] {
             end++
             lastContent = end
         }
+        coveredUntil = Math.max(coveredUntil, lastContent)
         entries.push({
-            id: (match[2] ?? '').trim(),
-            status: (match[1] ?? ' ') as TaskEntry['status'],
+            id: match
+                ? (match[2] ?? '').trim()
+                : (untagged?.[1]?.match(LEADING_ID)?.[1] ?? `line-${i + 1}`),
+            status: (match ? (match[1] ?? ' ') : 'x') as TaskEntry['status'],
+            tagged: Boolean(match),
             start: i,
             end: lastContent,
             headings: headingStack.filter(h => h.level > 1).map(h => h.text),
@@ -288,8 +304,23 @@ export function appendToClosedRegistry(
     const header = `# ${title}\n\n> Append-only history moved out of \`.autonomos/${source}\`. Not startup context; search by ID.\n`
     const base = existing && existing.trim() ? existing.replace(/\s*$/, '\n') : header
     const parts = [base]
-    if (groupHeading) parts.push(`## ${groupHeading}\n`)
     const joiner = kind === 'issues' ? '\n\n' : '\n'
-    parts.push(entries.map(e => e.replace(/\s*$/, '')).join(joiner) + '\n')
+    const body = entries.map(e => e.replace(/\s*$/, '')).join(joiner) + '\n'
+    const lastGroup = [...base.matchAll(/^## (.+)$/gm)].at(-1)?.[1]
+    // Continue the current group: same date, same batch.
+    if (groupHeading && lastGroup === groupHeading)
+        return base + (kind === 'issues' ? '\n' : '') + body
+    if (groupHeading) parts.push(`## ${groupHeading}\n`)
+    parts.push(body)
     return parts.join('\n')
+}
+
+const UNFINISHED = /^\s*[-*] \[ \]|\b(?:follow[- ]?ups?|todo|not yet|still open)\b/im
+
+/**
+ * True when a record being closed still mentions unfinished work: an unchecked
+ * item or follow-up wording. Closing does not settle it; review it first.
+ */
+export function mentionsUnfinishedWork(text: string): boolean {
+    return UNFINISHED.test(text)
 }

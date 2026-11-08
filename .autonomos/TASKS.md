@@ -9,7 +9,7 @@
 
 ### Protocol Refinements
 
-- [ ] **[PROTO-16]** Measure agent adherence to protocol 0.8 on disposable consumer copies `Priority: 🔴` `Complexity: L` — ISSUE-05; other agents, scored rubric, then a corrective pass if needed.
+- [/] **[PROTO-16]** Measure agent adherence to protocol 0.8 on real consumer migrations `Priority: 🔴` `Complexity: L` — ISSUE-05; round 1 done (5 agents), round 2 with a weaker model after 0.8.1.
 
 ### Testing & Quality
 

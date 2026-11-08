@@ -4,6 +4,7 @@ import {
     extractIssues,
     extractTasks,
     isClosedIssueStatus,
+    mentionsUnfinishedWork,
     parseIssueEntries,
     parseTaskEntries,
     stampCompleted,
@@ -137,4 +138,46 @@ describe('stampCompleted and closed registry', () => {
         expect(second).toContain('- [x] **[A]** a')
         expect(second).toContain('## Batch\n\n- [x] **[B]** b\n')
     })
+})
+
+describe('untagged checked items', () => {
+    const doc = `# T
+
+## Site
+
+- [x] SITE-12 Ship the landing page
+- [x] Polish footer
+    - note
+- [ ] **[A-9]** Open \`Priority: 🔵\` \`Complexity: S\`
+    - [x] criterion met
+- [ ] plain open item
+`
+
+    it('parses only top-level checked items without a bold tag', () => {
+        const untagged = parseTaskEntries(doc).filter(e => !e.tagged)
+        expect(untagged.map(e => e.id)).toEqual(['SITE-12', 'line-6'])
+        expect(untagged[1]?.text).toBe('- [x] Polish footer\n    - note')
+    })
+
+    it('moves them with completed work and keeps criteria of open tasks', () => {
+        const { remaining, moved } = extractTasks(doc, e => e.status === 'x')
+        expect(moved.map(e => e.id)).toEqual(['SITE-12', 'line-6'])
+        expect(remaining).toContain('    - [x] criterion met')
+        expect(remaining).toContain('- [ ] plain open item')
+    })
+})
+
+describe('mentionsUnfinishedWork', () => {
+    it('flags unchecked items and follow-up wording only', () => {
+        expect(mentionsUnfinishedWork('- [x] **[A]** a\n    - [ ] left')).toBe(true)
+        expect(mentionsUnfinishedWork('- [x] **[A]** a — follow-up in B')).toBe(true)
+        expect(mentionsUnfinishedWork('- [x] **[A]** done and verified')).toBe(false)
+    })
+})
+
+it('reuses the last group heading instead of repeating it', () => {
+    const once = appendToClosedRegistry(undefined, 'tasks', ['- a'], 'Closed 2026-11-09')
+    const twice = appendToClosedRegistry(once, 'tasks', ['- b'], 'Closed 2026-11-09')
+    expect(twice.match(/## Closed 2026-11-09/g)).toHaveLength(1)
+    expect(twice).toContain('- a\n- b\n')
 })

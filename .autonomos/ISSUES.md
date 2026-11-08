@@ -58,4 +58,4 @@
   artifact-format change ships a migration that quarantines legacy examples.
   Budget drift is visible through `autonomos status`.
 - **Related:** ISSUE-03 / SPEC-003 (superseded in part by SPEC-004); ISSUE-04.
-- **Tasks:** PROTO-15 (done), PROTO-16 — owner accepted the direction on 2026-11-08; SPEC-004.
+- **Tasks:** PROTO-15 (done), PROTO-16, PROTO-17 (done) — owner accepted the direction on 2026-11-08; SPEC-004.

@@ -358,12 +358,17 @@ program
         'after',
         `
 Mechanical, content-preserving upgrade (format 1 → 2):
-  - completed tasks and closed issues move to .autonomos/archive/closed/
+  - completed tasks (including checked items without a **[ID]** tag) and
+    closed issues move to .autonomos/archive/closed/
   - existing worklogs move to .autonomos/archive/worklogs-format-1/ so they
     stop serving as examples for new worklogs
   - Markdown references to moved files are repaired across the project
   - the archive index and manifest record the change
-Nothing is deleted or rewritten. Commit first; review the diff afterwards.
+  - git-ignored worklogs stay ignored at their new location
+Nothing is deleted or rewritten. Commit unrelated changes first (registering the
+migration task is fine) so the diff stays reviewable. Closed records that still
+mention unfinished work are listed: move each follow-up to an open record.
+Rerun after merging into a checkout that holds git-ignored legacy worklogs.
 Remaining findings (AGENT.md size, long open tasks) are semantic work for /reconcile.
 
 ${pc.bold('Examples:')}
@@ -389,6 +394,20 @@ ${pc.bold('Examples:')}
         }
         console.log(`   Worklogs quarantined: ${result.movedWorklogs}`)
         console.log(`   Files with repaired references: ${result.rewrittenFiles.length}`)
+        for (const note of result.notes) console.log(`   ${pc.cyan('ℹ')} ${note}`)
+        if (result.followUps.length) {
+            const shown = result.followUps.slice(0, 20).join(', ')
+            const more =
+                result.followUps.length > 20 ? ` (+${result.followUps.length - 20} more)` : ''
+            console.log(
+                pc.yellow(
+                    `\n⚠ ${result.followUps.length} closed record(s) still mention unfinished work (unchecked items, follow-ups): ${shown}${more}`
+                )
+            )
+            console.log(
+                '   Make sure each follow-up lives in an open task or issue before relying on the archive.'
+            )
+        }
         if (result.findings.length) {
             console.log(pc.bold('\nRemaining work for /reconcile:'))
             for (const finding of result.findings)
