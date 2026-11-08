@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 
 import {
     AUTONOMOS_DIR,
@@ -16,7 +16,12 @@ import {
 } from '@autonomos/core'
 
 import packageJson from '../../package.json' with { type: 'json' }
-import { buildTargetFilename, getWorkflowsDir, WORKFLOW_FILES } from '../protocol-artifacts'
+import {
+    buildTargetFilename,
+    getTargetArtifactFiles,
+    getWorkflowsDir,
+    WORKFLOW_FILES,
+} from '../protocol-artifacts'
 const CLI_VERSION: string = packageJson.version
 
 interface UpdateOptions {
@@ -115,13 +120,11 @@ function writeHarnessWorkflows(cwd: string, harnessIds: string[], workflowsDir: 
     const targets = resolveTargets(harnessIds, cwd)
     const written: string[] = []
     for (const target of targets) {
-        mkdirSync(target.path, { recursive: true })
-        for (const workflowFile of WORKFLOW_FILES) {
-            const source = readFileSync(join(workflowsDir, workflowFile), 'utf-8')
-            const filename = buildTargetFilename(workflowFile, target.fileExtension)
-            const dest = join(target.path, filename)
-            writeFileSync(dest, source)
-            written.push(`${target.path}/${filename}`)
+        for (const file of getTargetArtifactFiles(target, WORKFLOW_FILES)) {
+            mkdirSync(dirname(file.destinationPath), { recursive: true })
+            const source = readFileSync(join(workflowsDir, file.sourceFilename), 'utf-8')
+            writeFileSync(file.destinationPath, source)
+            written.push(file.destinationPath)
         }
     }
     return written
@@ -129,33 +132,116 @@ function writeHarnessWorkflows(cwd: string, harnessIds: string[], workflowsDir: 
 
 /**
  * Refresh workflows for harnesses already installed in the project.
- * A workflow update is independent from the protocol version: workflow files
- * are executable artifacts and may be fixed between protocol releases.
+ * Automatically migrates legacy layouts to conform to modern harness requirements:
+ *  - Migrates legacy flat files in .agents/skills/ to standard skill bundles (.agents/skills/protocol-[name]/SKILL.md)
+ *  - Migrates legacy .agent/workflows/ to .agents/workflows/
+ *  - Cleans legacy flat files from .claude/skills/
  */
 function refreshInstalledHarnessWorkflows(cwd: string, workflowsDir: string): string[] {
+    const updatedTargets: string[] = []
+
+    // 1. Migration of legacy flat files in .agents/skills
+    const agentsSkillsDir = join(cwd, '.agents', 'skills')
+    if (existsSync(agentsSkillsDir)) {
+        let removedFlat = false
+        for (const workflowFile of WORKFLOW_FILES) {
+            const flatFile = join(agentsSkillsDir, buildTargetFilename(workflowFile, '.md'))
+            if (existsSync(flatFile)) {
+                try {
+                    rmSync(flatFile, { force: true })
+                    removedFlat = true
+                } catch {
+                    // Ignore removal failures
+                }
+            }
+        }
+        if (removedFlat) {
+            // Install skill bundles in .agents/skills
+            const skillTarget = {
+                path: agentsSkillsDir,
+                fileExtension: '.md',
+                kind: 'skill' as const,
+            }
+            for (const file of getTargetArtifactFiles(skillTarget, WORKFLOW_FILES)) {
+                mkdirSync(dirname(file.destinationPath), { recursive: true })
+                const source = readFileSync(join(workflowsDir, file.sourceFilename), 'utf-8')
+                writeFileSync(file.destinationPath, source)
+            }
+            updatedTargets.push(agentsSkillsDir)
+        }
+    }
+
+    // 2. Migration of legacy .agent/workflows (singular) to .agents/workflows
+    const legacyAgentWorkflowsDir = join(cwd, '.agent', 'workflows')
+    if (existsSync(legacyAgentWorkflowsDir)) {
+        const modernWorkflowsDir = join(cwd, '.agents', 'workflows')
+        mkdirSync(modernWorkflowsDir, { recursive: true })
+        let changedLegacy = false
+        for (const workflowFile of WORKFLOW_FILES) {
+            const flatName = buildTargetFilename(workflowFile, '.md')
+            const source = readFileSync(join(workflowsDir, workflowFile), 'utf-8')
+            const modernDest = join(modernWorkflowsDir, flatName)
+            if (!existsSync(modernDest) || readFileSync(modernDest, 'utf-8') !== source) {
+                writeFileSync(modernDest, source)
+                changedLegacy = true
+            }
+            const legacyDest = join(legacyAgentWorkflowsDir, flatName)
+            if (!existsSync(legacyDest) || readFileSync(legacyDest, 'utf-8') !== source) {
+                writeFileSync(legacyDest, source)
+                changedLegacy = true
+            }
+        }
+        if (changedLegacy) {
+            if (!updatedTargets.includes(modernWorkflowsDir)) {
+                updatedTargets.push(modernWorkflowsDir)
+            }
+            if (!updatedTargets.includes(legacyAgentWorkflowsDir)) {
+                updatedTargets.push(legacyAgentWorkflowsDir)
+            }
+        }
+    }
+
+    // 3. Migration of legacy flat files in .claude/skills
+    const claudeSkillsDir = join(cwd, '.claude', 'skills')
+    if (existsSync(claudeSkillsDir)) {
+        for (const workflowFile of WORKFLOW_FILES) {
+            const flatFile = join(claudeSkillsDir, buildTargetFilename(workflowFile, '.md'))
+            if (existsSync(flatFile)) {
+                try {
+                    rmSync(flatFile, { force: true })
+                } catch {
+                    // Ignore removal failures
+                }
+            }
+        }
+    }
+
+    // 4. Standard refresh across all targets resolved from configured platforms
     const targets = resolveTargets(
         listHarnesses().map(({ id }) => id),
         cwd
     )
-    const updatedTargets: string[] = []
 
     for (const target of targets) {
         if (!existsSync(target.path)) continue
 
-        const files = WORKFLOW_FILES.map(workflowFile => ({
-            source: readFileSync(join(workflowsDir, workflowFile), 'utf-8'),
-            dest: join(target.path, buildTargetFilename(workflowFile, target.fileExtension)),
+        const files = getTargetArtifactFiles(target, WORKFLOW_FILES).map(file => ({
+            source: readFileSync(join(workflowsDir, file.sourceFilename), 'utf-8'),
+            dest: file.destinationPath,
         }))
         if (!files.some(({ dest }) => existsSync(dest))) continue
 
         let changed = false
         for (const { source, dest } of files) {
             if (!existsSync(dest) || readFileSync(dest, 'utf-8') !== source) {
+                mkdirSync(dirname(dest), { recursive: true })
                 writeFileSync(dest, source)
                 changed = true
             }
         }
-        if (changed) updatedTargets.push(target.path)
+        if (changed && !updatedTargets.includes(target.path)) {
+            updatedTargets.push(target.path)
+        }
     }
 
     return updatedTargets

@@ -18,13 +18,21 @@ export const InstallerSchema = z
         targetDir: z.string().optional(),
         skillsDir: z.string().optional(),
         commandsDir: z.string().optional(),
+        promptsDir: z.string().optional(),
         globalTargetDir: z.string().optional(),
         fileExtension: z.string(),
+        _note: z.string().optional(),
     })
     .refine(
-        data => Boolean(data.workflowsDir) || Boolean(data.targetDir) || Boolean(data.skillsDir),
+        data =>
+            Boolean(data.workflowsDir) ||
+            Boolean(data.targetDir) ||
+            Boolean(data.skillsDir) ||
+            Boolean(data.commandsDir) ||
+            Boolean(data.promptsDir),
         {
-            message: 'At least one of `workflowsDir`, `targetDir`, or `skillsDir` must be defined',
+            message:
+                'At least one of `workflowsDir`, `targetDir`, `skillsDir`, `commandsDir`, or `promptsDir` must be defined',
         }
     )
 

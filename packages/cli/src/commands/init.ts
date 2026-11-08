@@ -1,6 +1,6 @@
 import { checkbox, confirm } from '@inquirer/prompts'
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import {
     AGENT_FILE,
@@ -26,7 +26,7 @@ import {
 // inlines this JSON, so the resolved value is always current.
 // (package.json import — inlined by the bundler)
 import packageJson from '../../package.json' with { type: 'json' }
-import { buildTargetFilename, getWorkflowsDir, WORKFLOW_FILES } from '../protocol-artifacts'
+import { getTargetArtifactFiles, getWorkflowsDir, WORKFLOW_FILES } from '../protocol-artifacts'
 const CLI_VERSION: string = packageJson.version
 
 interface InitOptions {
@@ -270,9 +270,8 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
         }
 
         for (const target of targets) {
-            for (const workflowFile of WORKFLOW_FILES) {
-                const filename = buildTargetFilename(workflowFile, target.fileExtension)
-                harnessFiles.push(`${target.path}/${filename}`)
+            for (const file of getTargetArtifactFiles(target, WORKFLOW_FILES)) {
+                harnessFiles.push(file.destinationPath)
             }
         }
 
@@ -391,13 +390,11 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
     // Install workflow files for each selected harness
     const workflowsDir = getWorkflowsDir()
     for (const target of targets) {
-        mkdirSync(target.path, { recursive: true })
-        for (const workflowFile of WORKFLOW_FILES) {
-            const source = readFileSync(join(workflowsDir, workflowFile), 'utf-8')
-            const filename = buildTargetFilename(workflowFile, target.fileExtension)
-            const dest = join(target.path, filename)
-            writeFileSync(dest, source)
-            harnessFiles.push(`${target.path}/${filename}`)
+        for (const file of getTargetArtifactFiles(target, WORKFLOW_FILES)) {
+            mkdirSync(dirname(file.destinationPath), { recursive: true })
+            const source = readFileSync(join(workflowsDir, file.sourceFilename), 'utf-8')
+            writeFileSync(file.destinationPath, source)
+            harnessFiles.push(file.destinationPath)
         }
     }
 

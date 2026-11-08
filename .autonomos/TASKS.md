@@ -38,6 +38,9 @@
 
 ### Protocol Refinements
 
+- [x] **[RELEASE-04]** Coordinated patch release for native harness slash commands and skills layout `Priority: 🔴` `Complexity: M` `Completed: 2026-11-08` _See: .autonomos/worklogs/2026-11-08-RELEASE-04-harness-alignment.md_
+    - Align harness targets for Claude Code, Antigravity, Codex CLI, and OpenCode.
+    - Implement automated migration in `autonomos update` for existing projects.
 - [x] **[RELEASE-03]** Publish coordinated 0.7 Core/CLI packages through npm trusted publishing `Priority: 🔴` `Complexity: M` `Completed: 2026-10-24` _See: .autonomos/worklogs/2026-10-24-RELEASE-03.md_
     - Owner authorizes publication and reports configuring OIDC after removing the npm Actions token.
     - Remove token-based workflow configuration, validate, publish via GitHub Actions, and verify registry versions, dependency pin and distributed protocol.
