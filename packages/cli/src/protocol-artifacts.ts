@@ -45,10 +45,39 @@ export function getWorkflowsDir(): string {
     throw new Error('Could not locate the workflows directory inside @autonomos/core')
 }
 
+export interface TargetArtifactFile {
+    sourceFilename: string
+    relativeTargetFilePath: string
+    destinationPath: string
+}
+
 export function buildTargetFilename(sourceFile: string, targetExtension: string): string {
     const withoutPrefix = sourceFile.replace(/^protocol-/, '')
     const withoutExt = withoutPrefix.replace(/\.[^.]+$/, '')
     return withoutExt + targetExtension
+}
+
+export function getTargetArtifactFiles(
+    target: { path: string; fileExtension: string; kind?: 'flat' | 'skill' },
+    workflowFiles: readonly string[] = WORKFLOW_FILES
+): TargetArtifactFile[] {
+    return workflowFiles.map(sourceFile => {
+        if (target.kind === 'skill') {
+            const skillName = sourceFile.replace(/\.[^.]+$/, '')
+            const relPath = join(skillName, 'SKILL.md')
+            return {
+                sourceFilename: sourceFile,
+                relativeTargetFilePath: relPath,
+                destinationPath: join(target.path, relPath),
+            }
+        }
+        const flatFilename = buildTargetFilename(sourceFile, target.fileExtension)
+        return {
+            sourceFilename: sourceFile,
+            relativeTargetFilePath: flatFilename,
+            destinationPath: join(target.path, flatFilename),
+        }
+    })
 }
 
 export function verifyProtocolArtifacts(
@@ -69,10 +98,20 @@ export function verifyProtocolArtifacts(
         cwd
     )
 
+    const legacyAgentWorkflows = join(cwd, '.agent', 'workflows')
+    if (existsSync(legacyAgentWorkflows)) {
+        targets.push({
+            path: legacyAgentWorkflows,
+            fileExtension: '.md',
+            kind: 'flat',
+            usedBy: ['antigravity-legacy'],
+        })
+    }
+
     for (const target of targets) {
-        const expected = WORKFLOW_FILES.map(sourceFile => ({
-            source: readFileSync(join(workflowsDir, sourceFile), 'utf-8'),
-            destination: join(target.path, buildTargetFilename(sourceFile, target.fileExtension)),
+        const expected = getTargetArtifactFiles(target, WORKFLOW_FILES).map(file => ({
+            source: readFileSync(join(workflowsDir, file.sourceFilename), 'utf-8'),
+            destination: file.destinationPath,
         }))
         if (!expected.some(({ destination }) => existsSync(destination))) continue
         for (const file of expected) {

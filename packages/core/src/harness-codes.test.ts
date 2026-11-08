@@ -72,7 +72,7 @@ describe('harness-codes loader', () => {
         it('returns skills + commands targets for Claude Code (split mode)', () => {
             const targets = resolveTargets(['claude-code'], '/proj')
             const paths = targets.map(t => t.path).sort()
-            expect(paths).toEqual(['/proj/.claude/commands', '/proj/.claude/skills'])
+            expect(paths).toEqual(['/proj/.agents/skills', '/proj/.claude/commands'])
         })
 
         it('deduplicates the cross-tool .agents/skills/ standard across Codex + OpenCode + KiloCode', () => {
@@ -85,9 +85,9 @@ describe('harness-codes loader', () => {
             expect(skillsCount).toBe(1)
         })
 
-        it('keeps Antigravity (singular .agent/) separate from the cross-tool standard', () => {
+        it('configures Antigravity with .agents/workflows and shared .agents/skills', () => {
             const targets = resolveTargets(['antigravity', 'codex'], '/proj')
-            expect(targets.find(t => t.path === '/proj/.agent/workflows')).toBeDefined()
+            expect(targets.find(t => t.path === '/proj/.agents/workflows')).toBeDefined()
             expect(targets.find(t => t.path === '/proj/.agents/skills')).toBeDefined()
         })
 

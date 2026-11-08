@@ -40,6 +40,8 @@ export function listPreferredHarnesses(): Array<{ id: string; harness: Harness }
     return listHarnesses().filter(({ harness }) => harness.preferred)
 }
 
+export type TargetKind = 'flat' | 'skill'
+
 /**
  * A resolved target directory where workflow files will be written.
  * One per unique path, with the list of harness ids that share it.
@@ -49,6 +51,8 @@ export interface ResolvedTarget {
     path: string
     /** File extension to use (e.g. ".md", ".agent.md") */
     fileExtension: string
+    /** Whether target receives flat files (e.g. session.md) or skill bundles (e.g. protocol-session/SKILL.md) */
+    kind: TargetKind
     /** Ids of the harnesses that will read from this directory */
     usedBy: string[]
 }
@@ -56,9 +60,9 @@ export interface ResolvedTarget {
 /**
  * Resolve the unique target directories for a set of harness ids.
  *
- * Harnesses that share the same `skillsDir` (e.g. Codex, OpenCode, KiloCode
- * all use `.agents/skills/`) are deduplicated: the directory appears once
- * in the output, with all the harness ids listed in `usedBy`.
+ * Harnesses that share the same `skillsDir` (e.g. Codex, OpenCode, KiloCode,
+ * Antigravity, Claude Code all use `.agents/skills/`) are deduplicated:
+ * the directory appears once in the output, with all the harness ids listed in `usedBy`.
  *
  * The `path` is returned relative to the project root (caller is responsible
  * for joining with the project cwd).
@@ -82,14 +86,19 @@ function collectFromInstaller(
 ): void {
     const ext = installer.fileExtension
     if (installer.workflowsDir) {
-        addTarget(map, joinPath(cwd, installer.workflowsDir), ext, harnessId)
-    } else if (installer.targetDir) {
-        addTarget(map, joinPath(cwd, installer.targetDir), ext, harnessId)
-    } else if (installer.skillsDir) {
-        addTarget(map, joinPath(cwd, installer.skillsDir), ext, harnessId)
+        addTarget(map, joinPath(cwd, installer.workflowsDir), ext, 'flat', harnessId)
     }
     if (installer.commandsDir) {
-        addTarget(map, joinPath(cwd, installer.commandsDir), ext, harnessId)
+        addTarget(map, joinPath(cwd, installer.commandsDir), ext, 'flat', harnessId)
+    }
+    if (installer.promptsDir) {
+        addTarget(map, joinPath(cwd, installer.promptsDir), ext, 'flat', harnessId)
+    }
+    if (installer.targetDir) {
+        addTarget(map, joinPath(cwd, installer.targetDir), ext, 'flat', harnessId)
+    }
+    if (installer.skillsDir) {
+        addTarget(map, joinPath(cwd, installer.skillsDir), ext, 'skill', harnessId)
     }
 }
 
@@ -97,6 +106,7 @@ function addTarget(
     map: Map<string, ResolvedTarget>,
     path: string,
     fileExtension: string,
+    kind: TargetKind,
     harnessId: string
 ): void {
     const existing = map.get(path)
@@ -105,7 +115,7 @@ function addTarget(
             existing.usedBy.push(harnessId)
         }
     } else {
-        map.set(path, { path, fileExtension, usedBy: [harnessId] })
+        map.set(path, { path, fileExtension, kind, usedBy: [harnessId] })
     }
 }
 

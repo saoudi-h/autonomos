@@ -120,11 +120,14 @@ describe('init', () => {
         expect(result.success).toBe(true)
         expect(existsSync(join(root, '.autonomos', 'manifest.json'))).toBe(true)
         expect(existsSync(join(root, 'AGENT.md'))).toBe(true)
-        expect(existsSync(join(root, '.claude', 'skills', 'session.md'))).toBe(true)
-        expect(existsSync(join(root, '.claude', 'skills', 'issue.md'))).toBe(true)
-        expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
-        expect(existsSync(join(root, '.claude', 'skills', 'reconcile.md'))).toBe(true)
-        expect(existsSync(join(root, '.claude', 'skills', 'design.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'session.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'issue.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'adopt.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'reconcile.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'design.md'))).toBe(true)
+        expect(existsSync(join(root, '.agents', 'skills', 'protocol-session', 'SKILL.md'))).toBe(
+            true
+        )
         expect(existsSync(join(root, '.autonomos', 'archive'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'specs'))).toBe(false)
         expect(existsSync(join(root, '.autonomos', 'decisions'))).toBe(false)
@@ -167,7 +170,7 @@ describe('init', () => {
         for (const [file, content] of Object.entries(preserved)) {
             expect(readFileSync(file, 'utf-8')).toBe(content)
         }
-        expect(existsSync(join(root, '.claude', 'skills', 'adopt.md'))).toBe(true)
+        expect(existsSync(join(root, '.claude', 'commands', 'adopt.md'))).toBe(true)
     })
 
     it('refuses to install from a subdirectory in non-interactive mode', async () => {

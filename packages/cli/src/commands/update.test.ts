@@ -153,4 +153,59 @@ describe('update', () => {
         expect(readFileSync(protocolPath, 'utf-8')).toBe('old protocol')
         expect(readFileSync(packagePath, 'utf-8')).toBe(JSON.stringify({ name: 'fixture' }))
     })
+
+    it('migrates legacy harness layouts (flat skills in .agents/skills, .agent/workflows, .claude/skills)', () => {
+        root = mkdtempSync(join(tmpdir(), 'autonomos-migrate-'))
+        const manifestPath = join(root, '.autonomos', 'manifest.json')
+        mkdirSync(join(root, '.autonomos'), { recursive: true })
+        writeFileSync(
+            manifestPath,
+            JSON.stringify({
+                protocolVersion: PROTOCOL_VERSION,
+                cliVersion: '0.7.0',
+                initializedAt: '2026-01-01T00:00:00.000Z',
+                lastUpdated: '2026-01-01T00:00:00.000Z',
+            } satisfies Manifest)
+        )
+
+        // Simulate legacy layout:
+        // 1. flat files in .agents/skills/
+        const agentsSkills = join(root, '.agents', 'skills')
+        mkdirSync(agentsSkills, { recursive: true })
+        writeFileSync(join(agentsSkills, 'session.md'), 'old flat session')
+        writeFileSync(join(agentsSkills, 'task.md'), 'old flat task')
+        // Preserved custom skill in .agents/skills/
+        mkdirSync(join(agentsSkills, 'custom-tool'), { recursive: true })
+        writeFileSync(join(agentsSkills, 'custom-tool', 'SKILL.md'), 'custom tool skill')
+
+        // 2. legacy singular .agent/workflows
+        const legacyAgent = join(root, '.agent', 'workflows')
+        mkdirSync(legacyAgent, { recursive: true })
+        writeFileSync(join(legacyAgent, 'session.md'), 'old agent session')
+
+        // 3. legacy flat files in .claude/skills
+        const claudeSkills = join(root, '.claude', 'skills')
+        mkdirSync(claudeSkills, { recursive: true })
+        writeFileSync(join(claudeSkills, 'session.md'), 'old claude session')
+
+        const result = update({ cwd: root })
+
+        expect(result.success).toBe(true)
+
+        // 1. Flat files removed, standard skill bundle created
+        expect(existsSync(join(agentsSkills, 'session.md'))).toBe(false)
+        expect(existsSync(join(agentsSkills, 'task.md'))).toBe(false)
+        expect(existsSync(join(agentsSkills, 'protocol-session', 'SKILL.md'))).toBe(true)
+        expect(existsSync(join(agentsSkills, 'protocol-task', 'SKILL.md'))).toBe(true)
+        // Custom skill untouched
+        expect(readFileSync(join(agentsSkills, 'custom-tool', 'SKILL.md'), 'utf-8')).toBe(
+            'custom tool skill'
+        )
+
+        // 2. Modern .agents/workflows created
+        expect(existsSync(join(root, '.agents', 'workflows', 'session.md'))).toBe(true)
+
+        // 3. Legacy flat claude/skills cleaned
+        expect(existsSync(join(claudeSkills, 'session.md'))).toBe(false)
+    })
 })

@@ -38,7 +38,8 @@
         "turbo": "^2.7.2",
         "typescript": "^5.9.3",
         "unplugin-unused": "^0.5.7",
-        "vite-tsconfig-paths": "^6.0.3"
+        "vite-tsconfig-paths": "^6.0.3",
+        "@autonomos/cli": "^0.7.0"
     },
     "packageManager": "pnpm@10.27.0",
     "engines": {
