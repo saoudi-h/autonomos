@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION } from '../constants'
+import { ARTIFACT_FORMAT, PROTOCOL_VERSION } from '../constants'
 import { ManifestSchema, type Manifest } from '../schemas/manifest'
 
 /**
@@ -11,6 +11,7 @@ export function createManifest(cliVersion: string): Manifest {
         cliVersion,
         initializedAt: now,
         lastUpdated: now,
+        artifactFormat: ARTIFACT_FORMAT,
     }
 }
 
@@ -27,4 +28,9 @@ export function generateManifestContent(manifest: Manifest): string {
 export function parseManifest(content: string): Manifest {
     const data = JSON.parse(content)
     return ManifestSchema.parse(data)
+}
+
+/** Artifact format recorded by a manifest (format 1 when absent). */
+export function manifestArtifactFormat(manifest: Manifest): number {
+    return manifest.artifactFormat ?? 1
 }

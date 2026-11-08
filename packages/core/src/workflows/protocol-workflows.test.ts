@@ -387,9 +387,6 @@ describe('Archival and current-context continuity', () => {
         )
         expect(reconcile).toContain('not permanent per-completion stubs')
         expect(crystallize).toContain('Do not turn a current choice into a broader prohibition')
-        expect(crystallize).toContain(
-            'Do not reorganize archives mechanically after every task or by calendar age'
-        )
     })
     it('checks actual output and preserves valid parts of mixed claims', () => {
         expect(reconcile).toContain('Re-read exact source text before edits')
@@ -398,5 +395,47 @@ describe('Archival and current-context continuity', () => {
         expect(crystallize).toContain('claim by claim')
         expect(task).toContain('reserve new IDs against current and archived registries')
         expect(issue).toContain('identifier reuse')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 13. Artifact format 2 — bounded context, proportionate records, migration
+// ---------------------------------------------------------------------------
+describe('Bounded context and proportionate records (format 2)', () => {
+    it('closes finished records mechanically in the same session', () => {
+        expect(crystallize).toContain('`autonomos close <ID>`')
+        expect(crystallize).toContain('.autonomos/archive/closed/')
+        expect(crystallize).toContain('never a progress journal')
+        expect(issue).toContain('never appended to the issue')
+        expect(PROTOCOL_TEMPLATE).toContain('`ISSUES.md` holds open and accepted issues')
+        expect(PROTOCOL_TEMPLATE).toContain('Unfinished work may be closed only as abandoned')
+    })
+
+    it('prescribes a fixed, bounded worklog shape and forbids imitation', () => {
+        for (const field of ['`Outcome:`', '`Decisions:`', '`Validation:`', '`Open:`'])
+            expect(crystallize).toContain(field)
+        expect(crystallize).toContain('do not model it on existing worklogs')
+        expect(crystallize).toContain('Leave out chronology, plans, file lists')
+        expect(crystallize).toContain('2,500 bytes')
+        expect(crystallize).toContain('needs no worklog')
+    })
+
+    it('admits AGENT.md knowledge by cost, with budgets', () => {
+        expect(crystallize).toContain('does it apply to most tasks in this scope')
+        expect(crystallize).toContain('Root `AGENT.md` stays under 8,000 bytes')
+        expect(PROTOCOL_TEMPLATE).toContain('## Context Budgets')
+        expect(reconcile).toContain('Over-budget `AGENT.md`')
+    })
+
+    it('keeps evidence out of task entries', () => {
+        expect(task).toContain('Evidence never goes into the task entry')
+        expect(PROTOCOL_TEMPLATE).toContain('One line per task')
+    })
+
+    it('surfaces status findings and routes format upgrades through migrate', () => {
+        expect(session).toContain('run `autonomos status`')
+        expect(reconcile).toContain('autonomos migrate --dry-run')
+        expect(PROTOCOL_TEMPLATE).toContain('## Artifact Format and Migration')
+        expect(PROTOCOL_TEMPLATE).toContain('worklogs-format-1')
     })
 })

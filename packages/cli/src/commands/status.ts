@@ -3,10 +3,13 @@ import { join } from 'node:path'
 
 import {
     AUTONOMOS_DIR,
+    checkContextBudgets,
     MANIFEST_FILE,
+    manifestArtifactFormat,
     parseManifest,
     readTaskRegistry,
     TASKS_FILE,
+    type BudgetFinding,
     type Manifest,
     type TaskReference,
 } from '@autonomos/core'
@@ -38,6 +41,9 @@ export interface StatusResult {
     warnings?: string[]
     artifactIntegrity?: ArtifactIntegrity
     driftedArtifacts?: string[]
+    artifactFormat?: number
+    /** Advisory context-budget findings (artifact format 2). */
+    budgetFindings?: BudgetFinding[]
 }
 
 /**
@@ -112,5 +118,9 @@ export function status(options: StatusOptions = {}): StatusResult {
         warnings: registry.warnings,
         artifactIntegrity: integrity.state,
         driftedArtifacts: integrity.driftedFiles,
+        artifactFormat: manifestArtifactFormat(manifest),
+        budgetFindings: checkContextBudgets(cwd, {
+            artifactFormat: manifestArtifactFormat(manifest),
+        }),
     }
 }

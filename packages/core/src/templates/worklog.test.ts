@@ -1,37 +1,26 @@
 import { describe, expect, it } from 'vitest'
+import { CONTEXT_BUDGETS } from '../constants'
 import { generateWorklogContent } from './worklog'
 
-describe('Worklog Template', () => {
-    it('should generate a valid worklog content', () => {
+describe('Worklog Template (format 2)', () => {
+    it('produces the proportionate four-field shape', () => {
         const content = generateWorklogContent({
             taskId: 'TASK-01',
-            taskName: 'Fixing Bug',
-            status: 'Complete',
-            description: 'Fixed the line splitting issue.',
-            filesModified: ['src/parsers/task-parser.ts'],
-            decisions: ['Used regex for splitting'],
-            challenges: ['Template literal escaping'],
-            nextSteps: ['Add more tests'],
+            title: 'Fix line splitting',
+            outcome: 'Parser accepts CRLF input.',
+            decisions: ['Split on /\\r?\\n/ instead of normalizing files: preserves bytes'],
+            validation: ['`vitest run task-parser` → 12 passed'],
         })
-
-        expect(content).toContain('# WORKLOG: [TASK-01] Fixing Bug')
-        expect(content).toContain('**Agent Status:** [Complete]')
-        expect(content).toContain('- src/parsers/task-parser.ts')
-        expect(content).toContain('- Used regex for splitting')
+        expect(content).toContain('# [TASK-01] Fix line splitting')
+        expect(content).toContain('Outcome: Parser accepts CRLF input.')
+        expect(content).toContain('Decisions:\n- Split on')
+        expect(content).toContain('Validation:\n- `vitest run task-parser` → 12 passed')
+        expect(content).toContain('Open: none')
     })
 
-    it('should use current date if not provided', () => {
-        const content = generateWorklogContent({
-            taskId: 'T',
-            taskName: 'N',
-            status: 'Partial',
-            description: 'D',
-            filesModified: [],
-            decisions: [],
-            challenges: [],
-            nextSteps: [],
-        })
-        const today = new Date().toISOString().split('T')[0]
-        expect(content).toContain(`**Date:** ${today}`)
+    it('omits narrative sections and stays within budget', () => {
+        const content = generateWorklogContent({ taskId: 'T', title: 'N', outcome: 'D' })
+        expect(content).not.toMatch(/Files Modified|Description|Challenges|Next Steps/)
+        expect(Buffer.byteLength(content)).toBeLessThan(CONTEXT_BUDGETS.worklogBytes)
     })
 })

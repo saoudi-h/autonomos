@@ -48,9 +48,38 @@ content. Drift is reported with the affected paths and can be repaired with
 `autonomos update`; artifacts from other protocol versions are reported as
 unverifiable rather than incorrectly judged against the current release.
 
+It also reports context-budget findings: closed records left in `TASKS.md` or
+`ISSUES.md`, oversized registries, task entries, `AGENT.md` files and worklogs, and
+an outdated artifact format. They are advisory; `--strict` exits non-zero.
+
 ```bash
 autonomos status
 autonomos status --history
+autonomos status --strict
+```
+
+### `close`
+
+Move finished records out of current context into `.autonomos/archive/closed/`.
+A task must be `[x]` (a `Completed:` date is added when missing) unless
+`--abandoned "<reason>"` is given; an issue must be resolved, declined, closed or
+superseded. Entries move intact and their relative links are repaired.
+
+```bash
+autonomos close PROTO-15 ISSUE-05
+autonomos close SPIKE-02 --abandoned "superseded by PROTO-15"
+```
+
+### `migrate`
+
+Upgrade project records to the current artifact format, content-preserving and
+idempotent. Format 1 → 2 moves closed records to `archive/closed/`, quarantines
+existing worklogs in `archive/worklogs-format-1/`, repairs Markdown references and
+records `artifactFormat`. Run `--dry-run` first on a clean working tree.
+
+```bash
+autonomos migrate --dry-run
+autonomos migrate
 ```
 
 ### `agents`

@@ -45,7 +45,7 @@
 ## Files modified
 
 - `.autonomos/TASKS.md`
-- `.autonomos/worklogs/2026-07-31-PROTO-06-information-architecture-audit.md`
+- `.autonomos/archive/worklogs-format-1/2026-07-31-PROTO-06-information-architecture-audit.md`
 - `AGENT.md`
 
 ## Next steps
