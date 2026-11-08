@@ -38,4 +38,4 @@
 - `packages/cli/src/commands/update.ts`
 - `packages/cli/src/commands/update.test.ts`
 - `.autonomos/TASKS.md`
-- `.autonomos/worklogs/2026-07-31-BUG-03-published-workflow-resolution.md`
+- `.autonomos/archive/worklogs-format-1/2026-07-31-BUG-03-published-workflow-resolution.md`

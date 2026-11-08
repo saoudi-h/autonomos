@@ -3,7 +3,7 @@ name: 'Autonomos'
 type: 'project'
 status: 'active'
 stack: ['Node.js', 'TypeScript', 'TurboRepo', 'pnpm', 'Commander.js', 'Vitest', 'tsdown']
-protocol: '0.6.0-alpha'
+protocol: '0.8.0-alpha'
 ---
 
 # AGENT CONTEXT: Autonomos
@@ -37,10 +37,11 @@ Autonomos is a project dedicated to defining and implementing a robust, structur
 
 ## ⚠️ Known Constraints
 
-- Project is in early alpha stage (v0.6.0-alpha).
+- Project is in early alpha; the protocol version lives in `packages/core/src/constants.ts` (`PROTOCOL_VERSION`), the record layout in `ARTIFACT_FORMAT`.
 - CLI commands require the protocol structure to be initialized via `autonomos init`.
-- v0.6 design: installed protocol artifacts are read-only to agents using Autonomos in a consumer project. For a given protocol version, `PROTOCOL.md` and the harness workflows must exactly match the published artifacts; they evolve only from this repository through a new version and `autonomos update`. Project-owned `specs/`, `decisions/`, and `DESIGN.md` remain optional and are preserved by the CLI.
+- Installed protocol artifacts are read-only to agents using Autonomos in a consumer project. For a given protocol version, `PROTOCOL.md` and the harness workflows must exactly match the published artifacts; they evolve only from this repository through a new version and `autonomos update`. Project-owned `specs/`, `decisions/`, and `DESIGN.md` remain optional and are preserved by the CLI.
 - Semantic adoption is explicit and reviewable through `/adopt`; it may organize legacy knowledge only after user confirmation and never rewrites historical worklogs, issues, or tasks.
 - Workflow `.md` files must stay ≤35 lines (enforced by tests) to fit in LLM working memory.
-- **Adopt the protocol from the first turn of any session.** When a user explicitly asks to "use the protocol" / "adopt the protocol" / "follow the workflow", do not jump straight to code. Start a session (read AGENT.md → recent worklog → TASKS.md), pick a task, mark it `[/]`, then work. The protocol is the contract; bypassing it is a bug.
+- **Adopt the protocol from the first turn of any session.** When a user asks to use the protocol, follow `/session` then `/task` before touching code. The protocol is the contract; bypassing it is a bug.
+- **Changing what consumers write** (record shape, locations, budgets) requires a new `ARTIFACT_FORMAT` and a content-preserving path in `autonomos migrate`; otherwise legacy records keep serving as examples.
 - **Workflow releases:** the published CLI pins an exact `@autonomos/core` version. Any protocol or workflow change therefore requires a new protocol version and coordinated releases of both packages so `init` and `update` distribute one immutable artifact set.
