@@ -59,7 +59,7 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.8.1-alpha)
+## 📜 The Protocol (v0.8.2-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 
@@ -85,7 +85,8 @@ What an agent reads at startup follows open work, not project age:
   what outlives the session (`Outcome`, `Decisions`, `Validation`, `Open`).
 - Root `AGENT.md` admits guidance that applies to most tasks; scoped knowledge goes
   to a narrower `AGENT.md` or project documentation.
-- `autonomos status` reports context-budget findings (advisory; `--strict` fails).
+- `autonomos status` reports context-budget findings and records removed or
+  shortened without their content landing elsewhere (advisory; `--strict` fails).
   `/reconcile` consolidates them and archives other history in named batches.
 
 ```bash

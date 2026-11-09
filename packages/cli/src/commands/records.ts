@@ -483,7 +483,8 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
             `${keepIgnored.length} git-ignored worklog(s) stay ignored via ${rel(ignoreFile)}.`
         )
     }
-    if (isLinkedWorktree(paths.root))
+    // Only the format upgrade moves every worklog, so only then can another checkout's be missed.
+    if (fromFormat < ARTIFACT_FORMAT && isLinkedWorktree(paths.root))
         notes.push(
             'Linked git worktree: git-ignored worklogs of other checkouts are not visible here. After merging, run `autonomos migrate` in each checkout that has them.'
         )
@@ -539,7 +540,10 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         )
     if (indexLines.length) {
         let index = plan.read(paths.archiveIndex) ?? INDEX_HEADER
-        const missing = indexLines.filter(line => !index.includes(line.slice(0, line.indexOf('—'))))
+        // Match on the directory name alone: index lines may be reworded by hand.
+        const missing = indexLines.filter(
+            line => !index.includes(line.match(/`[^`]+`/)?.[0] ?? line)
+        )
         if (missing.length) {
             index = index.replace(/\s*$/, '\n') + '\n' + missing.join('\n') + '\n'
             plan.write(paths.archiveIndex, index)
@@ -577,9 +581,11 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
     const changed = plan.writes.size + plan.renames.length + plan.deletes.size > 0
     return {
         success: true,
-        message: changed
-            ? `${options.dryRun ? 'Would migrate' : 'Migrated'} records from format ${fromFormat} to ${ARTIFACT_FORMAT}.`
-            : `Already at artifact format ${ARTIFACT_FORMAT}; nothing to move.`,
+        message: !changed
+            ? `Already at artifact format ${ARTIFACT_FORMAT}; nothing to move.`
+            : fromFormat < ARTIFACT_FORMAT
+              ? `${options.dryRun ? 'Would migrate' : 'Migrated'} records from format ${fromFormat} to ${ARTIFACT_FORMAT}.`
+              : `${options.dryRun ? 'Would archive' : 'Archived'} records left in current context (format ${ARTIFACT_FORMAT}).`,
         fromFormat,
         toFormat: ARTIFACT_FORMAT,
         closedTasks: closed.tasks,

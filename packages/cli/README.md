@@ -52,10 +52,19 @@ It also reports context-budget findings: closed records left in `TASKS.md` or
 `ISSUES.md`, oversized registries, task entries, `AGENT.md` files and worklogs, and
 an outdated artifact format. They are advisory; `--strict` exits non-zero.
 
+Record loss compares `TASKS.md` and `ISSUES.md` with `HEAD` (or `--since <rev>`):
+a task or issue removed or shortened is reported when most of its lost words appear
+neither in lines the change adds (an archive, a worklog, another record) nor in the
+files the record links to. Records closed with `autonomos close` or `migrate` pass.
+Findings are advisory; `--strict` exits non-zero. Translated or reworded text can
+be reported too: check each finding. A clean status checks structure only, not
+that the work is complete or recorded.
+
 ```bash
 autonomos status
 autonomos status --history
 autonomos status --strict
+autonomos status --since main   # review a branch for record loss
 ```
 
 ### `close`

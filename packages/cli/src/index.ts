@@ -237,6 +237,10 @@ Displays information about the current project:
   - Context budgets: closed records left in current registries, oversized
     TASKS.md/ISSUES.md/AGENT.md/task entries/worklogs, outdated artifact format.
     Advisory unless --strict.
+  - Record loss: tasks or issues removed or shortened since HEAD (or --since
+    <rev>) whose words the change adds nowhere else. Close records with
+    \`autonomos close\`; move evidence to a worklog. Advisory unless --strict.
+    A clean status checks structure only; it does not mean the work is done.
   - With --history: separate archived counts and task ID collisions
     Only archive/**/TASKS.md registries are counted; history is not read by default.
     Archived does not imply completed. Read diagnostics and partial counts are explicit.
@@ -245,12 +249,14 @@ ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos status')}
   $ ${pc.cyan('autonomos status --history')}
   $ ${pc.cyan('autonomos status --strict')}
+  $ ${pc.cyan('autonomos status --since main')}   ${pc.dim('# review a branch')}
 `
     )
     .option('--history', 'Include archived task registries and check reserved task IDs')
-    .option('--strict', 'Exit non-zero when context-budget findings exist')
-    .action((opts: { history?: boolean; strict?: boolean }) => {
-        const result = status({ history: opts.history })
+    .option('--strict', 'Exit non-zero when context-budget or record-loss findings exist')
+    .option('--since <rev>', 'Git revision to check record loss against (default: HEAD)')
+    .action((opts: { history?: boolean; strict?: boolean; since?: string }) => {
+        const result = status({ history: opts.history, since: opts.since })
 
         if (!result.success) {
             console.error(pc.red(`\n❌ ${result.message}`))
@@ -312,6 +318,32 @@ ${pc.bold('Examples:')}
             }
         }
         if (findings.length && opts.strict) process.exitCode = 1
+        const losses = result.recordLoss ?? []
+        if (result.recordBaseError) {
+            console.warn(pc.yellow(`! ${result.recordBaseError}`))
+            process.exitCode = 1
+        } else if (result.recordBase) {
+            console.log(
+                `\n${pc.bold('🧾 Record loss:')} ${losses.length ? pc.yellow(`${losses.length} finding(s)`) : pc.green('none')} ${pc.dim(`(since ${result.recordBase})`)}`
+            )
+            for (const loss of losses) {
+                const what =
+                    loss.change === 'removed'
+                        ? `removed from ${loss.kind === 'task' ? 'TASKS.md' : 'ISSUES.md'}`
+                        : 'shortened'
+                console.log(
+                    `   ${pc.yellow('•')} ${pc.white(loss.id)} ${what}: ${loss.lostWords} words not found in the change or the files it links to`
+                )
+            }
+            if (losses.length) {
+                console.log(
+                    pc.dim(
+                        '   Check each one: restore the text, close finished records with `autonomos close`, or move evidence to a worklog. Never delete content to satisfy a finding.'
+                    )
+                )
+                if (opts.strict) process.exitCode = 1
+            }
+        }
         for (const warning of result.warnings ?? []) console.warn(pc.yellow(`! ${warning}`))
         if (result.duplicateTaskIds?.length) {
             console.warn(pc.yellow(`! Duplicate task IDs: ${result.duplicateTaskIds.join(', ')}`))

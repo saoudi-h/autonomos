@@ -7,10 +7,6 @@
 
 ## 🚀 Active Sprint
 
-### Protocol Refinements
-
-- [ ] **[PROTO-18]** Make content loss and skipped recording visible to weaker agents (0.8.2) `Priority: 🟠` `Complexity: M` — ISSUE-05; see PROTO-16 worklog
-
 ### Testing & Quality
 
 - [ ] **[TEST-02]** Add integration tests for CLI commands `Priority: 🔵` `Complexity: L`
