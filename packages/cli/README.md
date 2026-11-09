@@ -36,7 +36,7 @@ autonomos update
 Show project status and current task records from `.autonomos/TASKS.md`.
 
 Use `--history` to add a separate historical summary from archive `TASKS.md`
-registries. History is not read by default. Counts recognize task IDs even without
+registries, and the closed records that still mention unfinished work. History is not read by default. Counts recognize task IDs even without
 priority/complexity metadata and ignore fenced examples. Archived status is
 historical, not current work; abandoned records need not be marked completed.
 Symbolic links are not followed. Skipped/unreadable registries and duplicate task
@@ -55,7 +55,9 @@ an outdated artifact format. They are advisory; `--strict` exits non-zero.
 Record loss compares `TASKS.md` and `ISSUES.md` with `HEAD` (or `--since <rev>`):
 a task or issue removed or shortened is reported when most of its lost words appear
 neither in lines the change adds (an archive, a worklog, another record) nor in the
-files the record links to. Records closed with `autonomos close` or `migrate` pass.
+files the record links to, an archived record with the same ID, or a worklog named
+for that ID. Records closed with `autonomos close` or `migrate` pass; a file that is
+only moved does not count as new text.
 Findings are advisory; `--strict` exits non-zero. Translated or reworded text can
 be reported too: check each finding. A clean status checks structure only, not
 that the work is complete or recorded; it does note a change since the base with
@@ -89,8 +91,10 @@ records `artifactFormat`. Untagged checked items move too, git-ignored worklogs 
 ignored, and closed records mentioning unfinished work are listed for review. Run
 `--dry-run` first with unrelated changes committed; rerun after merging into a
 checkout that holds git-ignored legacy worklogs. It ends with numbered next steps:
-review follow-ups, resolve remaining findings with `/reconcile` in the same task,
-record the upgrade (task, worklog, `close`) and pass `status --strict`.
+review follow-ups (all IDs are printed; `status --history` lists them again),
+resolve remaining findings with `/reconcile` in the same task or track those that
+need an owner decision in an open task, record the upgrade (task, worklog, `[x]`,
+`close`) and pass `status --strict`.
 
 ```bash
 autonomos migrate --dry-run
