@@ -213,9 +213,26 @@ describe('records commands', () => {
             const snapshot = read('archive', 'closed', 'TASKS.md')
             const second = migrate({ cwd: root, date: '2026-11-09' })
             expect(second.message).toContain('nothing to move')
+            expect(second.notes).toEqual([])
             expect(second.movedWorklogs).toBe(0)
             expect(read('archive', 'closed', 'TASKS.md')).toBe(snapshot)
             expect(existsSync(dot('worklogs', '2026-11-09-T-2.md'))).toBe(true)
+        })
+
+        it('archives late closed records without re-indexing a reworded archive index', () => {
+            migrate({ cwd: root, date: '2026-11-08' })
+            writeFileSync(
+                dot('archive', 'README.md'),
+                read('archive', 'README.md').replaceAll(' — ', ': ')
+            )
+            writeFileSync(
+                dot('TASKS.md'),
+                `${read('TASKS.md')}- [x] **[T-9]** Late \`Priority: 🔵\`\n`
+            )
+            const again = migrate({ cwd: root, date: '2026-11-09' })
+            expect(again.message).toBe('Archived records left in current context (format 2).')
+            expect(again.closedTasks).toEqual(['T-9'])
+            expect(read('archive', 'README.md').match(/`closed\/`/g)).toHaveLength(1)
         })
     })
 
@@ -248,6 +265,44 @@ describe('records commands', () => {
             expect(read('archive', 'worklogs-format-1', '.gitignore')).toContain(
                 '/2026-01-05-private.md'
             )
+        })
+    })
+
+    describe('status record loss', () => {
+        const gitIn = (...args: string[]): string =>
+            execFileSync('git', args, { cwd: root, encoding: 'utf8' })
+        const commit = (message: string): void => {
+            gitIn('add', '-A')
+            gitIn('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', message)
+        }
+
+        it('flags records deleted to satisfy findings, not records closed with the CLI', () => {
+            gitIn('init', '-q')
+            writeFileSync(
+                dot('TASKS.md'),
+                TASKS.replace(
+                    '- [ ] **[T-2]** Open',
+                    '- [ ] **[T-2]** Open: compare direct file serving against the redirect chain'
+                )
+            )
+            commit('base')
+            expect(status({ cwd: root }).recordLoss).toEqual([])
+
+            close({ cwd: root, ids: ['T-1', 'I-2'], date: '2026-11-09' })
+            expect(status({ cwd: root }).recordLoss).toEqual([])
+            commit('close')
+
+            const tasks = read('TASKS.md').replace(/^- \[ \] \*\*\[T-2\]\*\*.*\n/m, '')
+            writeFileSync(dot('TASKS.md'), tasks)
+            const result = status({ cwd: root })
+            expect(result.recordBase).toBe('HEAD')
+            expect(result.recordLoss?.map(l => `${l.id}:${l.change}`)).toEqual(['T-2:removed'])
+            commit('drop T-2')
+            expect(status({ cwd: root }).recordLoss).toEqual([])
+            expect(status({ cwd: root, since: 'HEAD~1' }).recordLoss?.map(l => l.id)).toEqual([
+                'T-2',
+            ])
+            expect(status({ cwd: root, since: 'nope' }).recordBaseError).toContain('nope')
         })
     })
 

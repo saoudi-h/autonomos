@@ -134,7 +134,7 @@ Only user/project governance accepts a specification or decision as normative. A
 
 ## Context Budgets
 
-Advisory limits reported by \`autonomos status\` (\`--strict\` makes them fail): root \`AGENT.md\` 8,000 bytes, local \`AGENT.md\` 4,000 bytes, \`TASKS.md\` 16 KB, \`ISSUES.md\` 24 KB, one task entry 300 characters, one worklog 2,500 bytes, and no closed record in current registries. Over budget, consolidate or move knowledge to its narrowest home before adding more. Root \`AGENT.md\` admits only guidance that applies to most tasks in the project.
+Advisory limits reported by \`autonomos status\` (\`--strict\` makes them fail): root \`AGENT.md\` 8,000 bytes, local \`AGENT.md\` 4,000 bytes, \`TASKS.md\` 16 KB, \`ISSUES.md\` 24 KB, one task entry 300 characters, one worklog 2,500 bytes, and no closed record in current registries. Over budget, consolidate or move knowledge to its narrowest home before adding more; never delete a record or its content to meet a limit. \`autonomos status\` also flags tasks and issues removed or shortened since the last commit (\`--since <rev>\` to review a branch) whose words appear neither in the change nor in the files they link to. A clean status checks structure, not completion. Root \`AGENT.md\` admits only guidance that applies to most tasks in the project.
 
 ## Artifact Format and Migration
 
