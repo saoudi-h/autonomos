@@ -120,3 +120,7 @@
 ## Closed 2026-11-08
 
 - [x] **[PROTO-17]** Fix migration gaps found by PROTO-16 round 1 (0.8.1) `Priority: 🔴` `Complexity: M` `Completed: 2026-11-08` — ISSUE-05
+
+## Closed 2026-11-09
+
+- [x] **[PROTO-16]** Measure agent adherence to protocol 0.8 on real consumer migrations `Priority: 🔴` `Complexity: L` `Completed: 2026-11-09` — ISSUE-05; [results](../../worklogs/2026-11-09-PROTO-16.md)
