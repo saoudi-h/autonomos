@@ -152,6 +152,7 @@ function checkRecordLoss(
         }
     }
     const before = { tasks: show(TASKS_FILE), issues: show(ISSUES_FILE) }
+    const baseDate = (git(cwd, ['log', '-1', '--format=%cs', since]) ?? '').trim()
     const baseTasks = new Set(before.tasks.split('\n').map(taskKey).filter(Boolean))
     const dot = `${AUTONOMOS_DIR}/`
     const touched = [...changed, ...untracked]
@@ -165,8 +166,15 @@ function checkRecordLoss(
             const key = taskKey(l)
             return key !== undefined && !baseTasks.has(key)
         }) ||
-        (addedByFile.get(`${dot}${ARCHIVE_DIR}/${CLOSED_DIR}/${TASKS_FILE}`) ?? []).some(l =>
-            /^## Closed \d{4}-\d{2}-\d{2}/.test(l)
+        (addedByFile.get(`${dot}${ARCHIVE_DIR}/${CLOSED_DIR}/${TASKS_FILE}`) ?? []).some(
+            l =>
+                /^## Closed \d{4}-\d{2}-\d{2}/.test(l) ||
+                // `close` into an existing same-day group adds no heading; its stamp is
+                // not older than the base (migrate never invents dates).
+                (TASK_LINE.test(l) &&
+                    (l.match(/`(?:Completed|Abandoned): (\d{4}-\d{2}-\d{2})`/)?.[1] ?? '') >=
+                        baseDate &&
+                    baseDate !== '')
         )
     const losses =
         before.tasks || before.issues

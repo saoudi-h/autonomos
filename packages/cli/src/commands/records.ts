@@ -590,7 +590,7 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         )
     if (findings.length)
         nextSteps.push(
-            `Resolve the ${findings.length} remaining finding(s) now with /reconcile: move details and acceptance criteria of long open tasks to worklogs before shortening them; move scoped AGENT.md guidance verbatim to narrower AGENT.md files or docs. Never delete content. If a finding needs an owner decision, register an open task naming it and why instead of leaving it silently.`
+            `Resolve the ${findings.length} remaining finding(s) now with /reconcile: move details and acceptance criteria of long open tasks to worklogs before shortening them; move scoped AGENT.md guidance verbatim to narrower AGENT.md files or docs. Never delete content. Findings are agent work, not owner decisions; if one cannot be finished in this task, register an open task saying what remains instead of leaving it silently.`
         )
     if (changed)
         nextSteps.push(
