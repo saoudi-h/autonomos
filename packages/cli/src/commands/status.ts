@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, lstatSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
 import {
@@ -12,9 +12,13 @@ import {
     LEGACY_WORKLOGS_DIR,
     MANIFEST_FILE,
     manifestArtifactFormat,
+    mentionsUnfinishedWork,
+    parseIssueEntries,
     parseManifest,
+    parseTaskEntries,
     readTaskRegistry,
     TASKS_FILE,
+    WORKLOGS_DIR,
     type BudgetFinding,
     type Manifest,
     type RecordLoss,
@@ -45,6 +49,8 @@ export interface StatusResult {
     initialized: boolean
     taskSummary?: TaskSummary
     archivedTaskSummary?: TaskSummary
+    /** With history: closed records (archive/closed/) that still mention unfinished work. */
+    closedFollowUps?: string[]
     historyComplete?: boolean
     duplicateTaskIds?: string[]
     warnings?: string[]
@@ -63,12 +69,13 @@ export interface StatusResult {
     recordBaseError?: string
 }
 
-function git(cwd: string, args: string[]): string | undefined {
+function git(cwd: string, args: string[], input?: string): string | undefined {
     try {
         return execFileSync('git', args, {
             cwd,
+            input,
             encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'ignore'],
+            stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'ignore'],
             maxBuffer: 64 * 1024 * 1024,
         })
     } catch {
@@ -112,7 +119,32 @@ function checkRecordLoss(
     const untracked = (git(cwd, ['ls-files', '--others', '--exclude-standard', '--', '.']) ?? '')
         .split('\n')
         .filter(Boolean)
-    for (const path of untracked.filter(p => /\.mdx?$/.test(p))) {
+    // An untracked copy of a deleted file is a move, not new text (git shows it as a
+    // rename once committed); counting it would make the verdict change on commit.
+    const deletedBlobs = new Set(
+        (
+            git(cwd, [
+                'diff',
+                '--raw',
+                '--no-abbrev',
+                '--no-renames',
+                '--relative',
+                since,
+                '--',
+                '.',
+            ]) ?? ''
+        )
+            .split('\n')
+            .map(line => line.match(/^:\S+ \S+ (\S+) \S+ D\t/)?.[1])
+            .filter((sha): sha is string => Boolean(sha))
+    )
+    const markdown = untracked.filter(p => /\.mdx?$/.test(p))
+    const hashes = markdown.length
+        ? (git(cwd, ['hash-object', '--stdin-paths'], markdown.join('\n')) ?? '').split('\n')
+        : []
+    for (const [index, path] of markdown.entries()) {
+        const hash = hashes[index] ?? ''
+        if (deletedBlobs.has(hash)) continue
         try {
             for (const line of readFileSync(join(cwd, path), 'utf8').split('\n')) add(path, line)
         } catch {
@@ -142,7 +174,10 @@ function checkRecordLoss(
                   before,
                   { tasks: read(TASKS_FILE), issues: read(ISSUES_FILE) },
                   [...addedByFile.values()].flat().join('\n'),
-                  text => readLinkedMarkdown(cwd, text)
+                  (text, id) => {
+                      const archived = archivedText(cwd, id)
+                      return `${readLinkedMarkdown(cwd, `${text}\n${archived}`)}\n${archived}`
+                  }
               )
             : []
     return { losses, unrecorded: touched.length > 0 && !recorded }
@@ -154,6 +189,46 @@ const TASK_LINE = /^\s*- \[([ x/!])\] \*\*\[([^\]]+)\]\*\*/
 function taskKey(line: string): string | undefined {
     const match = line.match(TASK_LINE)
     return match ? `${match[1]}:${match[2]}` : undefined
+}
+
+function closedFollowUps(root: string): string[] {
+    const dir = join(root, AUTONOMOS_DIR, ARCHIVE_DIR, CLOSED_DIR)
+    const read = (file: string): string => {
+        const path = join(dir, file)
+        return existsSync(path) ? readFileSync(path, 'utf8') : ''
+    }
+    return [...parseTaskEntries(read(TASKS_FILE)), ...parseIssueEntries(read(ISSUES_FILE))]
+        .filter(e => mentionsUnfinishedWork(e.text))
+        .map(e => e.id)
+}
+
+/** Archived (closed) records and worklogs for this ID: closing or deduplicating keeps content there. */
+function archivedText(root: string, id: string): string {
+    const dir = join(root, AUTONOMOS_DIR, ARCHIVE_DIR, CLOSED_DIR)
+    const read = (file: string): string => {
+        const path = join(dir, file)
+        return existsSync(path) ? readFileSync(path, 'utf8') : ''
+    }
+    // Worklogs follow `YYYY-MM-DD-<ID>.md`, whether or not a record links them.
+    const worklogs = [
+        join(root, AUTONOMOS_DIR, WORKLOGS_DIR),
+        join(root, AUTONOMOS_DIR, ARCHIVE_DIR, LEGACY_WORKLOGS_DIR),
+    ].flatMap(folder => {
+        try {
+            return readdirSync(folder)
+                .filter(name => name.endsWith(`-${id}.md`))
+                .map(name => readFileSync(join(folder, name), 'utf8'))
+        } catch {
+            return []
+        }
+    })
+    return [
+        ...parseTaskEntries(read(TASKS_FILE)).filter(e => e.id === id),
+        ...parseIssueEntries(read(ISSUES_FILE)).filter(e => e.id === id),
+    ]
+        .map(e => e.text)
+        .concat(worklogs)
+        .join('\n')
 }
 
 /** Contents of the project Markdown files a record links to (worklogs, specs). */
@@ -250,6 +325,7 @@ export function status(options: StatusOptions = {}): StatusResult {
         ...(options.history
             ? {
                   archivedTaskSummary: summarize(registry.archived),
+                  closedFollowUps: closedFollowUps(cwd),
                   historyComplete: registry.complete,
               }
             : {}),

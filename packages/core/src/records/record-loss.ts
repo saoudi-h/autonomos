@@ -79,14 +79,15 @@ function wordsByKey(list: Entry[]): Map<string, Entry> {
  * Compare registries before and after a change. An entry whose ID disappeared,
  * or that lost words, is reported unless the change added most of
  * the lost words elsewhere (an archive, a worklog, another record) or they
- * already appear in a file the entry links to (`readLinked`, given the entry's
- * text before and after the change).
+ * already appear in text the caller considers kept (`readLinked`, given the
+ * entry's text before and after the change and its ID): linked files, or an
+ * archived record with the same ID.
  */
 export function findRecordLoss(
     before: RegistryTexts,
     after: RegistryTexts,
     addedText: string,
-    readLinked?: (entryText: string) => string
+    readLinked?: (entryText: string, id: string) => string
 ): RecordLoss[] {
     const added = significantWords(addedText)
     const current = wordsByKey(entries(after))
@@ -97,7 +98,9 @@ export function findRecordLoss(
         if (lost.length < MIN_LOST_WORDS) continue
         let unmoved = lost.filter(word => !added.has(word))
         if (unmoved.length > lost.length * (1 - MOVED_SHARE) && readLinked) {
-            const linked = significantWords(readLinked(`${entry.text}\n${now?.text ?? ''}`))
+            const linked = significantWords(
+                readLinked(`${entry.text}\n${now?.text ?? ''}`, entry.id)
+            )
             unmoved = unmoved.filter(word => !linked.has(word))
         }
         if (unmoved.length <= lost.length * (1 - MOVED_SHARE)) continue

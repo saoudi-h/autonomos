@@ -306,6 +306,10 @@ ${pc.bold('Examples:')}
                     '   Historical status is not current work; archived does not mean completed.'
                 )
             )
+            if (result.closedFollowUps?.length)
+                console.log(
+                    `   Closed records still mentioning unfinished work (${result.closedFollowUps.length}): ${result.closedFollowUps.join(', ')}`
+                )
         }
         const findings = result.budgetFindings ?? []
         console.log(
@@ -435,12 +439,11 @@ ${pc.bold('Examples:')}
         console.log(`   Files with repaired references: ${result.rewrittenFiles.length}`)
         for (const note of result.notes) console.log(`   ${pc.cyan('ℹ')} ${note}`)
         if (result.followUps.length) {
-            const shown = result.followUps.slice(0, 20).join(', ')
-            const more =
-                result.followUps.length > 20 ? ` (+${result.followUps.length - 20} more)` : ''
+            // Print every ID; `status --history` lists them again later.
+            const shown = result.followUps.join(', ')
             console.log(
                 pc.yellow(
-                    `\n⚠ ${result.followUps.length} closed record(s) still mention unfinished work (unchecked items, follow-ups): ${shown}${more}`
+                    `\n⚠ ${result.followUps.length} closed record(s) still mention unfinished work (unchecked items, follow-ups): ${shown}`
                 )
             )
             console.log(

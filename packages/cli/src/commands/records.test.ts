@@ -310,6 +310,55 @@ describe('records commands', () => {
             expect(status({ cwd: root, since: 'nope' }).recordBaseError).toContain('nope')
         })
 
+        it('keeps duplicates settled by an archived record, and judges moves the same before and after commit', () => {
+            gitIn('init', '-q')
+            const extra =
+                '- [ ] **[T-1]** Duplicate: compare direct file serving against the redirect chain\n'
+            writeFileSync(dot('TASKS.md'), `${TASKS}${extra}`)
+            writeFileSync(
+                dot('worklogs', '2026-01-01-T-1.md'),
+                '# T-1\n\nThe task said compare direct file serving against the redirect chain.\n'
+            )
+            commit('base')
+            migrate({ cwd: root, date: '2026-11-09' })
+            // The open duplicate is dropped: its words live in the archived T-1's worklog.
+            writeFileSync(dot('TASKS.md'), read('TASKS.md').replace(extra, ''))
+            expect(status({ cwd: root }).recordLoss).toEqual([])
+            commit('migrate')
+            expect(status({ cwd: root, since: 'HEAD~1' }).recordLoss).toEqual([])
+
+            // A moved worklog is not new text: deleting T-2's details is reported either way.
+            const tasks = read('TASKS.md')
+            writeFileSync(
+                join(root, 'docs', 'queue.md'),
+                '# Queue\n\nOpen: compare queue depth against worker saturation thresholds.\n'
+            )
+            writeFileSync(
+                dot('TASKS.md'),
+                tasks.replace(
+                    '- [ ] **[T-2]** Open',
+                    '- [ ] **[T-2]** Open: compare queue depth against worker saturation thresholds'
+                )
+            )
+            commit('detail')
+            const moved = join(root, 'docs', 'archive-queue.md')
+            writeFileSync(moved, readFileSync(join(root, 'docs', 'queue.md'), 'utf8'))
+            rmSync(join(root, 'docs', 'queue.md'))
+            writeFileSync(dot('TASKS.md'), tasks)
+            const before = status({ cwd: root }).recordLoss?.map(l => l.id)
+            commit('drop')
+            expect(status({ cwd: root, since: 'HEAD~1' }).recordLoss?.map(l => l.id)).toEqual(
+                before
+            )
+            expect(before).toEqual(['T-2'])
+        })
+
+        it('lists closed records that still mention unfinished work with --history', () => {
+            migrate({ cwd: root, date: '2026-11-09' })
+            expect(status({ cwd: root, history: true }).closedFollowUps).toContain('SITE-9')
+            expect(status({ cwd: root }).closedFollowUps).toBeUndefined()
+        })
+
         it('reports unrecorded changes until a task, worklog or closure is written', () => {
             gitIn('init', '-q')
             commit('base')

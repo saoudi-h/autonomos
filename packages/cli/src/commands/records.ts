@@ -586,16 +586,16 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
     if (options.dryRun && changed) nextSteps.push('Run `autonomos migrate` to apply this plan.')
     if (closed.followUps.length)
         nextSteps.push(
-            `Review the ${closed.followUps.length} closed record(s) listed above: move each unfinished follow-up into an open task or issue.`
+            `Review the ${closed.followUps.length} closed record(s) listed above (\`autonomos status --history\` lists them again): move each unfinished follow-up into an open task or issue, or note in the worklog that it is settled.`
         )
     if (findings.length)
         nextSteps.push(
-            `Resolve the ${findings.length} remaining finding(s) now with /reconcile: move details and acceptance criteria of long open tasks to worklogs before shortening them; move scoped AGENT.md guidance to narrower AGENT.md files or docs. Never delete content.`
+            `Resolve the ${findings.length} remaining finding(s) now with /reconcile: move details and acceptance criteria of long open tasks to worklogs before shortening them; move scoped AGENT.md guidance verbatim to narrower AGENT.md files or docs. Never delete content. If a finding needs an owner decision, register an open task naming it and why instead of leaving it silently.`
         )
     if (changed)
         nextSteps.push(
-            'Record the upgrade: register its task in TASKS.md if missing, write its worklog, then run `autonomos close <ID>`.',
-            'Run `autonomos status --strict`; explain in the worklog any finding you leave.'
+            'Record the upgrade: register its task in TASKS.md if missing, write its worklog, mark the task [x], then run `autonomos close <ID>`.',
+            'Run `autonomos status --strict`; every finding left must be tracked by an open task.'
         )
     return {
         success: true,
