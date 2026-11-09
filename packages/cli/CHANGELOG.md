@@ -1,5 +1,16 @@
 # @autonomos/cli
 
+## 0.8.5
+
+### Patch Changes
+
+- [#26](https://github.com/saoudi-h/autonomos/pull/26) [`116f7fb`](https://github.com/saoudi-h/autonomos/commit/116f7fb57d4bbbd187ee0bc6c0ff6c9d905f7776) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Context-budget findings are agent work: `migrate` next steps and the reconcile workflow no longer suggest escalating them to the owner; a finding the task cannot finish becomes an open task saying what remains.
+
+    `status` also counts a `close` into an existing same-day group as recorded work (it adds no new heading).
+
+- Updated dependencies [[`116f7fb`](https://github.com/saoudi-h/autonomos/commit/116f7fb57d4bbbd187ee0bc6c0ff6c9d905f7776)]:
+    - @autonomos/core@0.8.5
+
 ## 0.8.4
 
 ### Patch Changes
