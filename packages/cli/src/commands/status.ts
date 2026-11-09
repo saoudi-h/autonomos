@@ -6,6 +6,7 @@ import {
     ARCHIVE_DIR,
     AUTONOMOS_DIR,
     checkContextBudgets,
+    CLOSED_DIR,
     findRecordLoss,
     ISSUES_FILE,
     LEGACY_WORKLOGS_DIR,
@@ -54,6 +55,8 @@ export interface StatusResult {
     budgetFindings?: BudgetFinding[]
     /** Records removed or shortened without their content being kept elsewhere. */
     recordLoss?: RecordLoss[]
+    /** The change since `recordBase` has no task edit, worklog or closure yet. */
+    unrecorded?: boolean
     /** Revision the record comparison used, when it ran. */
     recordBase?: string
     /** Why the record comparison could not run with an explicit `since`. */
@@ -77,7 +80,10 @@ function git(cwd: string, args: string[]): string | undefined {
  * Compare current registries with a git revision. The added text is every line
  * the change adds (tracked diff plus untracked Markdown), where moved content lands.
  */
-function checkRecordLoss(cwd: string, since: string): { losses?: RecordLoss[]; error?: string } {
+function checkRecordLoss(
+    cwd: string,
+    since: string
+): { losses?: RecordLoss[]; unrecorded?: boolean; error?: string } {
     if (git(cwd, ['rev-parse', '--verify', '--quiet', `${since}^{commit}`]) === undefined)
         return { error: `Unknown git revision: ${since}` }
     const show = (file: string): string =>
@@ -86,31 +92,68 @@ function checkRecordLoss(cwd: string, since: string): { losses?: RecordLoss[]; e
         const path = join(cwd, AUTONOMOS_DIR, file)
         return existsSync(path) ? readFileSync(path, 'utf8') : ''
     }
-    const before = { tasks: show(TASKS_FILE), issues: show(ISSUES_FILE) }
-    if (!before.tasks && !before.issues) return { losses: [] }
-    const diff = git(cwd, ['diff', '--no-color', '--no-ext-diff', '-U0', since, '--', '.']) ?? ''
-    const added = diff
+    // Added lines per file (paths relative to the project root).
+    const addedByFile = new Map<string, string[]>()
+    const add = (path: string, text: string): void => {
+        addedByFile.set(path, [...(addedByFile.get(path) ?? []), text])
+    }
+    const diff =
+        git(cwd, ['diff', '--no-color', '--no-ext-diff', '--relative', '-U0', since, '--', '.']) ??
+        ''
+    let file = ''
+    for (const line of diff.split('\n')) {
+        if (line.startsWith('+++ ')) file = line.slice(4).replace(/^b\//, '')
+        else if (line.startsWith('diff --git ')) file = ''
+        else if (line.startsWith('+') && file) add(file, line.slice(1))
+    }
+    const changed = (git(cwd, ['diff', '--name-only', '--relative', since, '--', '.']) ?? '')
         .split('\n')
-        .filter(line => line.startsWith('+') && !line.startsWith('+++'))
-        .map(line => line.slice(1))
+        .filter(Boolean)
     const untracked = (git(cwd, ['ls-files', '--others', '--exclude-standard', '--', '.']) ?? '')
         .split('\n')
-        .filter(path => /\.mdx?$/.test(path))
-    for (const path of untracked) {
+        .filter(Boolean)
+    for (const path of untracked.filter(p => /\.mdx?$/.test(p))) {
         try {
-            added.push(readFileSync(join(cwd, path), 'utf8'))
+            for (const line of readFileSync(join(cwd, path), 'utf8').split('\n')) add(path, line)
         } catch {
             // Unreadable files cannot hold moved content.
         }
     }
-    return {
-        losses: findRecordLoss(
-            before,
-            { tasks: read(TASKS_FILE), issues: read(ISSUES_FILE) },
-            added.join('\n'),
-            text => readLinkedMarkdown(cwd, text)
-        ),
-    }
+    const before = { tasks: show(TASKS_FILE), issues: show(ISSUES_FILE) }
+    const baseTasks = new Set(before.tasks.split('\n').map(taskKey).filter(Boolean))
+    const dot = `${AUTONOMOS_DIR}/`
+    const touched = [...changed, ...untracked]
+    // Work is recorded once the change writes a worklog, edits a task line, or closes a record.
+    const recorded =
+        touched.some(
+            p => /^\.autonomos\/worklogs\/.+\.mdx?$/.test(p) && existsSync(join(cwd, p))
+        ) ||
+        // A new task or status change counts; moved lines and repaired links do not.
+        (addedByFile.get(`${dot}${TASKS_FILE}`) ?? []).some(l => {
+            const key = taskKey(l)
+            return key !== undefined && !baseTasks.has(key)
+        }) ||
+        (addedByFile.get(`${dot}${ARCHIVE_DIR}/${CLOSED_DIR}/${TASKS_FILE}`) ?? []).some(l =>
+            /^## Closed \d{4}-\d{2}-\d{2}/.test(l)
+        )
+    const losses =
+        before.tasks || before.issues
+            ? findRecordLoss(
+                  before,
+                  { tasks: read(TASKS_FILE), issues: read(ISSUES_FILE) },
+                  [...addedByFile.values()].flat().join('\n'),
+                  text => readLinkedMarkdown(cwd, text)
+              )
+            : []
+    return { losses, unrecorded: touched.length > 0 && !recorded }
+}
+
+const TASK_LINE = /^\s*- \[([ x/!])\] \*\*\[([^\]]+)\]\*\*/
+
+/** `status:ID` of a task line, e.g. `/:PROTO-18`. */
+function taskKey(line: string): string | undefined {
+    const match = line.match(TASK_LINE)
+    return match ? `${match[1]}:${match[2]}` : undefined
 }
 
 /** Contents of the project Markdown files a record links to (worklogs, specs). */
@@ -218,7 +261,9 @@ export function status(options: StatusOptions = {}): StatusResult {
         budgetFindings: checkContextBudgets(cwd, {
             artifactFormat: manifestArtifactFormat(manifest),
         }),
-        ...(loss.losses ? { recordLoss: loss.losses, recordBase: base } : {}),
+        ...(loss.losses
+            ? { recordLoss: loss.losses, recordBase: base, unrecorded: loss.unrecorded }
+            : {}),
         ...(loss.error ? { recordBaseError: loss.error } : {}),
     }
 }

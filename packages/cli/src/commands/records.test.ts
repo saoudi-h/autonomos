@@ -214,6 +214,7 @@ describe('records commands', () => {
             const second = migrate({ cwd: root, date: '2026-11-09' })
             expect(second.message).toContain('nothing to move')
             expect(second.notes).toEqual([])
+            expect(second.nextSteps).toEqual([])
             expect(second.movedWorklogs).toBe(0)
             expect(read('archive', 'closed', 'TASKS.md')).toBe(snapshot)
             expect(existsSync(dot('worklogs', '2026-11-09-T-2.md'))).toBe(true)
@@ -232,6 +233,7 @@ describe('records commands', () => {
             const again = migrate({ cwd: root, date: '2026-11-09' })
             expect(again.message).toBe('Archived records left in current context (format 2).')
             expect(again.closedTasks).toEqual(['T-9'])
+            expect(again.nextSteps.join(' ')).toContain('autonomos close <ID>')
             expect(read('archive', 'README.md').match(/`closed\/`/g)).toHaveLength(1)
         })
     })
@@ -287,9 +289,11 @@ describe('records commands', () => {
             )
             commit('base')
             expect(status({ cwd: root }).recordLoss).toEqual([])
+            expect(status({ cwd: root }).unrecorded).toBe(false)
 
             close({ cwd: root, ids: ['T-1', 'I-2'], date: '2026-11-09' })
             expect(status({ cwd: root }).recordLoss).toEqual([])
+            expect(status({ cwd: root }).unrecorded).toBe(false)
             commit('close')
 
             const tasks = read('TASKS.md').replace(/^- \[ \] \*\*\[T-2\]\*\*.*\n/m, '')
@@ -297,12 +301,22 @@ describe('records commands', () => {
             const result = status({ cwd: root })
             expect(result.recordBase).toBe('HEAD')
             expect(result.recordLoss?.map(l => `${l.id}:${l.change}`)).toEqual(['T-2:removed'])
+            expect(result.unrecorded).toBe(true)
             commit('drop T-2')
             expect(status({ cwd: root }).recordLoss).toEqual([])
             expect(status({ cwd: root, since: 'HEAD~1' }).recordLoss?.map(l => l.id)).toEqual([
                 'T-2',
             ])
             expect(status({ cwd: root, since: 'nope' }).recordBaseError).toContain('nope')
+        })
+
+        it('reports unrecorded changes until a task, worklog or closure is written', () => {
+            gitIn('init', '-q')
+            commit('base')
+            writeFileSync(join(root, 'docs', 'note.md'), '# note\n')
+            expect(status({ cwd: root }).unrecorded).toBe(true)
+            writeFileSync(dot('worklogs', '2026-11-09-T-2.md'), '# [T-2] x\n')
+            expect(status({ cwd: root }).unrecorded).toBe(false)
         })
     })
 

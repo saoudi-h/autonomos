@@ -58,7 +58,8 @@ neither in lines the change adds (an archive, a worklog, another record) nor in 
 files the record links to. Records closed with `autonomos close` or `migrate` pass.
 Findings are advisory; `--strict` exits non-zero. Translated or reworded text can
 be reported too: check each finding. A clean status checks structure only, not
-that the work is complete or recorded.
+that the work is complete or recorded; it does note a change since the base with
+no task added or status changed, no worklog written and no `close` yet.
 
 ```bash
 autonomos status
@@ -87,7 +88,9 @@ existing worklogs in `archive/worklogs-format-1/`, repairs Markdown references a
 records `artifactFormat`. Untagged checked items move too, git-ignored worklogs stay
 ignored, and closed records mentioning unfinished work are listed for review. Run
 `--dry-run` first with unrelated changes committed; rerun after merging into a
-checkout that holds git-ignored legacy worklogs.
+checkout that holds git-ignored legacy worklogs. It ends with numbered next steps:
+review follow-ups, resolve remaining findings with `/reconcile` in the same task,
+record the upgrade (task, worklog, `close`) and pass `status --strict`.
 
 ```bash
 autonomos migrate --dry-run
