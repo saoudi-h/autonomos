@@ -1,5 +1,14 @@
 # @autonomos/cli
 
+## 0.8.4
+
+### Patch Changes
+
+- [#24](https://github.com/saoudi-h/autonomos/pull/24) [`59a7818`](https://github.com/saoudi-h/autonomos/commit/59a78181303f0a7b7407a2e726e49827d48ef944) Thanks [@saoudi-h](https://github.com/saoudi-h)! - Record loss counts text kept in an archived record with the same ID or a worklog named for that ID, and no longer treats an untracked moved file as new text, so `status` gives the same verdict before and after commit. `migrate` prints every follow-up ID and `status --history` lists closed records that still mention unfinished work. Next steps say to mark the task `[x]` before `close` and to track findings that need an owner decision in an open task.
+
+- Updated dependencies [[`59a7818`](https://github.com/saoudi-h/autonomos/commit/59a78181303f0a7b7407a2e726e49827d48ef944)]:
+    - @autonomos/core@0.8.4
+
 ## 0.8.3
 
 ### Patch Changes
