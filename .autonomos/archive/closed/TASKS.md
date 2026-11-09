@@ -125,3 +125,4 @@
 
 - [x] **[PROTO-16]** Measure agent adherence to protocol 0.8 on real consumer migrations `Priority: 🔴` `Complexity: L` `Completed: 2026-11-09` — ISSUE-05; [results](../../worklogs/2026-11-09-PROTO-16.md)
 - [x] **[PROTO-18]** Make content loss and skipped recording visible to weaker agents (0.8.2) `Priority: 🟠` `Complexity: M` `Completed: 2026-11-09` — ISSUE-05; see PROTO-16 worklog
+- [x] **[PROTO-19]** Show remaining work and unrecorded changes in CLI output (0.8.3) `Priority: 🟠` `Complexity: S` `Completed: 2026-11-09` — ISSUE-05

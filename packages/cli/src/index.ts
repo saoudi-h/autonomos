@@ -237,6 +237,8 @@ Displays information about the current project:
   - Context budgets: closed records left in current registries, oversized
     TASKS.md/ISSUES.md/AGENT.md/task entries/worklogs, outdated artifact format.
     Advisory unless --strict.
+  - Recording: a change since HEAD (or --since <rev>) with no task edit,
+    worklog or closure yet. Advisory.
   - Record loss: tasks or issues removed or shortened since HEAD (or --since
     <rev>) whose words the change adds nowhere else. Close records with
     \`autonomos close\`; move evidence to a worklog. Advisory unless --strict.
@@ -343,6 +345,10 @@ ${pc.bold('Examples:')}
                 )
                 if (opts.strict) process.exitCode = 1
             }
+            if (result.unrecorded)
+                console.log(
+                    `\n${pc.bold('📝 Recording:')} ${pc.yellow(`changes since ${result.recordBase} have no task edit, worklog or closure yet.`)}\n   ${pc.dim('Register the task in TASKS.md, write its worklog (unless S), then `autonomos close <ID>`. A clean status does not mean the work is recorded.')}`
+                )
         }
         for (const warning of result.warnings ?? []) console.warn(pc.yellow(`! ${warning}`))
         if (result.duplicateTaskIds?.length) {
@@ -401,7 +407,8 @@ Nothing is deleted or rewritten. Commit unrelated changes first (registering the
 migration task is fine) so the diff stays reviewable. Closed records that still
 mention unfinished work are listed: move each follow-up to an open record.
 Rerun after merging into a checkout that holds git-ignored legacy worklogs.
-Remaining findings (AGENT.md size, long open tasks) are semantic work for /reconcile.
+Remaining findings (AGENT.md size, long open tasks) are part of the same upgrade:
+resolve them with /reconcile in the same task. The command ends with next steps.
 
 ${pc.bold('Examples:')}
   $ ${pc.cyan('autonomos migrate --dry-run')}
@@ -441,9 +448,13 @@ ${pc.bold('Examples:')}
             )
         }
         if (result.findings.length) {
-            console.log(pc.bold('\nRemaining work for /reconcile:'))
+            console.log(pc.bold('\nRemaining findings (part of this upgrade):'))
             for (const finding of result.findings)
                 console.log(`   ${pc.yellow('•')} ${finding.path}: ${finding.message}`)
+        }
+        if (result.nextSteps.length) {
+            console.log(pc.bold('\nNext steps — the upgrade is not finished until they are done:'))
+            result.nextSteps.forEach((step, i) => console.log(`   ${i + 1}. ${step}`))
         }
     })
 

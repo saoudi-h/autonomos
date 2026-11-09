@@ -318,6 +318,8 @@ export interface MigrateResult {
     bytes?: { tasks: [number, number]; issues: [number, number] }
     /** Remaining semantic work for `/reconcile`. */
     findings: BudgetFinding[]
+    /** What the agent must still do to finish the upgrade, in order. */
+    nextSteps: string[]
 }
 
 const SKIPPED = new Set(['node_modules', 'dist', 'build', 'coverage'])
@@ -420,6 +422,7 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         followUps: [],
         notes: [],
         findings: [],
+        nextSteps: [],
     }
     const manifest = readManifest(paths)
     if (typeof manifest === 'string') return { success: false, message: manifest, ...empty }
@@ -579,6 +582,21 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
               f => f.code !== 'format-outdated'
           )
     const changed = plan.writes.size + plan.renames.length + plan.deletes.size > 0
+    const nextSteps: string[] = []
+    if (options.dryRun && changed) nextSteps.push('Run `autonomos migrate` to apply this plan.')
+    if (closed.followUps.length)
+        nextSteps.push(
+            `Review the ${closed.followUps.length} closed record(s) listed above: move each unfinished follow-up into an open task or issue.`
+        )
+    if (findings.length)
+        nextSteps.push(
+            `Resolve the ${findings.length} remaining finding(s) now with /reconcile: move details and acceptance criteria of long open tasks to worklogs before shortening them; move scoped AGENT.md guidance to narrower AGENT.md files or docs. Never delete content.`
+        )
+    if (changed)
+        nextSteps.push(
+            'Record the upgrade: register its task in TASKS.md if missing, write its worklog, then run `autonomos close <ID>`.',
+            'Run `autonomos status --strict`; explain in the worklog any finding you leave.'
+        )
     return {
         success: true,
         message: !changed
@@ -596,5 +614,6 @@ export function migrate(options: MigrateOptions = {}): MigrateResult {
         notes,
         bytes: { tasks: [tasksBefore, tasksAfter], issues: [issuesBefore, issuesAfter] },
         findings,
+        nextSteps,
     }
 }
