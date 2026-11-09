@@ -1,5 +1,14 @@
 # @autonomos/cli
 
+## 0.8.2
+
+### Patch Changes
+
+- [#20](https://github.com/saoudi-h/autonomos/pull/20) [`051d95a`](https://github.com/saoudi-h/autonomos/commit/051d95ad8d0efef5e0eaf25480c5ba9b01171426) Thanks [@saoudi-h](https://github.com/saoudi-h)! - `status` reports tasks and issues removed or shortened since `HEAD` (or `--since <rev>`) whose content lands neither in the change nor in the files they link to; `--strict` fails on them. Workflows say a clean status checks structure, not completion, and never to delete content to satisfy a finding. `migrate` recognizes reworded archive index lines, no longer prints "format 2 to 2", and shows the linked-worktree note only when upgrading.
+
+- Updated dependencies [[`051d95a`](https://github.com/saoudi-h/autonomos/commit/051d95ad8d0efef5e0eaf25480c5ba9b01171426)]:
+    - @autonomos/core@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
