@@ -59,7 +59,7 @@ List all `AGENT.md` context anchors in the project tree:
 autonomos agents --all
 ```
 
-## 📜 The Protocol (v0.8.4-alpha)
+## 📜 The Protocol (v0.8.5-alpha)
 
 The protocol is centered around the `.autonomos/` directory:
 

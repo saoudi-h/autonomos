@@ -367,6 +367,20 @@ describe('records commands', () => {
             writeFileSync(dot('worklogs', '2026-11-09-T-2.md'), '# [T-2] x\n')
             expect(status({ cwd: root }).unrecorded).toBe(false)
         })
+
+        it('counts a close into an existing same-day group as recorded', () => {
+            gitIn('init', '-q')
+            const today = new Date().toISOString().slice(0, 10)
+            close({ cwd: root, ids: ['T-1'], date: today })
+            commit('first close')
+            writeFileSync(
+                dot('TASKS.md'),
+                read('TASKS.md').replace('- [x] **[T-4]**', '- [x] **[T-4]**')
+            )
+            close({ cwd: root, ids: ['T-4'], date: today })
+            expect(read('archive', 'closed', 'TASKS.md').match(/## Closed/g)).toHaveLength(1)
+            expect(status({ cwd: root }).unrecorded).toBe(false)
+        })
     })
 
     describe('status budget findings', () => {

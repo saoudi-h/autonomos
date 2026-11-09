@@ -127,3 +127,4 @@
 - [x] **[PROTO-18]** Make content loss and skipped recording visible to weaker agents (0.8.2) `Priority: 🟠` `Complexity: M` `Completed: 2026-11-09` — ISSUE-05; see PROTO-16 worklog
 - [x] **[PROTO-19]** Show remaining work and unrecorded changes in CLI output (0.8.3) `Priority: 🟠` `Complexity: S` `Completed: 2026-11-09` — ISSUE-05
 - [x] **[PROTO-20]** Fix the round-4 tool gaps: same-ID kept content, moves, full follow-up list, next steps (0.8.4) `Priority: 🟠` `Complexity: S` `Completed: 2026-11-09` — ISSUE-05
+- [x] **[PROTO-21]** Treat context-budget findings as agent work, never owner decisions (0.8.5) `Priority: 🔵` `Complexity: S` `Completed: 2026-11-09` — ISSUE-05

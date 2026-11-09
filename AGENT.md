@@ -3,7 +3,7 @@ name: 'Autonomos'
 type: 'project'
 status: 'active'
 stack: ['Node.js', 'TypeScript', 'TurboRepo', 'pnpm', 'Commander.js', 'Vitest', 'tsdown']
-protocol: '0.8.4-alpha'
+protocol: '0.8.5-alpha'
 ---
 
 # AGENT CONTEXT: Autonomos

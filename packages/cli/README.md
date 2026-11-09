@@ -92,8 +92,8 @@ ignored, and closed records mentioning unfinished work are listed for review. Ru
 `--dry-run` first with unrelated changes committed; rerun after merging into a
 checkout that holds git-ignored legacy worklogs. It ends with numbered next steps:
 review follow-ups (all IDs are printed; `status --history` lists them again),
-resolve remaining findings with `/reconcile` in the same task or track those that
-need an owner decision in an open task, record the upgrade (task, worklog, `[x]`,
+resolve remaining findings with `/reconcile` in the same task (findings are agent
+work; one the task cannot finish becomes an open task), record the upgrade (task, worklog, `[x]`,
 `close`) and pass `status --strict`.
 
 ```bash
