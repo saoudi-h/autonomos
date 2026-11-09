@@ -1,5 +1,11 @@
 # @autonomos/core
 
+## 0.8.3
+
+### Patch Changes
+
+- [#22](https://github.com/saoudi-h/autonomos/pull/22) [`a7a9644`](https://github.com/saoudi-h/autonomos/commit/a7a9644e2f7ef77fa2de9d66014cde0a7a05081d) Thanks [@saoudi-h](https://github.com/saoudi-h)! - `migrate` ends with numbered next steps (follow-ups, remaining findings to resolve with `/reconcile` in the same task, recording the upgrade, `status --strict`). `status` notes a change since `HEAD` (or `--since <rev>`) that adds or moves no task, writes no worklog and closes nothing.
+
 ## 0.8.2
 
 ### Patch Changes
