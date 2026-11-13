@@ -200,6 +200,16 @@ Autonomos provides a premium CLI experience with:
 
 This project is currently in **active alpha development**. Feel free to explore the code, but be aware that interfaces are subject to change until v1.0.
 
+## Other projects
+
+Related open-source projects by [Hakim Saoudi](https://github.com/saoudi-h):
+
+- [Postdot](https://postdot.app/?utm_source=github&utm_medium=readme&utm_campaign=autonomos): self-hosted social publishing for you and your agents
+- [Solar Icons](https://solar-icons.dev/?utm_source=github&utm_medium=readme&utm_campaign=autonomos): an icon catalogue in six styles, with packages for major frameworks
+- [RateLock](https://ratelock-docs.vercel.app/?utm_source=github&utm_medium=readme&utm_campaign=autonomos): rate limiting for Node.js, Bun and other runtimes
+- [tw-screens](https://github.com/saoudi-h/tw-screens): responsive breakpoint hooks inspired by Tailwind CSS
+- [Tala Tools](https://github.com/saoudi-h/tala-tools): shared lint, format, TypeScript and build configurations
+
 ## ⚖️ License
 
 MIT
